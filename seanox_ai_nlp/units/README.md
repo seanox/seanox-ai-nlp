@@ -1,22 +1,49 @@
 ## Description
-TODO:
+In natural language, measurements are usually expressed as a combination of a
+numerical value and a unit (e.g., _-20.5 &ordm;C_, _1000 hPa_, _50 km/h_). Units
+supports the extraction of language-neutral measurements from natural texts as
+structured entities, as well as the optimization of measurement formatting. When
+extracting as entities, units distinguishes between pure units of measurement
+(_UNIT_) and combined units with values (_UNIT-VALUE_). The latter includes both
+the numerical value and the associated unit of measurement -- e.g., -20.5
+&ordm;C_, _1000 hPa_, _50 km/h_. Various number formats are supported, including
+decimal values, negative values, positive and negative exponents, and compound
+units. The entities are extracted in a structured manner to facilitate further
+processing and formatting in pipelines and downstream applications.
 
-This list contains common language-independent base units as they typically
-appear in natural sentences -- ranging from everyday usage to slightly technical
-or mildly academic contexts. The columns __Informal Prefix__ and __Informal
-Suffix__ take into account additional forms that may occur in informal or
-non-standard contexts.
+The units are common language-independent basic units that typically occur in
+natural sentences -- from everyday contexts to slightly technical or slightly
+academic contexts. This includes _informal prefixes_ and _informal suffixes_
+that may occur in informal or non-standard contexts.
 
-The table serves:
-- as an overview of supported units of measurement,
-- as a basis for creating regular expressions (RegEx) to identify units as
-  phrases in texts.
+# Table Of Contents
+- [Description](#description)
+  - [Numeric Value](#numeric-value)
+  - [Units](#units)
+  - [SI Prefixes for Multiples & Parts](#si-prefixes-for-multiples--parts)
+  - [SI Suffix for Exponents](#si-suffix-for-exponents)
+  - [Mathematical Operators](#mathematical-operators)
+  - [Informal Prefix & Suffix](#informal-prefix--suffix-)
+- [Usage](#usage)
+
+Below are the details in tables that show the basis of the regular expressions
+used.
+
+## Numeric Value
+| Locale | __Sign__     | __Format__               | 
+|--------|--------------|--------------------------|
+| CH     | + - &plusmn; | 1&rsquo;000&rsquo;000,00 |
+|        | + - &plusmn; | 1000000,00               |
+| DE     | + - &plusmn; | 1.000.000,00             |
+|        | + - &plusmn; | 1000000,00               |
+| EN     | + - &plusmn; | 1,000,000.00             |
+|        | + - &plusmn; | 1000000.00               |
 
 ## Units
 __Note__ These are base units only. Variants result from the additional
 properties recorded. There is no claim to interpretation, classification, or
 complete standardization of the units (e.g., [IEC](https://iec.ch/si),
-[BIPM][https://www.bipm.org/en/measurement-units]).
+[BIPM](https://www.bipm.org/en/measurement-units).
 
 | Unit                    | __Symbol__    | SI conform | Exponents | Informal Prefix | Informal Suffix |
 |-------------------------|---------------|------------|-----------|-----------------|-----------------|
@@ -134,3 +161,6 @@ complete standardization of the units (e.g., [IEC](https://iec.ch/si),
 | Cubic       | q          | Cubic      | 2          |
 | Square (de) | q          | Square     | 3          |
 | Square (en) | sq         |            |            |
+
+# Usage
+TODO:

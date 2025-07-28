@@ -4,8 +4,8 @@ from typing import TypedDict, Union
 
 import re
 
-_UNIT_SYMBOLS_SI_CONFORM_PATTERN = r"(?:A|bar|Bq|C|cd|d|dam|F|g|H|Hz|J|K|l|lm|lx|m|mol|N|\u03A9|Pa|p|rad|s|S|sr|T|t|V|w|Wb)"
-_UNIT_SYMBOLS_SI_NOT_CONFORM_PATTERN = r"(?:a|AE|atm|At\u00FC|bbl|ct|dB|dpt|dz|Dz|ft|gal|ha|h|hl|hp|in|kt|lj|ls|mi|min|oz.|oz.tr.|pc|Pf|PS|pt|rm|sq.ft.|sq.in.|sq.mile|sq.yd.|St|u|v|V|yd|Z|\u00B0|\u00B0C|\u2032|\u2033|\u03C1|\u03C9)"
+_UNIT_SYMBOLS_SI_CONFORM_PATTERN = r"(?:A|bar|Bq|C|cd|d|dam|F|g|H|Hz|J|K|l|lm|lx|m|mol|N|\u03A9|Pa|p|rad|s|S|sr|T|t|V|W|Wb)"
+_UNIT_SYMBOLS_SI_NOT_CONFORM_PATTERN = r"(?:a|AE|atm|At\u00FC|bbl|ct|dB|dpt|dz|Dz|ft|gal|ha|h|hl|hp|in|kt|lj|ls|mi|min|oz.|oz.tr.|pc|lb|PS|pt|rm|sq.ft.|sq.in.|sq.mile|sq.yd.|St|u|v|V|yd|Z|\u00B0|\u00B0C|\u2032|\u2033|\u03C1|\u03C9)"
 
 _UNIT_SYMBOLS_SI_CONFORM_FOR_EXPONENTS_PATTERN = r"(?:A|C|dam|F|H|J|K|m|\u03A9|s|T|V)"
 _UNIT_SYMBOLS_SI_NOT_CONFORM_FOR_EXPONENTS_PATTERN = r"(?:a|ft|ha|in|lj|mi|pc|rm|St|v|yd|\u03C9)"
@@ -186,6 +186,7 @@ UnitEntry = Union[UnitValue, Unit]
 
 
 def units(text: str) -> list[UnitEntry]:
+
     if not text:
         return []
 

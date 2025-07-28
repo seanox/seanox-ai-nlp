@@ -134,8 +134,8 @@ _UNIT_INFORMAL_SUFFIX_PART_PATTERN = _re_compile(rf"""
     (?:{_UNIT_MATHEMATICAL_OPERATORS_PATTERN}|$)
 """)
 
-_NUMERIC_LOOK_AHEAD_PATTERN = r"(?:(?<![\u00B1-+,.\u2019\w\d])|^)"
-_NUMERIC_SIGN_PATTERN = r"[\u00B1+-]"
+_NUMERIC_LOOK_AHEAD_PATTERN = r"(?:(?<![\u00B1+\-,.\u2019\w\d])|^)"
+_NUMERIC_SIGN_PATTERN = r"[\u00B1+\-]"
 _NUMERIC_DE_PATTERN = r"(?:(?:(?:\d{1,3}(?:\.\d{3})*)|\d+)(?:,\d+)?)"
 _NUMERIC_EN_PATTERN = r"(?:(?:(?:\d{1,3}(?:,\d{3})*)|\d+)(?:\.\d+))?"
 _NUMERIC_CH_PATTERN = r"(?:(?:(?:\d{1,3}(?:\u2019\d{3})*)|\d+)(?:,\d+)?)"

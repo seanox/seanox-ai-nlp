@@ -17,9 +17,9 @@ Processing (NLP)__. It comprises various packages and modules, each of which
 extends or simplifies specific aspects of language processing.
 
 # Packages & Modules
-- __[units](seanox_ai_nlp/units/README.md)__ Extracts and/or optimizes
-  language-independent entities in natural texts to SI-compliant and everyday
-  language units of measurement.   
+- __[units](seanox_ai_nlp/units/README.md)__ supports the language-neutral
+  extraction of SI-compliant and everyday units of measurement from natural text
+  as structured entities
 
 # Licence Agreement
 LIZENZBEDINGUNGEN - Seanox Software Solutions ist ein Open-Source-Projekt, im

@@ -112,7 +112,7 @@ complete standardization of the units (e.g., [IEC](https://iec.ch/si),
 | Minute (long form)      | __min__       |            |           |                 |                 |
 | Mole                    | __mol__       | x          |           |                 |                 |
 | Newton                  | __N__         | x          |           |                 |                 |
-| Ohm                     | __?__         | x          | x         |                 |                 |
+| Ohm                     | __&#8486;__   | x          | x         |                 |                 |
 | Ounce                   | __oz.__       |            |           |                 |                 |
 | Troy Ounce              | __oz.tr.__    |            |           |                 |                 |
 | Pascal                  | __Pa__        | x          |           |                 |                 |

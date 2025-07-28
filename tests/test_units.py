@@ -5,7 +5,7 @@ from seanox_ai_nlp.units import normalize, units
 import pytest
 import re
 
-__TEST_CASES_01 = """
+_TEST_CASES_01 = """
 # simple units
 100m                 -> 100 m
 100 m                -> 100 m
@@ -124,7 +124,8 @@ xxx 100.0 km/s       -> xxx 100.0 km/s
 xxx 100.0  km/s      -> xxx 100.0 km/s
 """
 
-def __parse_test_cases(data):
+
+def _parse_test_cases(data):
     cases = []
     for line in data.strip().splitlines():
         line = line.strip()
@@ -136,6 +137,7 @@ def __parse_test_cases(data):
             cases.append((input.strip(), expected.strip()))
     return cases
 
-@pytest.mark.parametrize("input,expected", __parse_test_cases(__TEST_CASES_01))
+
+@pytest.mark.parametrize("input,expected", _parse_test_cases(_TEST_CASES_01))
 def test_normalize(input, expected):
     assert normalize(input) == expected

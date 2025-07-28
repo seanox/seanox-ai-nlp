@@ -1,20 +1,31 @@
 ## Description
-In natural language, measurements are usually expressed as a combination of a
-numerical value and a unit (e.g., _-20.5 &ordm;C_, _1000 hPa_, _50 km/h_). Units
-supports the extraction of language-neutral measurements from natural texts as
-structured entities, as well as the optimization of measurement formatting. When
-extracting as entities, units distinguishes between pure units of measurement
-(_UNIT_) and combined units with values (_UNIT-VALUE_). The latter includes both
-the numerical value and the associated unit of measurement -- e.g., -20.5
-&ordm;C_, _1000 hPa_, _50 km/h_. Various number formats are supported, including
-decimal values, negative values, positive and negative exponents, and compound
-units. The entities are extracted in a structured manner to facilitate further
-processing and formatting in pipelines and downstream applications.
 
-The units are common language-independent basic units that typically occur in
-natural sentences -- from everyday contexts to slightly technical or slightly
-academic contexts. This includes _informal prefixes_ and _informal suffixes_
-that may occur in informal or non-standard contexts.
+In natural language, __measurements__ are usually expressed as a combination of
+a __numerical value__ and a __unit__ (e.g. _-20.5 °C_, _1000 hPa_, _50 km/h_).
+
+__units__ supports the extraction of __language-neutral measurements__ from
+natural texts as __structured entities__, as well as the __optimization of
+measurement formatting__.
+
+When extracting measurements, units always __returns two entities__ per match:
+- combined units with values (__UNIT-VALUE__)
+- pure units of measurement (__UNIT__)
+
+Various __number formats__ are supported, including:
+- __decimal values__
+- __negative values__
+- __positive and negative exponents__
+- __compound units__
+
+The entities are extracted in a __structured manner__ to facilitate their
+__further processing__ and __formatting__ in __processing pipelines__ -- e.g.
+using an __EntityRuler__ in __spaCy__ -- as well as in __downstream
+applications__.
+
+The units are __common language-independent basic units__ that typically occur
+in __natural sentences__ -- from __everyday contexts__ to __slightly technical__
+or __slightly academic contexts__. This includes __informal prefixes__ and
+__informal suffixes__ that may occur in __informal or non-standard contexts__.
 
 # Table Of Contents
 - [Description](#description)
@@ -24,7 +35,15 @@ that may occur in informal or non-standard contexts.
   - [SI Suffix for Exponents](#si-suffix-for-exponents)
   - [Mathematical Operators](#mathematical-operators)
   - [Informal Prefix & Suffix](#informal-prefix--suffix-)
+- [Installation & Setup](#installation--setup)
 - [Usage](#usage)
+  - [UNIT_PATTERN](#unit_pattern)
+  - [NUMERIC_UNIT_PATTERN](#numeric_unit_pattern)
+  - [UnitValue](#unitvalue)
+  - [Unit](#unit)
+  - [UnitEntry](#unitentry)
+  - [units(text: str) -> list\[UnitEntry\]](#unitstext-str---listunitentry)
+  - [normalize(text: str) -> str](#normalizetext-str---str)
 
 Below are the details in tables that show the basis of the regular expressions
 used.
@@ -162,5 +181,29 @@ complete standardization of the units (e.g., [IEC](https://iec.ch/si),
 | Square (de) | q          | Square     | 3          |
 | Square (en) | sq         |            |            |
 
+# Installation & Setup
+TODO:
+
 # Usage
+TODO:
+
+## UNIT_PATTERN
+TODO:
+
+## NUMERIC_UNIT_PATTERN
+TODO:
+
+## UnitValue
+TODO:
+
+## Unit
+TODO:
+
+## UnitEntry
+TODO:
+
+## units(text: str) -> list\[UnitEntry\]
+TODO:
+
+## normalize(text: str) -> str
 TODO:

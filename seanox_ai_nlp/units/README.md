@@ -49,14 +49,12 @@ Below are the details in tables that show the basis of the regular expressions
 used.
 
 ## Numeric Value
-| Locale | __Sign__     | __Format__               | 
-|--------|--------------|--------------------------|
-| CH     | + - &plusmn; | 1&rsquo;000&rsquo;000,00 |
-|        | + - &plusmn; | 1000000,00               |
-| DE     | + - &plusmn; | 1.000.000,00             |
-|        | + - &plusmn; | 1000000,00               |
-| EN     | + - &plusmn; | 1,000,000.00             |
-|        | + - &plusmn; | 1000000.00               |
+| Locale  | __Sign__     | __Format__               | 
+|---------|--------------|--------------------------|
+| CH      | + - &plusmn; | 1&rsquo;000&rsquo;000,00 |
+| DE      | + - &plusmn; | 1.000.000,00             |
+| EN      | + - &plusmn; | 1,000,000.00             |
+| neutral | + - &plusmn; | 1000000.00               |
 
 ## Units
 __Note__ These are base units only. Variants result from the additional

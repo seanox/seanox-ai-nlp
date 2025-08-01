@@ -38,13 +38,14 @@ __informal suffixes__ that may occur in __informal or non-standard contexts__.
   - [Informal Prefix & Suffix](#informal-prefix--suffix-)
 - [Installation & Setup](#installation--setup)
 - [Usage](#usage)
-  - [UNIT_PATTERN](#unit_pattern)
-  - [NUMERIC_UNIT_PATTERN](#numeric_unit_pattern)
-  - [UnitValue](#unitvalue)
-  - [Unit](#unit)
-  - [UnitEntry](#unitentry)
-  - [units(text: str) -> list\[UnitEntry\]](#unitstext-str---listunitentry)
-  - [normalize(text: str) -> str](#normalizetext-str---str)
+  - [`UNIT_PATTERN`](#unit_pattern)
+  - [`NUMERIC_UNIT_PATTERN`](#numeric_unit_pattern)
+  - [`UnitValue`](#unitvalue)
+  - [`Unit`](#unit)
+  - [`UnitEntry`](#unitentry)
+  - [`units(text: str) -> list\[UnitEntry\]`](#unitstext-str---listunitentry)
+  - [`normalize(text: str) -> str`](#normalizetext-str---str)
+- [Links](#links) 
 
 Below are the details in tables that show the basis of the regular expressions
 used.
@@ -216,23 +217,32 @@ TODO:
 # Usage
 TODO:
 
-## UNIT_PATTERN
+## `UNIT_PATTERN`
 TODO:
 
-## NUMERIC_UNIT_PATTERN
+## `NUMERIC_UNIT_PATTERN`
 TODO:
 
-## UnitValue
+## `UnitValue`
 TODO:
 
-## Unit
+## `Unit`
 TODO:
 
-## UnitEntry
+## `UnitEntry`
 TODO:
 
-## units(text: str) -> list\[UnitEntry\]
+## `units(text: str) -> list\[UnitEntry\]`
 TODO:
 
-## normalize(text: str) -> str
+## `normalize(text: str) -> str`
 TODO:
+
+# Links
+References to the sources that contributed to the content of the page, among
+other things.
+
+- https://de.wikipedia.org/wiki/Internationales_Einheitensystem
+- https://de.wikipedia.org/wiki/Gebr%C3%A4uchliche_Nicht-SI-Einheiten
+- https://www.taschenhirn.de/aktuelles-allgemeinwissen/liste-masseinheiten-formeln/
+- https://www.tablesgenerator.com/markdown_tables

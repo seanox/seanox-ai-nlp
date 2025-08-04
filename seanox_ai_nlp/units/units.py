@@ -1,5 +1,38 @@
 # seanox_ai_npl/units/units.py
 
+# DESIGN NOTE
+#
+# This module relies entirely on statically aggregated and precompiled data
+# structures derived from an external Excel source. The decision to embed unit
+# definitions and classification patterns directly into the code is intentional
+# and performance-driven.
+#
+# Rationale:
+# - The unit data is curated and maintained externally in a structured Excel
+#   file.
+# - At build time, the relevant entries are aggregated and transformed into
+#   static regex-compatible strings and dictionaries.
+# - This avoids runtime file I/O, dynamic parsing, or external dependencies.
+# - All regex patterns are precompiled to maximize performance during text
+#   processing.
+#
+# Trade-offs:
+# - Flexibility is reduced: updates require regeneration of the static data.
+# - Readability may be impacted due to the dense format of embedded strings.
+# - However, this approach ensures high-speed recognition and classification of
+#   units in NLP pipelines, especially when processing large volumes of text.
+#
+# Recommendation:
+# - Maintain a separate script or tool to convert the Excel source into the
+#   required Python format.
+# - Document the transformation process and keep the Excel file under version
+#   control.
+#
+# Summary:
+# This module prioritizes performance and reliability over dynamic flexibility.
+# It is designed for production-grade NLP tasks where speed and consistency are
+# critical.
+
 from typing import TypedDict, Union
 from enum import Enum
 
@@ -11,15 +44,15 @@ def _re_compile(expression: str, debug: bool=False) -> re.Pattern:
         return re.compile(expression)
     return expression
 
-_UNIT_SI_SYMBOLS_BASE_PATTERN = r"(?:A|cd|g|K|m|mol|s)"
-_UNIT_SI_SYMBOLS_DERIVATION_PATTERN = r"(?:Bq|C|F|Gy|H|Hz|J|kat|lm|lx|N|\u00B0C|Pa|rad|S|sr|Sv|T|V|W|Wb|\u03A9)"
-_UNIT_SI_SYMBOLS_EXTENSION_PATTERN = r"(?:a|AE|Ah|AU|b|B|bar|ct|d|Da|dB|db\([ACGZ]\)|dpt|eV|h|ha|kn|kt|l|L|mel|min|Np|oz\. tr\.|PS|pt|sone|tex|VA|Wh)"
-_UNIT_SI_SYMBOLS_RELEVANT_PATTERN = r"(?:A|a|AE|Ah|AU|b|B|bar|Bq|C|cd|ct|d|Da|dB|db\([ACGZ]\)|dpt|eV|F|g|Gy|H|h|ha|Hz|J|K|kat|kn|kt|l|L|lm|lx|m|mel|min|mol|N|Np|\u00B0C|oz\. tr\.|Pa|PS|pt|rad|s|S|sone|sr|Sv|T|tex|V|VA|W|Wb|Wh|\u03A9)"
-_UNIT_SI_SYMBOLS_PREFIX_PATTERN = r"(?:A|AE|AU|b|Bq|C|cd|ct|Da|eV|F|g|Gy|H|h|Hz|J|K|kat|l|L|lm|lx|m|mol|N|oz\. tr\.|Pa|rad|s|S|sr|Sv|t|T|V|VA|W|Wb|Wh|\u03A9)"
-_UNIT_SI_SYMBOLS_SUFFIX_PATTERN = r"(?:A|Bq|C|F|g|H|J|kat|l|L|lm|lx|m|mol|Pa|s|S|sr|T|V|W|Wb|\u03A9)"
-_UNIT_SI_SYMBOLS_PREFIX_SUFFIX_PATTERN = r"(?:A|Bq|C|F|g|H|J|kat|l|L|lm|lx|m|mol|Pa|s|S|sr|T|V|W|Wb|\u03A9)"
-_UNIT_COMMON_SYMBOLS_PATTERN = r"(?:\''|%|\u2033|a|a|a|Ah|atm|At\u00FC|B|bar|bbl|d|dam|dB|db\([ACGZ]\)|dpt|dz|dz|ft|gal|ha|hp|in|kn|kt|kt|lb|lj|ls|mel|mi|min|Np|\u00B0|\u00B0C|oz|oz.|p|pc|PS|pt|rm|sone|St|tex|u|v|Var|yd|Z|\u03C1|\u03C9)"
-_UNIT_INFORMAL_SYMBOLS_PATTERN = r"(?:ft|in|m|mi|mile|yd)"
+_UNIT_SI_SYMBOLS_BASE_PATTERN = r"(?:cd|g|K|m|mol|s)"
+_UNIT_SI_SYMBOLS_DERIVATION_PATTERN = r"(?:Bq|C|F|Gy|H|Hz|J|kat|lm|lx|N|\u00BAC|Pa|rad|S|sr|Sv|T|V|W|Wb|\u03A9)"
+_UNIT_SI_SYMBOLS_EXTENSION_PATTERN = r"(?:a|AE|Ah|AU|b|B|bar|ct|d|Da|dB|db\(A\)|db\(C\)|db\(G\)|db\(Z\)|dpt|eV|h|ha|kn|kt|l|L|mel|min|Np|oz\. tr\.|PS|pt|sone|tex|VA|Wh)"
+_UNIT_SI_SYMBOLS_RELEVANT_PATTERN = r"(?:a|AE|Ah|AU|b|B|bar|Bq|C|cd|ct|d|Da|dB|db\(A\)|db\(C\)|db\(G\)|db\(Z\)|dpt|eV|F|g|Gy|H|h|ha|Hz|J|K|kat|kn|kt|l|L|lm|lx|m|mel|min|mol|N|Np|\u00BAC|oz\. tr\.|Pa|PS|pt|rad|s|S|sone|sr|Sv|T|tex|V|VA|W|Wb|Wh|\u03A9)"
+_UNIT_SI_SYMBOLS_PREFIX_PATTERN = r"(?:AE|AU|b|Bq|C|cd|ct|Da|eV|F|g|Gy|H|h|Hz|J|K|kat|l|L|lm|lx|m|mol|N|oz\. tr\.|Pa|rad|s|S|sr|Sv|t|T|V|VA|W|Wb|Wh|\u03A9)"
+_UNIT_SI_SYMBOLS_SUFFIX_PATTERN = r"(?:Bq|C|F|g|H|J|kat|l|L|lm|lx|m|mol|Pa|s|S|sr|T|V|W|Wb|\u03A9)"
+_UNIT_SI_SYMBOLS_PREFIX_SUFFIX_PATTERN = r"(?:Bq|C|F|g|H|J|kat|l|L|lm|lx|m|mol|Pa|s|S|sr|T|V|W|Wb|\u03A9)"
+_UNIT_COMMON_SYMBOLS_PATTERN = r"(?:\'|%|\u2033|a|Ah|atm|At\u00FC|B|bar|bbl|d|dam|dB|db\(A\)|db\(C\)|db\(G\)|db\(Z\)|dpt|dz|dz|ft|gal|ha|hp|in|kn|kt|kt|lb|lj|ls|mel|mi|min|Np|\u00BA|\u00BAC|oz|oz.|p|pc|PS|pt|rm|sone|St|tex|u|Var|yd|Z|\u03C9)"
+_UNIT_INFORMAL_SYMBOLS_PATTERN = r"(?:ft|in|m|mi|mile|mph|yd)"
 
 _UNIT_SI_PREFIX_PATTERN = r"(?:Q|R|Y|Z|E|P|T|G|M|k|h|da|d|c|m|\u00B5|n|p|f|a|z|y|r|q)"
 _UNIT_SI_SUFFIX_PATTERN = r"(?:\u207B?[\u00B9\u00B2\u00B3])"
@@ -60,7 +93,7 @@ _UNIT_INFORMAL_RAW_PATTERN = rf"""
     )
 """
 
-_UNIT_MATHEMATICAL_OPERATORS_PATTERN = r"[\u00B7\u00D7\u002A\u0078\u002F]"
+UNIT_OPERATORS_PATTERN = r"[\u00B7\u00D7\u002A\u0078\u002F]"
 
 _UNIT_LOOK_AHEAD_PATTERN = r"(?:(?<=[\W\d])|^)"
 _UNIT_LOOK_AHEAD_WITHOUT_SPACE_PATTERN = r"(?<=\d)"
@@ -96,7 +129,7 @@ _UNIT_EXPRESSION_RAW_PATTERN = rf"""
     (?:
       {_UNIT_RAW_PATTERN}
       (?:
-        {_UNIT_MATHEMATICAL_OPERATORS_PATTERN}
+        {UNIT_OPERATORS_PATTERN}
         {_UNIT_RAW_PATTERN}
       )*
     )
@@ -213,7 +246,7 @@ _UNIT_VALIDATION_EXPRESSION_PATTERN = _re_compile(rf"""
     ^(?:
       {_UNIT_VALIDATION_PATTERN}
       (?:
-        {_UNIT_MATHEMATICAL_OPERATORS_PATTERN}
+        {UNIT_OPERATORS_PATTERN}
         {_UNIT_VALIDATION_PATTERN}
       )*
     )$
@@ -236,7 +269,7 @@ _UNIT_SI_CLASSIFICATION_PATTERN = rf"""
         (?P<unitSiSuffixSymbol>{_UNIT_SI_SYMBOLS_SUFFIX_PATTERN})
         (?P<unitSiSuffixSuffix>{_UNIT_SI_SUFFIX_PATTERN})
       )
-      |(?P<unitCommonSymbol>{_UNIT_SI_SYMBOLS_RELEVANT_PATTERN})
+      |(?P<unitSiSymbol>{_UNIT_SI_SYMBOLS_RELEVANT_PATTERN})
     )  
 """
 
@@ -252,18 +285,55 @@ _UNIT_INFORMAL_CLASSIFICATION_PATTERN = rf"""
     )
 """
 
-# TODO:
-print(_re_compile(_UNIT_SI_CLASSIFICATION_PATTERN, True))
-print(_re_compile(_UNIT_COMMON_CLASSIFICATION_PATTERN, True))
-print(_re_compile(_UNIT_INFORMAL_CLASSIFICATION_PATTERN, True))
-
-_UNIT_CLASSIFICATION_PATTERN = rf"""
+UNIT_CLASSIFICATION_PATTERN = _re_compile(rf"""
     ^(?:
       {_UNIT_SI_CLASSIFICATION_PATTERN}
       |{_UNIT_COMMON_CLASSIFICATION_PATTERN}
       |{_UNIT_INFORMAL_CLASSIFICATION_PATTERN}
     )$
-"""
+""")
+
+def dict_from_comma_separated_pairs(data: str) -> dict[str, str]:
+    result = {}
+    data = re.sub("\s*\|\s*[\r\n]\s*", "", data.strip())
+    items = re.split(r"\s*\|\s*", data)
+    for item in range(1, len(items) -1, 2):
+        key = items[item].strip()
+        value = items[item + 1].strip()
+        if key and value:
+            result[key] = value
+    return result
+
+_UNIT_CLASSIFICATION_DICT = dict_from_comma_separated_pairs(r"""
+| \'       | length            | db\(C\) | acoustics                | L         | volume            | rad    | angle                   |
+|----------|-------------------|---------|--------------------------|-----------|-------------------|--------|-------------------------|
+| \"       | length            | db\(G\) | acoustics                | lb        | mass              | rm     | volume                  |
+| %        | ratio             | db\(Z\) | acoustics                | lj        | length astronomy  | s      | time                    |
+| \u2032   | length            | dpt     | optics                   | lm        | light             | S      | electricity conductance |
+| \u2033   | length            | dz      | quantity                 | ls        | light energy      | sone   | acoustics               |
+| A        | electricity       | dz      | quantity                 | lx        | light             | sr     | angle                   |
+| a        | area              | eV      | energy                   | m         | length            | St     | volume                  |
+| AE       | astronomy length  | F       | electricity capacitance  | mel       | acoustics         | Sv     | radiation               |
+| Ah       | electricity       | ft      | length                   | mi        | length            | t      | mass                    |
+| atm      | pressure          | g       | mass                     | mile      | length            | T      | magnetic field          |
+| At\u00FC | pressure          | gal     | volume                   | min       | time              | tex    | mass                    |
+| AU       | astronomy length  | Gy      | radiation                | mol       | amount            | u      | mass atomic             |
+| b        | area radiation    | H       | electricity              | mph       | length time       | V      | electricity             |
+| B        | acoustics         | h       | time                     | N         | force             | VA     | electricity power       |
+| bar      | pressure          | ha      | area                     | Np        | acoustics         | Var    | electricity power       |
+| bbl      | volume            | hp      | power                    | \u00BA    | angle             | W      | power                   |
+| Bq       | radiation         | Hz      | frequency                | \u00BAC   | temperature       | Wb     | magnetism               |
+| C        | electricity       | in      | length                   | oz        | mass              | Wh     | energy                  |
+| cd       | light             | J       | energy                   | oz.       | mass              | yd     | length                  |
+| ct       | mass              | K       | temperature              | oz\. tr\. | mass              | Z      | mass                    |
+| d        | time              | kat     | amount                   | p         | force             | \u03C9 | frequency rotation      |
+| Da       | mass atomic       | kn      | speed                    | Pa        | pressure          | \u03A9 | electricity             |
+| dam      | length            | kt      | mass                     | pc        | length astronomy  |        |                         |
+| dB       | acoustics         | kt      | speed                    | PS        | power             |        |                         |
+| db\(A\)  | acoustics         | l       | volume                   | pt        | volume            |        |                         |
+""")
+
+print(_UNIT_CLASSIFICATION_DICT)
 
 class SpacingMode(Enum):
     NUMERIC = _UNIT_WITH_INVALID_SPACES_NUMERIC_PATTERN
@@ -284,9 +354,7 @@ class UnitValue(TypedDict):
     text: str
     value: str
     unit: str
-    normalized: str
-    standard: bool
-    informal: bool
+    categories: list[str]
 
 class Unit(TypedDict):
     label: str
@@ -294,11 +362,25 @@ class Unit(TypedDict):
     end: int
     text: str
     unit: str
-    normalized: str
-    standard: bool
-    informal: bool
+    categories: list[str]
 
 UnitEntry = Union[UnitValue, Unit]
+
+def _get_categories_for_unit(unit: str) -> list[str]:
+    categories = []
+    for unitEntry in re.split(UNIT_OPERATORS_PATTERN, unit):
+        match = UNIT_CLASSIFICATION_PATTERN.search(unitEntry)
+        category = _UNIT_CLASSIFICATION_DICT.get(
+            match.group("unitSiPrefixSuffixSymbol")
+            or match.group("unitSiPrefixSymbol")
+            or match.group("unitSiSuffixSymbol")
+            or match.group("unitSiSymbol")
+            or match.group("unitCommonSymbol")
+            or match.group("unitInformalSymbol")
+        )
+        if category:
+            categories.append(category)
+    return categories
 
 def units(text: str) -> list[UnitEntry]:
 
@@ -322,6 +404,7 @@ def units(text: str) -> list[UnitEntry]:
                 "text": match.group(),
                 "value": numeric,
                 "unit": unit,
+                "categories": _get_categories_for_unit(unit)
             }
         else:
             entity: UnitValue = {
@@ -330,11 +413,7 @@ def units(text: str) -> list[UnitEntry]:
                 "end": match.end(),
                 "text": match.group(),
                 "unit": unit,
+                "categories": _get_categories_for_unit(unit)
             }
         entities.append(entity)
-
     return entities
-
-# TODO:
-if __name__ == "__main__":
-    units("")

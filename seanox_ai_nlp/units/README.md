@@ -7,7 +7,9 @@ medical statements, social media posts and more -- often with inconsistent
 formatting or informal phrasing.
 
 This module is intended for developers and NLP practitioners seeking to extract
-measurement expressions from natural language.
+measurement expressions from natural language -- without relying on large
+language models (LLMs). It provides a rule-based, deterministic approach,
+__aligned with lightweight, transparent, and production-grade NLP workflows__.
 
 __units__ is a parser module designed to extract measurement expressions from
 natural language text. It identifies numeric-unit constructs across general,
@@ -16,8 +18,8 @@ conventions.
 
 Extracted expressions are returned as structured entities, including:
 
-- __UnitValue__ combinations of numerical values with measurement units
-- __Unit__ standalone unit references without associated values
+- __UnitValue__ combinations of numerical values with measurement units  
+- __Unit__ standalone unit references without associated values  
 
 The module supports various number formats such as decimals, negative values,
 scientific notation, and compound dimensions like __50 × 30 × 20 cm__. Spacing
@@ -27,6 +29,84 @@ for deeper analysis.
 
 Ideal for integration into NLP workflows such as with spaCy’s __EntityRuler__,
 and downstream tasks like semantic analysis or data normalization.
+
+## Example
+
+```python
+from seanox_ai_nlp.units import units
+
+print(units(
+    "The cruising speed of the Boeing 747 is approximately 900 km/h (559 mph)."
+    "It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
+))
+```
+
+```json
+[
+  {
+    "label": "UNIT-VALUE",
+    "start": 54,
+    "end": 62,
+    "text": "900 km/h",
+    "value": "900",
+    "unit": "km/h",
+    "categories": ["length", "time"]
+  },
+  {
+    "label": "UNIT-VALUE",
+    "start": 64,
+    "end": 73,
+    "text": "559 mph",
+    "value": "559",
+    "unit": "mph",
+    "categories": ["length", "time"]
+  },
+  {
+    "label": "UNIT",
+    "start": 99,
+    "end": 101,
+    "text": "in",
+    "unit": "in",
+    "categories": ["length"]
+  },
+  {
+    "label": "UNIT",
+    "start": 123,
+    "end": 127,
+    "text": "km/h",
+    "unit": "km/h",
+    "categories": ["length", "time"]
+  },
+  {
+    "label": "UNIT",
+    "start": 149,
+    "end": 152,
+    "text": "mph",
+    "unit": "mph",
+    "categories": ["length", "time"]
+  }
+]
+```
+
+__Unit Extraction Note__
+
+The module identifies units and values using rule-based pattern recognition. In
+the preceding example, the word __in__ is extracted as a unit __(inch)__, even
+though it is used as a preposition in the context.
+
+Since the module does __not perform semantic analysis__, such edge cases are
+extracted __context-free__. Semantic interpretation is intentionally delegated to
+the application layer -- typically based on:
+
+- the presence of a __numeric value (value)__, if available
+- and the assigned __categories (categories)__, such as __length__ or __time__
+
+For example, an entry like __15 in__ can be interpreted as a valid unit
+__(inch)__, while a standalone __in__ without a value or matching context may be
+treated as a preposition.
+
+This separation ensures the module remains robust, transparent, and adaptable to
+different use cases.
 
 # Table Of Contents
 - [Description](#description)
@@ -104,103 +184,106 @@ claim to interpretation, classification, or complete standardization of the
 units (e.g. [IEC](https://iec.ch/si), [BIPM](
     https://www.bipm.org/en/measurement-units)).
 
-| Unit                       | Symbol&nbsp;&blacktriangledown; | Classification           | SI Base | SI Derivation | SI Extension | SI relevant | SI with Prefix | SI with Exponents | Common Units | Informal Variant |
-|----------------------------|---------------------------------|--------------------------|---------|---------------|--------------|-------------|----------------|-------------------|--------------|------------------|
-| Foot (single quote mark)   | '                               | Length                   |         |               |              |             |                |                   | x            |                  |
-| Inch (double quote mark)   | "                               | Length                   |         |               |              |             |                |                   | x            |                  |
-| Percent                    | %                               | Ratio                    |         |               |              |             |                |                   | x            |                  |
-| (Arc) Minute               | &#x2032;                        | Angle                    |         |               |              |             |                |                   | x            |                  |
-| (Arc) Second               | &#x2033;                        | Angle                    |         |               |              |             |                |                   | x            |                  |
-| Inch (quote mark)          | &#x2033;                        | Length                   |         |               |              |             |                |                   | x            |                  |
-| Ampere                     | A                               | Electricity              | x       |               |              | x           | x              | x                 |              |                  |
-| Are                        | a                               | Area                     |         |               | x            | x           |                |                   | x            |                  |
-| Year                       | a                               | Time                     |         |               |              |             |                |                   | x            |                  |
-| Astronomical Unit          | AE                              | Astronomy, Length        |         |               | x            | x           | x              |                   |              |                  |
-| Battery Capacity           | Ah                              | Electricity              |         |               | x            | x           |                |                   | x            |                  |
-| Atmosphere (pressure)      | atm                             | Pressure                 |         |               |              |             |                |                   | x            |                  |
-| Gauge Pressure             | At&uuml;                        | Pressure                 |         |               |              |             |                |                   | x            |                  |
-| Astronomical Unit          | AU                              | Astronomy, Length        |         |               | x            | x           | x              |                   |              |                  |
-| Barn                       | b                               | Area, Radiation          |         |               | x            | x           | x              |                   |              |                  |
-| Bel                        | B                               | Acoustics                |         |               | x            | x           |                |                   | x            |                  |
-| Bar                        | bar                             | Pressure                 |         |               | x            | x           |                |                   | x            |                  |
-| Barrel (oil)               | bbl                             | Volume                   |         |               |              |             |                |                   | x            |                  |
-| Becquerel                  | Bq                              | Radiation                |         | x             |              | x           | x              | x                 |              |                  |
-| Coulomb                    | C                               | Electricity              |         | x             |              | x           | x              | x                 |              |                  |
-| Candela                    | cd                              | Light                    | x       |               |              | x           | x              |                   |              |                  |
-| Carat (gem weight)         | ct                              | Mass                     |         |               | x            | x           | x              |                   |              |                  |
-| Day                        | d                               | Time                     |         |               | x            | x           |                |                   | x            |                  |
-| Dalton                     | Da                              | Mass, Atomic             |         |               | x            | x           | x              |                   |              |                  |
-| Decameter                  | dam                             | Length                   |         |               |              |             |                |                   | x            |                  |
-| Decibel                    | dB                              | Acoustics                |         |               | x            | x           |                |                   | x            |                  |
-| Decibel A/C/G/Z curve      | db([ACGZ])                      | Acoustics                |         |               | x            | x           |                |                   | x            |                  |
-| Dioptre                    | dpt                             | Optics                   |         |               | x            | x           |                |                   | x            |                  |
-| Double Hundredweight       | dz                              | Quantity                 |         |               |              |             |                |                   | x            |                  |
-| Dozen                      | dz                              | Quantity                 |         |               |              |             |                |                   | x            |                  |
-| Electronvolt               | eV                              | Energy                   |         |               | x            | x           | x              |                   |              |                  |
-| Farad                      | F                               | Electricity, Capacitance |         | x             |              | x           | x              | x                 |              |                  |
-| Foot                       | ft                              | Length                   |         |               |              |             |                |                   | x            | x                |
-| Gram                       | g                               | Mass                     | x       |               |              | x           | x              | x                 |              |                  |
-| Gallon                     | gal                             | Volume                   |         |               |              |             |                |                   | x            |                  |
-| Gray                       | Gy                              | Radiation                |         | x             |              | x           | x              |                   |              |                  |
-| Henry                      | H                               | Electricity              |         | x             |              | x           | x              | x                 |              |                  |
-| Hour                       | h                               | Time                     |         |               | x            | x           | x              |                   |              |                  |
-| Hectare                    | ha                              | Area                     |         |               | x            | x           |                |                   | x            |                  |
-| Horsepower (imperial)      | hp                              | Power                    |         |               |              |             |                |                   | x            |                  |
-| Hertz                      | Hz                              | Frequency                |         | x             |              | x           | x              |                   |              |                  |
-| Inch                       | in                              | Length                   |         |               |              |             |                |                   | x            | x                |
-| Joule                      | J                               | Energy                   |         | x             |              | x           | x              | x                 |              |                  |
-| Kelvin                     | K                               | Temperature              | x       |               |              | x           | x              |                   |              |                  |
-| Katal                      | kat                             | Amount                   |         | x             |              | x           | x              | x                 |              |                  |
-| Knot                       | kn                              | Speed                    |         |               | x            | x           |                |                   | x            |                  |
-| Karat (gold purity)        | kt                              | Mass                     |         |               |              |             |                |                   | x            |                  |
-| Knot                       | kt                              | Speed                    |         |               | x            | x           |                |                   | x            |                  |
-| Liter                      | l                               | Volume                   |         |               | x            | x           | x              | x                 |              |                  |
-| Liter                      | L                               | Volume                   |         |               | x            | x           | x              | x                 |              |                  |
-| Pound                      | lb                              | Mass                     |         |               |              |             |                |                   | x            |                  |
-| Light-year                 | lj                              | Length, Astronomy        |         |               |              |             |                |                   | x            |                  |
-| Lumen                      | lm                              | Light                    |         | x             |              | x           | x              | x                 |              |                  |
-| Lumen second               | ls                              | Light, Energy            |         |               |              |             |                |                   | x            |                  |
-| Lux                        | lx                              | Light                    |         | x             |              | x           | x              | x                 |              |                  |
-| Meter                      | m                               | Length                   | x       |               |              | x           | x              | x                 |              | x                |
-| Mel                        | mel                             | Acoustics                |         |               | x            | x           |                |                   | x            |                  |
-| Mile                       | mi                              | Length                   |         |               |              |             |                |                   | x            | x                |
-| Mile                       | mile                            | Length                   |         |               |              |             |                |                   |              | x                |
-| Minute (long form)         | min                             | Time                     |         |               | x            | x           |                |                   | x            |                  |
-| Mole                       | mol                             | Amount                   | x       |               |              | x           | x              | x                 |              |                  |
-| Newton                     | N                               | Force                    |         | x             |              | x           | x              |                   |              |                  |
-| Neper                      | Np                              | Acoustics                |         |               | x            | x           |                |                   | x            |                  |
-| Degree                     | &ordm;                          | Angle                    |         |               |              |             |                |                   | x            |                  |
-| Degree Celsius             | &ordm;C                         | Temperature              |         | x             |              | x           |                |                   | x            |                  |
-| Ounce                      | oz                              | Mass                     |         |               |              |             |                |                   | x            |                  |
-| Ounce                      | oz.                             | Mass                     |         |               |              |             |                |                   | x            |                  |
-| Troy Ounce                 | oz. tr.                         | Mass                     |         |               | x            | x           | x              |                   |              |                  |
-| Pond (metric force)        | p                               | Force                    |         |               |              |             |                |                   | x            |                  |
-| Pascal                     | Pa                              | Pressure                 |         | x             |              | x           | x              | x                 |              |                  |
-| Parsec                     | pc                              | Length, Astronomy        |         |               |              |             |                |                   | x            |                  |
-| Horsepower (metric)        | PS                              | Power                    |         |               | x            | x           |                |                   | x            |                  |
-| Pint                       | pt                              | Volume                   |         |               | x            | x           |                |                   | x            |                  |
-| Radian                     | rad                             | Angle                    |         | x             |              | x           | x              |                   |              |                  |
-| Cubic Meter (stacked wood) | rm                              | Volume                   |         |               |              |             |                |                   | x            |                  |
-| Second (long form)         | s                               | Time                     | x       |               |              | x           | x              | x                 |              |                  |
-| Siemens                    | S                               | Electricity, Conductance |         | x             |              | x           | x              | x                 |              |                  |
-| Sone                       | sone                            | Acoustics                |         |               | x            | x           |                |                   | x            |                  |
-| Steradian                  | sr                              | Angle                    |         | x             |              | x           | x              | x                 |              |                  |
-| Stere (wood volume)        | St                              | Volume                   |         |               |              |             |                |                   | x            |                  |
-| Sievert                    | Sv                              | Radiation                |         | x             |              | x           | x              |                   |              |                  |
-| Metric Ton                 | t                               | Mass                     |         |               |              |             | x              |                   |              |                  |
-| Tesla                      | T                               | Magnetic Field           |         | x             |              | x           | x              | x                 |              |                  |
-| Tex                        | tex                             | Mass                     |         |               | x            | x           |                |                   | x            |                  |
-| Atomic Mass Unit           | u                               | Mass, Atomic             |         |               |              |             |                |                   | x            |                  |
-| Volt                       | V                               | Electricity              |         | x             |              | x           | x              | x                 |              |                  |
-| Apparent Power             | VA                              | Electricity, Power       |         |               | x            | x           | x              |                   |              |                  |
-| Reactive Power             | Var                             | Electricity, Power       |         |               |              |             |                |                   | x            |                  |
-| Watt                       | W                               | Power                    |         | x             |              | x           | x              | x                 |              |                  |
-| Weber                      | Wb                              | Magnetism                |         | x             |              | x           | x              | x                 |              |                  |
-| Energy                     | Wh                              | Energy                   |         |               | x            | x           | x              |                   |              |                  |
-| Yard                       | yd                              | Length                   |         |               |              |             |                |                   | x            | x                |
-| Hundredweight (metric)     | Z                               | Mass                     |         |               |              |             |                |                   | x            |                  |
-| Angular Frequency          | &omega;                         | Frequency, Rotation      |         |               |              |             |                |                   | x            |                  |
-| Ohm                        | &Omega;                         | Electricity              |         | x             |              | x           | x              | x                 |              |                  |
+| Unit                        | Symbol&nbsp;&blacktriangledown; | Classification (Categories) | SI Base | SI Derivation | SI Extension | SI relevant | SI with Prefix | SI with Exponents | Common Units | Informal |
+|-----------------------------|---------------------------------|-----------------------------|---------|---------------|--------------|-------------|----------------|-------------------|--------------|----------|
+| Foot (single quote mark)    | '                               | length                      |         |               |              |             |                |                   | x            |          |
+| Inch (double quote mark)    | "                               | length                      |         |               |              |             |                |                   | x            |          |
+| Percent                     | %                               | ratio                       |         |               |              |             |                |                   | x            |          |
+| Foot (quote mark)           | &#x2032;                        | length                      |         |               |              |             |                |                   | x            |          |
+| Inch (quote mark)           | &#x2033;                        | length                      |         |               |              |             |                |                   | x            |          |
+| Ampere                      | A                               | electricity                 | x       |               |              | x           | x              | x                 |              |          |
+| Are                         | a                               | area                        |         |               | x            | x           |                |                   | x            |          |
+| Astronomical Unit           | AE                              | astronomy length            |         |               | x            | x           | x              |                   |              |          |
+| Battery Capacity            | Ah                              | electricity                 |         |               | x            | x           |                |                   | x            |          |
+| Atmosphere (pressure)       | atm                             | pressure                    |         |               |              |             |                |                   | x            |          |
+| Gauge Pressure              | At&uuml;                        | pressure                    |         |               |              |             |                |                   | x            |          |
+| Astronomical Unit           | AU                              | astronomy length            |         |               | x            | x           | x              |                   |              |          |
+| Barn                        | b                               | area radiation              |         |               | x            | x           | x              |                   |              |          |
+| Bel                         | B                               | acoustics                   |         |               | x            | x           |                |                   | x            |          |
+| Bar                         | bar                             | pressure                    |         |               | x            | x           |                |                   | x            |          |
+| Barrel (oil)                | bbl                             | volume                      |         |               |              |             |                |                   | x            |          |
+| Becquerel                   | Bq                              | radiation                   |         | x             |              | x           | x              | x                 |              |          |
+| Coulomb                     | C                               | electricity                 |         | x             |              | x           | x              | x                 |              |          |
+| Candela                     | cd                              | light                       | x       |               |              | x           | x              |                   |              |          |
+| Carat (gem weight)          | ct                              | mass                        |         |               | x            | x           | x              |                   |              |          |
+| Day                         | d                               | time                        |         |               | x            | x           |                |                   | x            |          |
+| Dalton                      | Da                              | mass atomic                 |         |               | x            | x           | x              |                   |              |          |
+| Decameter                   | dam                             | length                      |         |               |              |             |                |                   | x            |          |
+| Decibel                     | dB                              | acoustics                   |         |               | x            | x           |                |                   | x            |          |
+| Decibel A curve             | db(A)                           | acoustics                   |         |               | x            | x           |                |                   | x            |          |
+| Decibel C curve             | db(C)                           | acoustics                   |         |               | x            | x           |                |                   | x            |          |
+| Decibel G curve             | db(G)                           | acoustics                   |         |               | x            | x           |                |                   | x            |          |
+| Decibel Z curve             | db(Z)                           | acoustics                   |         |               | x            | x           |                |                   | x            |          |
+| Dioptre                     | dpt                             | optics                      |         |               | x            | x           |                |                   | x            |          |
+| Double Hundredweight        | dz                              | quantity                    |         |               |              |             |                |                   | x            |          |
+| Dozen                       | dz                              | quantity                    |         |               |              |             |                |                   | x            |          |
+| Electronvolt                | eV                              | energy                      |         |               | x            | x           | x              |                   |              |          |
+| Farad                       | F                               | electricity capacitance     |         | x             |              | x           | x              | x                 |              |          |
+| Foot                        | ft                              | length                      |         |               |              |             |                |                   | x            | x        |
+| Gram                        | g                               | mass                        | x       |               |              | x           | x              | x                 |              |          |
+| Gallon                      | gal                             | volume                      |         |               |              |             |                |                   | x            |          |
+| Gray                        | Gy                              | radiation                   |         | x             |              | x           | x              |                   |              |          |
+| Henry                       | H                               | electricity                 |         | x             |              | x           | x              | x                 |              |          |
+| Hour                        | h                               | time                        |         |               | x            | x           | x              |                   |              |          |
+| Hectare                     | ha                              | area                        |         |               | x            | x           |                |                   | x            |          |
+| Horsepower (imperial)       | hp                              | power                       |         |               |              |             |                |                   | x            |          |
+| Hertz                       | Hz                              | frequency                   |         | x             |              | x           | x              |                   |              |          |
+| Inch                        | in                              | length                      |         |               |              |             |                |                   | x            | x        |
+| Joule                       | J                               | energy                      |         | x             |              | x           | x              | x                 |              |          |
+| Kelvin                      | K                               | temperature                 | x       |               |              | x           | x              |                   |              |          |
+| Katal                       | kat                             | amount                      |         | x             |              | x           | x              | x                 |              |          |
+| Knot                        | kn                              | speed                       |         |               | x            | x           |                |                   | x            |          |
+| Karat (gold purity)         | kt                              | mass                        |         |               |              |             |                |                   | x            |          |
+| Knot                        | kt                              | speed                       |         |               | x            | x           |                |                   | x            |          |
+| Liter                       | l                               | volume                      |         |               | x            | x           | x              | x                 |              |          |
+| Liter                       | L                               | volume                      |         |               | x            | x           | x              | x                 |              |          |
+| Pound                       | lb                              | mass                        |         |               |              |             |                |                   | x            |          |
+| Light-year                  | lj                              | length astronomy            |         |               |              |             |                |                   | x            |          |
+| Lumen                       | lm                              | light                       |         | x             |              | x           | x              | x                 |              |          |
+| Lumen second                | ls                              | light energy                |         |               |              |             |                |                   | x            |          |
+| Lux                         | lx                              | light                       |         | x             |              | x           | x              | x                 |              |          |
+| Meter                       | m                               | length                      | x       |               |              | x           | x              | x                 |              | x        |
+| Mel                         | mel                             | acoustics                   |         |               | x            | x           |                |                   | x            |          |
+| Mile                        | mi                              | length                      |         |               |              |             |                |                   | x            | x        |
+| Mile                        | mile                            | length                      |         |               |              |             |                |                   |              | x        |
+| Minute (long form)          | min                             | time                        |         |               | x            | x           |                |                   | x            |          |
+| Mole                        | mol                             | amount                      | x       |               |              | x           | x              | x                 |              |          |
+| Miles per Hour              | mph                             | length time                 |         |               |              |             |                |                   |              | x        |
+| Newton                      | N                               | force                       |         | x             |              | x           | x              |                   |              |          |
+| Neper                       | Np                              | acoustics                   |         |               | x            | x           |                |                   | x            |          |
+| Degree                      | &ordm;                          | angle                       |         |               |              |             |                |                   | x            |          |
+| Degree Celsius              | &ordm;C                         | temperature                 |         | x             |              | x           |                |                   | x            |          |
+| Ounce                       | oz                              | mass                        |         |               |              |             |                |                   | x            |          |
+| Ounce                       | oz.                             | mass                        |         |               |              |             |                |                   | x            |          |
+| Troy Ounce                  | oz. tr.                         | mass                        |         |               | x            | x           | x              |                   |              |          |
+| Pond (metric force)         | p                               | force                       |         |               |              |             |                |                   | x            |          |
+| Pascal                      | Pa                              | pressure                    |         | x             |              | x           | x              | x                 |              |          |
+| Parsec                      | pc                              | length astronomy            |         |               |              |             |                |                   | x            |          |
+| Horsepower (metric)         | PS                              | power                       |         |               | x            | x           |                |                   | x            |          |
+| Pint                        | pt                              | volume                      |         |               | x            | x           |                |                   | x            |          |
+| Radian                      | rad                             | angle                       |         | x             |              | x           | x              |                   |              |          |
+| Cubic Meter (stacked wood)  | rm                              | volume                      |         |               |              |             |                |                   | x            |          |
+| Second (long form)          | s                               | time                        | x       |               |              | x           | x              | x                 |              |          |
+| Siemens                     | S                               | electricity conductance     |         | x             |              | x           | x              | x                 |              |          |
+| Sone                        | sone                            | acoustics                   |         |               | x            | x           |                |                   | x            |          |
+| Steradian                   | sr                              | angle                       |         | x             |              | x           | x              | x                 |              |          |
+| Stere (wood volume)         | St                              | volume                      |         |               |              |             |                |                   | x            |          |
+| Sievert                     | Sv                              | radiation                   |         | x             |              | x           | x              |                   |              |          |
+| Metric Ton                  | t                               | mass                        |         |               |              |             | x              |                   |              |          |
+| Tesla                       | T                               | magnetic field              |         | x             |              | x           | x              | x                 |              |          |
+| Tex                         | tex                             | mass                        |         |               | x            | x           |                |                   | x            |          |
+| Atomic Mass Unit            | u                               | mass atomic                 |         |               |              |             |                |                   | x            |          |
+| Volt                        | V                               | electricity                 |         | x             |              | x           | x              | x                 |              |          |
+| Apparent Power              | VA                              | electricity power           |         |               | x            | x           | x              |                   |              |          |
+| Reactive Power              | Var                             | electricity power           |         |               |              |             |                |                   | x            |          |
+| Watt                        | W                               | power                       |         | x             |              | x           | x              | x                 |              |          |
+| Weber                       | Wb                              | magnetism                   |         | x             |              | x           | x              | x                 |              |          |
+| Energy                      | Wh                              | energy                      |         |               | x            | x           | x              |                   |              |          |
+| Yard                        | yd                              | length                      |         |               |              |             |                |                   | x            | x        |
+| Hundredweight (metric)      | Z                               | mass                        |         |               |              |             |                |                   | x            |          |
+| Angular Frequency           | &omega;                         | frequency rotation          |         |               |              |             |                |                   | x            |          |
+| Ohm                         | &Omega;                         | electricity                 |         | x             |              | x           | x              | x                 |              |          |
+
 
 The units and prefixes included were compiled from publicly available sources,
 including technical references (e.g. Wikipedia, national standards, product

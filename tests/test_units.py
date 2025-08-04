@@ -274,3 +274,32 @@ xxx 100.0  hW/s      -> xxx 100.0 hW/s
 @pytest.mark.parametrize("input,expected", _parse_test_cases(_TEST_CASES_02))
 def test_normalize_02(input, expected):
     assert spacing(input, SpacingMode.ALPHANUMERIC) == expected
+
+_TEST_CASES_03 = """
+Die Batterie hält ca. 10h bei −20.5 °C.
+Das Solarpanel produziert etwa 1.2 × 10^3W unter optimalen Bedingungen.
+Mit einem Gewicht von ~2.3 kg ist das Gerät leicht tragbar.
+Der Reifendruck liegt bei 2500hPa, empfohlen sind aber nur 2.5 bar.
+Die Entfernung zum nächsten Ladepunkt beträgt rund 18 km, bei einer Durchschnittsgeschwindigkeit von 50km/h.
+Einige Nutzer berichten sogar von 21.5kWh Verbrauch auf 100km.
+
+Die Verpackung hat Maße von 35×22×12 cm und ein Volumen von ca. 9.24 l.
+Das Display misst 15.6 " bei einer Auflösung von 1920×1080 px.
+Der Lüfter erzeugt 34dB Geräuschpegel unter Last.
+Laut Hersteller beträgt die Akkulaufzeit 12–14 h je nach Nutzung.
+Das Gerät arbeitet in einem Temperaturbereich zwischen −10 °C und +45 °C.
+Der Stromverbrauch liegt bei max. 65 W, die Ladezeit bei 3.5h über ein Netzteil mit 20V und 3.25A.
+Die GPS-Genauigkeit beträgt etwa ±5 m.
+Bei Windstärken über 60 km/h sollte das Gerät gesichert werden.
+
+Das Plato befand sich auf 550 m Höhe bei einem relativen Luftdruck von 960hPa.
+Die Signalreichweite lag bei bis zu 120 m auf freier Fläche.
+Nach dem Update verbesserte sich die Bootzeit um 2.3 s, und die durchschnittliche CPU-Temperatur sank auf 36.5 °C.
+Die Ladegeschwindigkeit wurde mit 0.8C angegeben.
+Der Preis liegt aktuell bei etwa 299.99 €.
+"""
+@pytest.mark.parametrize("input", [_TEST_CASES_03])
+def test_units_02(input):
+    entities = units(input)
+    print(entities)
+#   assert TODO:

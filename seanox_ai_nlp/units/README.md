@@ -1,7 +1,7 @@
 ## Description
 
 In everyday language, measurements are typically expressed as a combination of
-numerical value and unit -- such as __1000 hPa__, __50 km/h__ or __?20.5
+numerical value and unit -- such as __1000 hPa__, __50 km/h__ or __-20.5
 &ordm;C__. These expressions appear in weather reports, product descriptions,
 medical statements, social media posts and more -- often with inconsistent
 formatting or informal phrasing.

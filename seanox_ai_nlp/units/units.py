@@ -201,10 +201,6 @@ _UNIT_INFORMAL_VALIDATION_PATTERN = rf"""
     )
 """
 
-print(_re_compile(_UNIT_SI_VALIDATION_PATTERN, True))
-print(_re_compile(_UNIT_COMMON_VALIDATION_PATTERN, True))
-print(_re_compile(_UNIT_INFORMAL_VALIDATION_PATTERN, True))
-
 _UNIT_VALIDATION_PATTERN = rf"""
     (?:
       {_UNIT_SI_VALIDATION_PATTERN}
@@ -222,6 +218,52 @@ _UNIT_VALIDATION_EXPRESSION_PATTERN = _re_compile(rf"""
       )*
     )$
 """)
+
+_UNIT_SI_CLASSIFICATION_PATTERN = rf"""
+    (?:
+      (?:
+        (?P<unitSiPrefixSuffixPrefix>{_UNIT_SI_PREFIX_PATTERN})
+        (?P<unitSiPrefixSuffixSymbol>{_UNIT_SI_SYMBOLS_PREFIX_SUFFIX_PATTERN})
+        (?P<unitSiPrefixSuffixSuffix>{_UNIT_SI_SUFFIX_PATTERN})
+      )
+      |
+      (?:
+        (?P<unitSiPrefixPrefix>{_UNIT_SI_PREFIX_PATTERN})
+        (?P<unitSiPrefixSymbol>{_UNIT_SI_SYMBOLS_PREFIX_PATTERN})
+      )
+      |
+      (?:
+        (?P<unitSiSuffixSymbol>{_UNIT_SI_SYMBOLS_SUFFIX_PATTERN})
+        (?P<unitSiSuffixSuffix>{_UNIT_SI_SUFFIX_PATTERN})
+      )
+      |(?P<unitCommonSymbol>{_UNIT_SI_SYMBOLS_RELEVANT_PATTERN})
+    )  
+"""
+
+_UNIT_COMMON_CLASSIFICATION_PATTERN = rf"""
+    (?P<unitCommonSymbol>{_UNIT_COMMON_SYMBOLS_PATTERN})
+"""
+
+_UNIT_INFORMAL_CLASSIFICATION_PATTERN = rf"""
+    (?:
+      (?P<unitInformalPrefix>{_UNIT_INFORMAL_PREFIX_PATTERN})?
+      (?P<unitInformalSymbol>{_UNIT_INFORMAL_SYMBOLS_PATTERN})
+      (?P<unitInformalSuffix>{_UNIT_INFORMAL_SUFFIX_PATTERN})?    
+    )
+"""
+
+# TODO:
+print(_re_compile(_UNIT_SI_CLASSIFICATION_PATTERN, True))
+print(_re_compile(_UNIT_COMMON_CLASSIFICATION_PATTERN, True))
+print(_re_compile(_UNIT_INFORMAL_CLASSIFICATION_PATTERN, True))
+
+_UNIT_CLASSIFICATION_PATTERN = rf"""
+    ^(?:
+      {_UNIT_SI_CLASSIFICATION_PATTERN}
+      |{_UNIT_COMMON_CLASSIFICATION_PATTERN}
+      |{_UNIT_INFORMAL_CLASSIFICATION_PATTERN}
+    )$
+"""
 
 class SpacingMode(Enum):
     NUMERIC = _UNIT_WITH_INVALID_SPACES_NUMERIC_PATTERN
@@ -292,3 +334,7 @@ def units(text: str) -> list[UnitEntry]:
         entities.append(entity)
 
     return entities
+
+# TODO:
+if __name__ == "__main__":
+    units("")

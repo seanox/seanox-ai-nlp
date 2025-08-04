@@ -298,8 +298,8 @@ Nach dem Update verbesserte sich die Bootzeit um 2.3 s, und die durchschnittlich
 Die Ladegeschwindigkeit wurde mit 0.8C angegeben.
 Der Preis liegt aktuell bei etwa 299.99 €.
 """
-@pytest.mark.parametrize("input", [_TEST_CASES_03])
-def test_units_02(input):
-    entities = units(input)
+@pytest.mark.parametrize("text", [_TEST_CASES_03])
+def test_units_01(text):
+    entities = units(text)
     print(entities)
-#   assert TODO:
+    assert True

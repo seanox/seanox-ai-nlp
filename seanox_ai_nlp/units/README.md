@@ -6,6 +6,9 @@ numerical value and unit -- such as __1000 hPa__, __50 km/h__ or __?20.5
 medical statements, social media posts and more -- often with inconsistent
 formatting or informal phrasing.
 
+This module is intended for developers and NLP practitioners seeking to extract
+measurement expressions from natural language.
+
 __units__ is a parser module designed to extract measurement expressions from
 natural language text. It identifies numeric-unit constructs across general,
 semi-technical, and academic contexts -- independent of language or formatting

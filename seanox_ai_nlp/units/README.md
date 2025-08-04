@@ -264,10 +264,10 @@ The parser is based on a rule-driven approach using regular expressions
 (__RegEx__). The definition values and aggregated patterns for unit extraction
 are centrally maintained in the file `units.xlsx`.
 
-- The Excel spreadsheet contains both the basic data (e.g., units,
-  classification, ...) and also aggregates the RegEx expressions for parsing.
-- These aggregated expressions are dynamically overwritten as constants within
-  `units.py`.
+- The Excel spreadsheet contains the basic data (e.g., units, classification,
+  ...) and also precompiles the RegEx expressions as constants for parsing.
+- These constants with the precompiled expressions then replace the existing
+  constants  in  `units.py` .
 - __units__ is designed to use the updated expressions at runtime -- enabling
   flexible maintenance and extendability of the extraction logic without
   modifying the source code.

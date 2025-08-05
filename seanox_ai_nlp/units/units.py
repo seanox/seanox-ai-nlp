@@ -102,6 +102,10 @@ _NUMERIC_SIGN_PATTERN = r"[\u00B1+\-~]"
 _NUMERIC_DE_PATTERN = r"(?:(?:(?:\d{1,3}(?:\.\d{3})*)|\d+)(?:,\d+)?)"
 _NUMERIC_EN_PATTERN = r"(?:(?:(?:\d{1,3}(?:,\d{3})*)|\d+)(?:\.\d+)?)"
 _NUMERIC_CH_PATTERN = r"(?:(?:(?:\d{1,3}(?:\u2019\d{3})*)|\d+)(?:,\d+)?)"
+_NUMERIC_FR_PATTERN = r"(?:(?:(?:\d{1,3}(?: \d{3})*)|\d+)(?:,\d+)?)"
+_NUMERIC_IN_PATTERN = r"(?:(?:(?:(?:(?:\d{1,2},)(?:\d{2},)*)?\d{3})|\d+)(?:\.\d+)?)"
+_NUMERIC_ISO_PATTERN = r"(?:(?:(?:\d{1,3}(?:[\u00A0\u202F]\d{3})*)|\d+)(?:\.\d+)?)"
+
 _NUMERIC_OPERATORS_PATTERN = r"(?:[\u002B\u2212\u00B1\u002A\u00D7\u0078\u00B7\u003A\u00F7\u002F\u005E\u2013])"
 
 _UNIT_SI_RAW_PATTERN = rf"""
@@ -134,31 +138,36 @@ _UNIT_EXPRESSION_RAW_PATTERN = rf"""
 
 _NUMERIC_PATTERN = rf"""
     (?:
+      {_NUMERIC_DE_PATTERN}
+      |{_NUMERIC_EN_PATTERN}
+      |{_NUMERIC_CH_PATTERN}
+      |{_NUMERIC_FR_PATTERN}
+      |{_NUMERIC_IN_PATTERN}
+      |{_NUMERIC_ISO_PATTERN}
+    )
+"""
+
+_NUMERIC_EXPRESSION_PATTERN = rf"""
+    (?:
       {_NUMERIC_SIGN_PATTERN}?
-      (?:
-        {_NUMERIC_DE_PATTERN}
-        |{_NUMERIC_EN_PATTERN}
-        |{_NUMERIC_CH_PATTERN}
-      )
+      {_NUMERIC_PATTERN}
       (?:
         \s*
         {_NUMERIC_OPERATORS_PATTERN}
         \s*
-        (?:
-          {_NUMERIC_DE_PATTERN}
-          |{_NUMERIC_EN_PATTERN}
-          |{_NUMERIC_CH_PATTERN}
-        )
+        {_NUMERIC_PATTERN}
       )*
     )
 """
 
-NUMERIC_PATTERN = _re_compile(_NUMERIC_PATTERN)
+NUMERIC_PATTERN = _re_compile(_NUMERIC_EXPRESSION_PATTERN)
 NUMERIC_OPERATORS_PATTERN = _re_compile(_NUMERIC_OPERATORS_PATTERN)
+NUMERIC_VALIDATION_PATTERN = _re_compile(rf"^{_NUMERIC_PATTERN}$")
+NUMERIC_EXPRESSION_VALIDATION_PATTERN = _re_compile(rf"^{_NUMERIC_EXPRESSION_PATTERN}$")
 
 _UNIT_VALUE_PATTERN = rf"""
     {_NUMERIC_LOOK_AHEAD_PATTERN}
-    (?P<unitValueNumeric>{_NUMERIC_PATTERN})
+    (?P<unitValueNumeric>{_NUMERIC_EXPRESSION_PATTERN})
     \s*
     (?P<unitValueUnit>{_UNIT_EXPRESSION_RAW_PATTERN})
     {_UNIT_LOOK_BEHIND_PATTERN}
@@ -242,7 +251,8 @@ _UNIT_VALIDATION_PATTERN = rf"""
     )
 """
 
-_UNIT_VALIDATION_EXPRESSION_PATTERN = _re_compile(rf"""
+UNIT_VALIDATION_PATTERN = _re_compile(rf"^{_UNIT_VALIDATION_PATTERN}")
+UNIT_EXPRESSION_VALIDATION_PATTERN = _re_compile(rf"""
     ^(?:
       {_UNIT_VALIDATION_PATTERN}
       (?:
@@ -310,9 +320,9 @@ def _dict_from_comma_separated_pairs(data: str) -> dict[str, str]:
 # that is not CSV is deliberately used, as it is only used internally and the
 # format is fully controlled.
 _UNIT_CLASSIFICATION_DICT = _dict_from_comma_separated_pairs(r"""
-| \'       | length            | db\(C\) | acoustics                | L         | volume            | rad    | angle                   |
-| \"       | length            | db\(G\) | acoustics                | lb        | mass              | rm     | volume                  |
-| %        | ratio             | db\(Z\) | acoustics                | lj        | length astronomy  | s      | time                    |
+| '        | length            | db(C)   | acoustics                | L         | volume            | rad    | angle                   |
+| "        | length            | db(G)   | acoustics                | lb        | mass              | rm     | volume                  |
+| %        | ratio             | db(Z)   | acoustics                | lj        | length astronomy  | s      | time                    |
 | \u2032   | length            | dpt     | optics                   | lm        | light             | S      | electricity conductance |
 | \u2033   | length            | dz      | quantity                 | ls        | light energy      | sone   | acoustics               |
 | A        | electricity       | dz      | quantity                 | lx        | light             | sr     | angle                   |
@@ -329,12 +339,12 @@ _UNIT_CLASSIFICATION_DICT = _dict_from_comma_separated_pairs(r"""
 | Bq       | radiation         | Hz      | frequency                | \u00BAC   | temperature       | Wb     | magnetism               |
 | C        | electricity       | in      | length                   | oz        | mass              | Wh     | energy                  |
 | cd       | light             | J       | energy                   | oz.       | mass              | yd     | length                  |
-| ct       | mass              | K       | temperature              | oz\. tr\. | mass              | Z      | mass                    |
+| ct       | mass              | K       | temperature              | oz. tr.   | mass              | Z      | mass                    |
 | d        | time              | kat     | amount                   | p         | force             | \u03C9 | frequency rotation      |
 | Da       | mass atomic       | kn      | speed                    | Pa        | pressure          | \u03A9 | electricity             |
 | dam      | length            | kt      | mass                     | pc        | length astronomy  |        |                         |
 | dB       | acoustics         | kt      | speed                    | PS        | power             |        |                         |
-| db\(A\)  | acoustics         | l       | volume                   | pt        | volume            |        |                         |
+| db(A)    | acoustics         | l       | volume                   | pt        | volume            |        |                         |
 """)
 
 
@@ -437,7 +447,7 @@ def units(text: str) -> list[Unit]:
         numeric = groups.get("unitValueNumeric")
         unit = groups.get("unitValueUnit") or groups.get("unitUnit")
 
-        if not (_UNIT_VALIDATION_EXPRESSION_PATTERN.match(unit)):
+        if not (UNIT_EXPRESSION_VALIDATION_PATTERN.match(unit)):
             continue
 
         if numeric:
@@ -455,7 +465,7 @@ def units(text: str) -> list[Unit]:
         else:
             entities.append(
                 Unit(
-                    label="UNIT-VALUE",
+                    label="UNIT",
                     start=match.start(),
                     end=match.end(),
                     text=match.group(),

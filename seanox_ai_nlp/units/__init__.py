@@ -1,5 +1,23 @@
 # seanox_ai_nlp/units/__init__.py
 
-from .units import UNIT_PATTERN, NUMERIC_UNIT_PATTERN, units, normalize
+from .units import (
+    UNIT_PATTERN,
+    UNIT_CLASSIFICATION_PATTERN,
+    UNIT_OPERATORS_PATTERN,
+    NUMERIC_PATTERN,
+    NUMERIC_OPERATORS_PATTERN,
+    units,
+    SpacingMode,
+    spacing
+)
 
-__all__ = ["UNIT_PATTERN", "NUMERIC_UNIT_PATTERN", "units", "normalize"]
+__all__ = [
+    "UNIT_PATTERN",
+    "UNIT_CLASSIFICATION_PATTERN",
+    "UNIT_OPERATORS_PATTERN",
+    "NUMERIC_PATTERN",
+    "NUMERIC_OPERATORS_PATTERN",
+    "units",
+    "SpacingMode",
+    "spacing"
+]

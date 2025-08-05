@@ -3,13 +3,12 @@
 # DESIGN NOTE
 #
 # This module relies entirely on statically aggregated and precompiled data
-# structures derived from an external Excel source. The decision to embed unit
-# definitions and classification patterns directly into the code is intentional
-# and performance-driven.
+# structures derived from an external structured Excel source. The decision to
+# embed unit definitions and classification patterns directly into the code is
+# intentional and performance-driven.
 #
 # Rationale:
-# - The unit data is curated and maintained externally in a structured Excel
-#   file.
+# - The unit data is curated and maintained externally in an Excel file.
 # - At build time, the relevant entries are aggregated and transformed into
 #   static regex-compatible strings and dictionaries.
 # - This avoids runtime file I/O, dynamic parsing, or external dependencies.
@@ -22,28 +21,26 @@
 # - However, this approach ensures high-speed recognition and classification of
 #   units in NLP pipelines, especially when processing large volumes of text.
 #
-# Recommendation:
-# - Maintain a separate script or tool to convert the Excel source into the
-#   required Python format.
-# - Document the transformation process and keep the Excel file under version
-#   control.
-#
 # Summary:
 # This module prioritizes performance and reliability over dynamic flexibility.
 # It is designed for production-grade NLP tasks where speed and consistency are
 # critical.
 
-from typing import TypedDict, Union
+from typing import Optional, NamedTuple
 from enum import Enum
+from functools import lru_cache
 
 import re
 
-def _re_compile(expression: str, debug: bool=False) -> re.Pattern:
+
+def _re_compile(expression: str, debug: bool = False) -> re.Pattern:
     expression = re.sub(r"\s{2,}|[\r\n]+", "", expression)
     if not debug:
         return re.compile(expression)
     return expression
 
+
+# Patterns generated from the Excel file
 _UNIT_SI_SYMBOLS_BASE_PATTERN = r"(?:cd|g|K|m|mol|s)"
 _UNIT_SI_SYMBOLS_DERIVATION_PATTERN = r"(?:Bq|C|F|Gy|H|Hz|J|kat|lm|lx|N|\u00BAC|Pa|rad|S|sr|Sv|T|V|W|Wb|\u03A9)"
 _UNIT_SI_SYMBOLS_EXTENSION_PATTERN = r"(?:a|AE|Ah|AU|b|B|bar|ct|d|Da|dB|db\(A\)|db\(C\)|db\(G\)|db\(Z\)|dpt|eV|h|ha|kn|kt|l|L|mel|min|Np|oz\. tr\.|PS|pt|sone|tex|VA|Wh)"
@@ -105,7 +102,7 @@ _NUMERIC_SIGN_PATTERN = r"[\u00B1+\-~]"
 _NUMERIC_DE_PATTERN = r"(?:(?:(?:\d{1,3}(?:\.\d{3})*)|\d+)(?:,\d+)?)"
 _NUMERIC_EN_PATTERN = r"(?:(?:(?:\d{1,3}(?:,\d{3})*)|\d+)(?:\.\d+)?)"
 _NUMERIC_CH_PATTERN = r"(?:(?:(?:\d{1,3}(?:\u2019\d{3})*)|\d+)(?:,\d+)?)"
-_NUMERIC_SYMBOLIC_SEPARATOR = r"(?:[\u002B\u2212\u00B1\u002A\u00D7\u0078\u00B7\u003A\u00F7\u002F\u005E\u2013])"
+_NUMERIC_OPERATORS_PATTERN = r"(?:[\u002B\u2212\u00B1\u002A\u00D7\u0078\u00B7\u003A\u00F7\u002F\u005E\u2013])"
 
 _UNIT_SI_RAW_PATTERN = rf"""
     (?:{_UNIT_SI_PREFIX_PATTERN}?
@@ -135,7 +132,7 @@ _UNIT_EXPRESSION_RAW_PATTERN = rf"""
     )
 """
 
-NUMERIC_PATTERN = rf"""
+_NUMERIC_PATTERN = rf"""
     (?:
       {_NUMERIC_SIGN_PATTERN}?
       (?:
@@ -145,7 +142,7 @@ NUMERIC_PATTERN = rf"""
       )
       (?:
         \s*
-        {_NUMERIC_SYMBOLIC_SEPARATOR}
+        {_NUMERIC_OPERATORS_PATTERN}
         \s*
         (?:
           {_NUMERIC_DE_PATTERN}
@@ -156,9 +153,12 @@ NUMERIC_PATTERN = rf"""
     )
 """
 
+NUMERIC_PATTERN = _re_compile(_NUMERIC_PATTERN)
+NUMERIC_OPERATORS_PATTERN = _re_compile(_NUMERIC_OPERATORS_PATTERN)
+
 _UNIT_VALUE_PATTERN = rf"""
     {_NUMERIC_LOOK_AHEAD_PATTERN}
-    (?P<unitValueNumeric>{NUMERIC_PATTERN})
+    (?P<unitValueNumeric>{_NUMERIC_PATTERN})
     \s*
     (?P<unitValueUnit>{_UNIT_EXPRESSION_RAW_PATTERN})
     {_UNIT_LOOK_BEHIND_PATTERN}
@@ -286,27 +286,31 @@ _UNIT_INFORMAL_CLASSIFICATION_PATTERN = rf"""
 """
 
 UNIT_CLASSIFICATION_PATTERN = _re_compile(rf"""
-    ^(?:
+    (?:
       {_UNIT_SI_CLASSIFICATION_PATTERN}
       |{_UNIT_COMMON_CLASSIFICATION_PATTERN}
       |{_UNIT_INFORMAL_CLASSIFICATION_PATTERN}
-    )$
+    )
 """)
 
-def dict_from_comma_separated_pairs(data: str) -> dict[str, str]:
+
+def _dict_from_comma_separated_pairs(data: str) -> dict[str, str]:
     result = {}
-    data = re.sub("\s*\|\s*[\r\n]\s*", "", data.strip())
+    data = re.sub(r"\s*\|\s*[\r\n]\s*", "", data.strip())
     items = re.split(r"\s*\|\s*", data)
-    for item in range(1, len(items) -1, 2):
+    for item in range(1, len(items) - 1, 2):
         key = items[item].strip()
         value = items[item + 1].strip()
         if key and value:
             result[key] = value
     return result
 
-_UNIT_CLASSIFICATION_DICT = dict_from_comma_separated_pairs(r"""
+
+# For better maintainability and error analysis, a proprietary inline format
+# that is not CSV is deliberately used, as it is only used internally and the
+# format is fully controlled.
+_UNIT_CLASSIFICATION_DICT = _dict_from_comma_separated_pairs(r"""
 | \'       | length            | db\(C\) | acoustics                | L         | volume            | rad    | angle                   |
-|----------|-------------------|---------|--------------------------|-----------|-------------------|--------|-------------------------|
 | \"       | length            | db\(G\) | acoustics                | lb        | mass              | rm     | volume                  |
 | %        | ratio             | db\(Z\) | acoustics                | lj        | length astronomy  | s      | time                    |
 | \u2032   | length            | dpt     | optics                   | lm        | light             | S      | electricity conductance |
@@ -333,40 +337,65 @@ _UNIT_CLASSIFICATION_DICT = dict_from_comma_separated_pairs(r"""
 | db\(A\)  | acoustics         | l       | volume                   | pt        | volume            |        |                         |
 """)
 
-print(_UNIT_CLASSIFICATION_DICT)
 
 class SpacingMode(Enum):
+    """
+    Specifies patterns used to correct spacing between numeric/alphanumeric
+    expressions and unit identifiers.
+
+    Modes:
+    - NUMERIC: Applies to spacing between numeric values and unit expressions.
+    - ALPHANUMERIC: Applies to alphanumeric strings followed by unit expressions.
+    - ALL: Applies broadly to numeric, alphanumeric, and special-character contexts.
+    """
     NUMERIC = _UNIT_WITH_INVALID_SPACES_NUMERIC_PATTERN
     ALPHANUMERIC = _UNIT_WITH_INVALID_SPACES_ALPHANUMERIC_PATTERN
     ALL = _UNIT_WITH_INVALID_SPACES_ALL_PATTERN
 
-def spacing(text: str, mode: SpacingMode=SpacingMode.NUMERIC) -> str:
+
+def spacing(text: str, mode: SpacingMode = SpacingMode.NUMERIC) -> str:
+    """
+    Corrects invalid spacing between numbers and unit expressions.
+
+    Args:
+        text (str): Input string to be corrected
+        mode (SpacingMode, optional): Correction mode for spacing.
+            Default is SpacingMode.NUMERIC.
+
+    Returns:
+        str: Corrected text with corrected spacing
+    """
     text = mode.value.sub(
         lambda match: " " + match.group(0).strip(),
         text
     )
     return text
 
-class UnitValue(TypedDict):
+
+class Unit(NamedTuple):
+    """
+    Represents a recognized unit entity extracted from text.
+
+    Attributes:
+        label (str): Classification label, e.g. 'UNIT-VALUE'.
+        start (int): Start index of the unit in the original text.
+        end (int): End index of the unit in the original text.
+        text (str): Raw text fragment containing the unit.
+        categories (tuple[str, ...]): Assigned semantic categories for the unit.
+        unit (str): The extracted unit string (e.g. 'kg', 'm').
+        value (Optional[str]): The numerical value associated with the unit, if present.
+    """
     label: str
     start: int
     end: int
     text: str
-    value: str
+    categories: tuple[str, ...]
     unit: str
-    categories: list[str]
+    value: Optional[str] = None
 
-class Unit(TypedDict):
-    label: str
-    start: int
-    end: int
-    text: str
-    unit: str
-    categories: list[str]
 
-UnitEntry = Union[UnitValue, Unit]
-
-def _get_categories_for_unit(unit: str) -> list[str]:
+@lru_cache(maxsize=256)
+def _get_categories_for_unit(unit: str) -> tuple[str, ...]:
     categories = []
     for unitEntry in re.split(UNIT_OPERATORS_PATTERN, unit):
         match = UNIT_CLASSIFICATION_PATTERN.search(unitEntry)
@@ -380,9 +409,24 @@ def _get_categories_for_unit(unit: str) -> list[str]:
         )
         if category:
             categories.append(category)
-    return categories
+    return tuple(categories)
 
-def units(text: str) -> list[UnitEntry]:
+
+def units(text: str) -> list[Unit]:
+    """
+    Extracts valid unit expressions and associated numeric values from a given text.
+
+    Args:
+        text (str): Input string to analyze.
+
+    Returns:
+        list[Unit]: List of Unit objects representing detected unit entities.
+
+    Notes:
+        - Only units matching known validation patterns will be returned.
+        - Numeric expression preceding units will be included when available.
+        - Designed for use in NLP pipelines, extraction, and preprocessing tasks.
+    """
 
     if not text:
         return []
@@ -397,23 +441,27 @@ def units(text: str) -> list[UnitEntry]:
             continue
 
         if numeric:
-            entity: UnitValue = {
-                "label": "UNIT-VALUE",
-                "start": match.start(),
-                "end": match.end(),
-                "text": match.group(),
-                "value": numeric,
-                "unit": unit,
-                "categories": _get_categories_for_unit(unit)
-            }
+            entities.append(
+                Unit(
+                    label="UNIT-VALUE",
+                    start=match.start(),
+                    end=match.end(),
+                    text=match.group(),
+                    unit=unit,
+                    value=numeric,
+                    categories=_get_categories_for_unit(unit)
+                )
+            )
         else:
-            entity: UnitValue = {
-                "label": "UNIT",
-                "start": match.start(),
-                "end": match.end(),
-                "text": match.group(),
-                "unit": unit,
-                "categories": _get_categories_for_unit(unit)
-            }
-        entities.append(entity)
+            entities.append(
+                Unit(
+                    label="UNIT-VALUE",
+                    start=match.start(),
+                    end=match.end(),
+                    text=match.group(),
+                    unit=unit,
+                    categories=_get_categories_for_unit(unit)
+                )
+            )
+
     return entities

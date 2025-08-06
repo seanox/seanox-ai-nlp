@@ -1,4 +1,4 @@
-# tests/test_units_units.py
+# tests/test_units_spacing_alphanumeric.py
 
 from seanox_ai_nlp.units import SpacingMode, spacing
 

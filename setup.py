@@ -16,5 +16,5 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/seanox/seanox-ai-nlp",
     license="Apache-2.0",
-    python_requires=">=3.7",
+    python_requires=">=3.9",
 )

@@ -454,8 +454,84 @@ filtering or interpretation as needed.
 
 # Integration in NLP-Workflows
 
-TODO: Verwendung mit spaCy’s EntityRuler
-TODO: Beispiel für Einbettung in eine Verarbeitungspipeline
+[Example spaCy pipeline (source)](../../examples/units/example-spaCy-pipeline.py)
+
+```python
+import spacy
+from spacy.tokens import Span
+from seanox_ai_nlp.units import units
+
+Span.set_extension("value", default=None)
+Span.set_extension("unit", default=None)
+Span.set_extension("categories", default=None)
+
+nlp = spacy.load("en_core_web_md")
+text = (
+    "The cruising speed of the Boeing 747 is approximately 900 - 950 km/h (559 mph)."
+    "It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
+)
+doc = nlp(text)
+units_entites = units(text)
+for units_entity in units_entites:
+    span = doc.char_span(
+        units_entity.start,
+        units_entity.end,
+        label=units_entity.label
+    )
+    if span:
+        span._.value = units_entity.value
+        span._.unit = units_entity.unit
+        span._.categories = list(units_entity.categories)
+        doc.ents += (span,)
+for ent in doc.ents:
+    if ent.label_ in ["UNIT", "UNIT-VALUE"]:
+        print(f"{ent.text:<20} | label: {ent.label_:<10} | value: {ent._.value or '':<10} | unit: {ent._.unit:<6} | categories: {ent._.categories}")
+    else:
+        print(f"{ent.text:<20} | label: {ent.label_}")
+```
+
+```text
+Boeing               | label: ORG
+747                  | label: PRODUCT
+900 - 950 km/h       | label: UNIT-VALUE | value: 900 - 950  | unit: km/h   | categories: ['length', 'time']
+559                  | label: CARDINAL
+in                   | label: UNIT       | value:            | unit: in     | categories: ['length']
+kilometers per hour  | label: TIME
+km/h                 | label: UNIT       | value:            | unit: km/h   | categories: ['length', 'time']
+mph                  | label: UNIT       | value:            | unit: mph    | categories: ['length']
+```
+
+[Example of using pandas (source)](../../examples/units/example-pandas.py)
+
+```python
+import pandas as pd
+from seanox_ai_nlp.units import units
+texts = [
+    "The cruising speed of the Boeing 747 is approximately 900 - 950 km/h (559 mph).",
+    "It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
+]
+df = pd.DataFrame(texts, columns=["text"])
+df["units"] = df["text"].apply(units)
+df["first_unit"] = df["units"].apply(lambda u: u[0].value if u else None)
+for index, row in df.iterrows():
+    print(f"\nText: {row['text']}")
+    print("Extracted units:")
+    for unit in row["units"]:
+        print(f"- {unit.label:<10} | text: {unit.text:<15} | value: {unit.value or '':<10} | unit: {unit.unit or '':<6} | categories: {', '.join(unit.categories)}")
+```
+
+```text
+Text: The cruising speed of the Boeing 747 is approximately 900 - 950 km/h (559 mph).
+Extracted units:
+- UNIT-VALUE | text: 900 - 950 km/h  | value: 900 - 950  | unit: km/h   | categories: length, time
+- UNIT-VALUE | text: 559 mph         | value: 559        | unit: mph    | categories: length
+
+Text: It is typically expressed in kilometers per hour (km/h) and miles per hour (mph).
+Extracted units:
+- UNIT       | text: in              | value:            | unit: in     | categories: length
+- UNIT       | text: km/h            | value:            | unit: km/h   | categories: length, time
+- UNIT       | text: mph             | value:            | unit: mph    | categories: length
+```
 
 # Installation & Setup
 

@@ -100,7 +100,7 @@ _NUMERIC_FR_PATTERN = r"(?:(?:(?:\d{1,3}(?: \d{3})*)|\d+)(?:,\d+)?)"
 _NUMERIC_IN_PATTERN = r"(?:(?:(?:(?:(?:\d{1,2},)(?:\d{2},)*)?\d{3})|\d+)(?:\.\d+)?)"
 _NUMERIC_ISO_PATTERN = r"(?:(?:(?:\d{1,3}(?:[\u00A0\u202F]\d{3})*)|\d+)(?:\.\d+)?)"
 
-_NUMERIC_OPERATORS_PATTERN = r"(?:[\u002B\u2212\u00B1\u002A\u00D7\u0078\u00B7\u003A\u00F7\u002F\u005E\u2012\u2013\u2014])"
+_NUMERIC_DIMENSIONAL_SEPARATORS_PATTERN = r"(?:[*+\-/:\^x\u00B1\u00D7\u00B7\u00F7\u2012\u2013\u2014\u2212])"
 
 _NUMERIC_PATTERN = rf"""
     (?:
@@ -119,18 +119,27 @@ _NUMERIC_EXPRESSION_PATTERN = rf"""
       {_NUMERIC_PATTERN}
       (?:
         \s*
-        {_NUMERIC_OPERATORS_PATTERN}
+        {_NUMERIC_DIMENSIONAL_SEPARATORS_PATTERN}
         \s*
         {_NUMERIC_PATTERN}
       )*
     )
 """
 
+# RegEx for numerical values in various formats.
 NUMERIC_PATTERN = _re_compile(_NUMERIC_EXPRESSION_PATTERN)
-NUMERIC_OPERATORS_PATTERN = _re_compile(_NUMERIC_OPERATORS_PATTERN)
+
+# RegEx with dimensional separators that combine numeric values into a numeric
+# expression.
+NUMERIC_DIMENSIONAL_SEPARATORS_PATTERN = _re_compile(_NUMERIC_DIMENSIONAL_SEPARATORS_PATTERN)
+
+# RegEx for validating numeric values..
 NUMERIC_VALIDATION_PATTERN = _re_compile(rf"^{_NUMERIC_PATTERN}$")
+
+# RegEx for validating numeric expressions.
 NUMERIC_EXPRESSION_VALIDATION_PATTERN = _re_compile(rf"^{_NUMERIC_EXPRESSION_PATTERN}$")
 
+# RegEx for all supported units.
 UNIT_SYMBOLS_PATTERN = _re_compile(rf"({_UNIT_SYMBOLS_PATTERN})")
 
 _UNIT_INFORMAL_SI_RAW_PATTERN = rf"""
@@ -161,6 +170,8 @@ _UNIT_INFORMAL_RAW_PATTERN = rf"""
 """
 
 _UNIT_OPERATORS_PATTERN = r"(?:(?:\s*[*/\u00B7\u00D7]\s*)|(?:\s+x\s+))"
+
+# RegEx for operators that combine units into compound unit expressions.
 UNIT_OPERATORS_PATTERN = _re_compile(_UNIT_OPERATORS_PATTERN)
 
 _UNIT_LOOK_AHEAD_PATTERN = r"(?:(?<=[\W\d])|^)"
@@ -216,6 +227,7 @@ _UNIT_PATTERN = rf"""
     {_UNIT_LOOK_BEHIND_PATTERN}
 """
 
+# RegEx for detecting measured values and units
 UNIT_PATTERN = _re_compile(rf"""
     {_UNIT_VALUE_PATTERN}
     |{_UNIT_PATTERN}
@@ -296,7 +308,10 @@ _UNIT_VALIDATION_PATTERN = rf"""
     )
 """
 
+# RegEx for validating units.
 UNIT_VALIDATION_PATTERN = _re_compile(rf"^{_UNIT_VALIDATION_PATTERN}")
+
+# RegEx for validating unit expressions.
 UNIT_EXPRESSION_VALIDATION_PATTERN = _re_compile(rf"""
     ^(?:
       {_UNIT_VALIDATION_PATTERN}
@@ -347,6 +362,7 @@ _UNIT_IEC_CLASSIFICATION_PATTERN = rf"""
     )
 """
 
+# RegEx for classification with OR linked named groups.
 UNIT_CLASSIFICATION_PATTERN = _re_compile(rf"""
     (?:
       {_UNIT_SI_CLASSIFICATION_PATTERN}
@@ -529,10 +545,3 @@ def units(text: str) -> list[Unit]:
             )
 
     return entities
-
-
-if __name__ == "__main__":
-    print(_get_categories_for_unit("B"))
-    print(_get_categories_for_unit("px"))
-    print(_get_categories_for_unit("lx"))
-    print(_get_categories_for_unit("tex"))

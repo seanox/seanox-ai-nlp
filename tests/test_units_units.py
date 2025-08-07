@@ -4,6 +4,7 @@ from seanox_ai_nlp.units import units
 from typing import Optional, NamedTuple
 
 import pytest
+import os
 
 
 class Unit(NamedTuple):
@@ -25,7 +26,6 @@ class Unit(NamedTuple):
     "Einige Nutzer berichten sogar von 21.5kWh Verbrauch auf 100km."
 
     "Die Verpackung hat Ma\u00dfe von 35\u00d722\u00d712 cm und ein Volumen von ca. 9.24 l."
-    "Das Display misst 15.6 \" bei einer Aufl\u00f6sung von 1920\u00d71080 px."
     "Der L\u00fcfter erzeugt 34dB Ger\u00e4uschpegel unter Last."
     "Laut Hersteller betr\u00e4gt die Akkulaufzeit 12\u201314 h je nach Nutzung."
     "Das Ger\u00e4t arbeitet in einem Temperaturbereich zwischen \u221210 \u00b0C und +45 \u00b0C."
@@ -38,41 +38,61 @@ class Unit(NamedTuple):
     "Nach dem Update verbesserte sich die Bootzeit um 2.3 s, und die durchschnittliche CPU-Temperatur sank auf 36.5 \u00b0C."
     "Die Ladegeschwindigkeit wurde mit 0.8C angegeben."
     "Der Preis liegt aktuell bei etwa 299.99 \u20ac."
+
+    "Das Display misst 15.6 \" bei einer Aufl\u00f6sung von 1920\u00d71080 px."
+    "Ein Node vom Kubernetes-Cluster mind. benötigt 1vCore und 512MiB."
+
+    "Das Produkt misst 10\u00d720\u00d730 cm und hat ein Volumen von 6 l."
+    "Der Energiebedarf liegt bei ca. 5 - 10 kWh"
+    "Der Durchmesser misst ca. 1\u002d11nm (Hyphen-Minus)"
+    "Der Durchmesser misst ca. 2 \u2013 22nm (En Dash)"
+    "Der Durchmesser misst ca. 3\u2014 33nm (Em Dash)"
+    "Der Durchmesser misst ca. 4 \u221244nm (Minus Sign	)"
 )])
 def test_units_01(text):
-    expected_units = [
+    expected = [
         Unit(label='UNIT-VALUE', start=22, end=25, text='10h', categories=('time',), unit='h', value='10'),
         Unit(label='UNIT', start=37, end=38, text='C', categories=('electricity',), unit='C', value=None),
         Unit(label='UNIT-VALUE', start=70, end=81, text='1.2 × 10^3W', categories=('power',), unit='W', value='1.2 × 10^3'),
         Unit(label='UNIT-VALUE', start=133, end=139, text='2.3 kg', categories=('mass',), unit='kg', value='2.3'),
         Unit(label='UNIT', start=144, end=147, text='das', categories=('time',), unit='das', value=None),
-        Unit(label='UNIT-VALUE', start=195, end=202, text='2500hPa', categories=('pressure',), unit='hPa', value='2500'),
-        Unit(label='UNIT-VALUE', start=228, end=235, text='2.5 bar', categories=('area radiation',), unit='bar', value='2.5'),
+        Unit(label='UNIT-VALUE', start=195, end=202, text='2500hPa', categories=('time',), unit='hPa', value='2500'),
+        Unit(label='UNIT-VALUE', start=228, end=235, text='2.5 bar', categories=('pressure',), unit='bar', value='2.5'),
         Unit(label='UNIT-VALUE', start=287, end=292, text='18 km', categories=('length',), unit='km', value='18'),
         Unit(label='UNIT-VALUE', start=337, end=343, text='50km/h', categories=('length', 'time'), unit='km/h', value='50'),
-        Unit(label='UNIT-VALUE', start=378, end=385, text='21.5kWh', categories=('power',), unit='kWh', value='21.5'),
+        Unit(label='UNIT-VALUE', start=378, end=385, text='21.5kWh', categories=('energy',), unit='kWh', value='21.5'),
         Unit(label='UNIT-VALUE', start=400, end=405, text='100km', categories=('length',), unit='km', value='100'),
         Unit(label='UNIT-VALUE', start=434, end=445, text='35×22×12 cm', categories=('length',), unit='cm', value='35×22×12'),
         Unit(label='UNIT-VALUE', start=470, end=476, text='9.24 l', categories=('volume',), unit='l', value='9.24'),
-        Unit(label='UNIT-VALUE', start=558, end=562, text='34dB', categories=('time',), unit='dB', value='34'),
-        Unit(label='UNIT-VALUE', start=629, end=636, text='12–14 h', categories=('time',), unit='h', value='12–14'),
-        Unit(label='UNIT', start=672, end=674, text='in', categories=('length',), unit='in', value=None),
-        Unit(label='UNIT', start=713, end=714, text='C', categories=('electricity',), unit='C', value=None),
-        Unit(label='UNIT', start=724, end=725, text='C', categories=('electricity',), unit='C', value=None),
-        Unit(label='UNIT-VALUE', start=760, end=764, text='65 W', categories=('power',), unit='W', value='65'),
-        Unit(label='UNIT-VALUE', start=783, end=787, text='3.5h', categories=('time',), unit='h', value='3.5'),
-        Unit(label='UNIT-VALUE', start=810, end=813, text='20V', categories=('electricity',), unit='V', value='20'),
-        Unit(label='UNIT-VALUE', start=857, end=861, text='±5 m', categories=('length',), unit='m', value='±5'),
-        Unit(label='UNIT-VALUE', start=883, end=890, text='60 km/h', categories=('length', 'time'), unit='km/h', value='60'),
-        Unit(label='UNIT', start=898, end=901, text='das', categories=('time',), unit='das', value=None),
-        Unit(label='UNIT-VALUE', start=951, end=956, text='550 m', categories=('length',), unit='m', value='550'),
-        Unit(label='UNIT-VALUE', start=996, end=1002, text='960hPa', categories=('pressure',), unit='hPa', value='960'),
-        Unit(label='UNIT-VALUE', start=1039, end=1044, text='120 m', categories=('length',), unit='m', value='120'),
-        Unit(label='UNIT-VALUE', start=1112, end=1117, text='2.3 s', categories=('time',), unit='s', value='2.3'),
-        Unit(label='UNIT', start=1175, end=1176, text='C', categories=('electricity',), unit='C', value=None),
-        Unit(label='UNIT-VALUE', start=1211, end=1215, text='0.8C', categories=('electricity',), unit='C', value='0.8'),
+        Unit(label='UNIT-VALUE', start=496, end=500, text='34dB', categories=('acoustics', 'it', 'storage'), unit='dB', value='34'),
+        Unit(label='UNIT-VALUE', start=567, end=574, text='12–14 h', categories=('time',), unit='h', value='12–14'),
+        Unit(label='UNIT', start=610, end=612, text='in', categories=('length',), unit='in', value=None),
+        Unit(label='UNIT', start=651, end=652, text='C', categories=('electricity',), unit='C', value=None),
+        Unit(label='UNIT', start=662, end=663, text='C', categories=('electricity',), unit='C', value=None),
+        Unit(label='UNIT-VALUE', start=698, end=702, text='65 W', categories=('power',), unit='W', value='65'),
+        Unit(label='UNIT-VALUE', start=721, end=725, text='3.5h', categories=('time',), unit='h', value='3.5'),
+        Unit(label='UNIT-VALUE', start=748, end=751, text='20V', categories=('electricity',), unit='V', value='20'),
+        Unit(label='UNIT-VALUE', start=795, end=799, text='±5 m', categories=('length',), unit='m', value='±5'),
+        Unit(label='UNIT-VALUE', start=821, end=828, text='60 km/h', categories=('length', 'time'), unit='km/h', value='60'),
+        Unit(label='UNIT', start=836, end=839, text='das', categories=('time',), unit='das', value=None),
+        Unit(label='UNIT-VALUE', start=889, end=894, text='550 m', categories=('length',), unit='m', value='550'),
+        Unit(label='UNIT-VALUE', start=934, end=940, text='960hPa', categories=('time',), unit='hPa', value='960'),
+        Unit(label='UNIT-VALUE', start=977, end=982, text='120 m', categories=('length',), unit='m', value='120'),
+        Unit(label='UNIT-VALUE', start=1050, end=1055, text='2.3 s', categories=('time',), unit='s', value='2.3'),
+        Unit(label='UNIT', start=1113, end=1114, text='C', categories=('electricity',), unit='C', value=None),
+        Unit(label='UNIT-VALUE', start=1149, end=1153, text='0.8C', categories=('electricity',), unit='C', value='0.8'),
+        Unit(label='UNIT-VALUE', start=1255, end=1267, text='1920×1080 px', categories=('graphics', 'it'), unit='px', value='1920×1080'),
+        Unit(label='UNIT-VALUE', start=1315, end=1321, text='1vCore', categories=('amount', 'it', 'processing'), unit='vCore', value='1'),
+        Unit(label='UNIT-VALUE', start=1326, end=1332, text='512MiB', categories=('acoustics', 'it', 'storage'), unit='MiB', value='512'),
+        Unit(label='UNIT-VALUE', start=1351, end=1362, text='10×20×30 cm', categories=('length',), unit='cm', value='10×20×30'),
+        Unit(label='UNIT-VALUE', start=1387, end=1390, text='6 l', categories=('volume',), unit='l', value='6'),
+        Unit(label='UNIT', start=1463, end=1465, text='nm', categories=('length',), unit='nm', value=None),
+        Unit(label='UNIT-VALUE', start=1506, end=1514, text='2 – 22nm', categories=('length',), unit='nm', value='2 – 22'),
+        Unit(label='UNIT-VALUE', start=1550, end=1557, text='3— 33nm', categories=('length',), unit='nm', value='3— 33'),
+        Unit(label='UNIT', start=1559, end=1561, text='Em', categories=('length',), unit='Em', value=None),
+        Unit(label='UNIT-VALUE', start=1593, end=1600, text='4 −44nm', categories=('length',), unit='nm', value='4 −44')
     ]
-    result_units = [
+    actual = [
         Unit(
             label=entity.label,
             start=entity.start,
@@ -84,7 +104,9 @@ def test_units_01(text):
         )
         for entity in units(text)
     ]
-    assert result_units == expected_units, f"\nExpected:\n{expected_units}\n\nGot:\n{result_units}"
+    print()
+    print(f",{os.linesep}".join([str(unit) for unit in actual]))
+    assert actual == expected, f"\nExpected:\n{expected}\n\nGot:\n{actual}"
 
 
 @pytest.mark.parametrize("text", [(
@@ -92,14 +114,14 @@ def test_units_01(text):
     "It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
 )])
 def test_units_02(text):
-    expected_units = [
+    expected = [
         Unit(label='UNIT-VALUE', start=54, end=62, text='900 km/h', categories=('length', 'time'), unit='km/h', value='900'),
         Unit(label='UNIT-VALUE', start=64, end=71, text='559 mph', categories=('length',), unit='mph', value='559'),
         Unit(label='UNIT', start=99, end=101, text='in', categories=('length',), unit='in', value=None),
         Unit(label='UNIT', start=123, end=127, text='km/h', categories=('length', 'time'), unit='km/h', value=None),
-        Unit(label='UNIT', start=149, end=152, text='mph', categories=('length',), unit='mph', value=None),
+        Unit(label='UNIT', start=149, end=152, text='mph', categories=('length',), unit='mph', value=None)
     ]
-    result_units = [
+    actual = [
         Unit(
             label=entity.label,
             start=entity.start,
@@ -111,4 +133,6 @@ def test_units_02(text):
         )
         for entity in units(text)
     ]
-    assert result_units == expected_units, f"\nExpected:\n{expected_units}\n\nGot:\n{result_units}"
+    print()
+    print(f",{os.linesep}".join([str(unit) for unit in actual]))
+    assert actual == expected, f"\nExpected:\n{expected}\n\nGot:\n{actual}"

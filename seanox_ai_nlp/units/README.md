@@ -65,6 +65,8 @@ expressions from natural language.
   - [Unit Recognition Without Semantic Context](#unit-recognition-without-semantic-context)
   - [Ambiguous Unit Symbols](#ambiguous-unit-symbols)
 - [Integration in NLP-Workflows](#integration-in-nlp-workflows)
+  - [Example spaCy pipeline](#example-spacy-pipeline)
+  - [Example of using pandas](#example-of-using-pandas)
 - [Installation & Setup](#installation--setup)
 - [API Reference](#api-reference)
   - [`units(text: str) -> list[Unit]`](#unitstext-str---listunit)
@@ -454,7 +456,9 @@ filtering or interpretation as needed.
 
 # Integration in NLP-Workflows
 
-[Example spaCy pipeline (source)](../../examples/units/example-spaCy-pipeline.py)
+## Example spaCy pipeline
+
+[Link to source example-spaCy-pipeline.py with comments.](../../examples/units/example-spaCy-pipeline.py)
 
 ```python
 import spacy
@@ -501,7 +505,9 @@ km/h                 | label: UNIT       | value:            | unit: km/h   | ca
 mph                  | label: UNIT       | value:            | unit: mph    | categories: ['length']
 ```
 
-[Example of using pandas (source)](../../examples/units/example-pandas.py)
+## Example of using pandas
+
+[Link to source example-pandas.py with comments.](../../examples/units/example-pandas.py)
 
 ```python
 import pandas as pd

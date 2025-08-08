@@ -1,5 +1,5 @@
-# examples/units/exampl-pandas.py
-# Run: python examples/units/exampl-pandas.py
+# examples/units/example-pandas.py
+# Run: python examples/units/example-pandas.py
 
 import pandas as pd
 from seanox_ai_nlp.units import units

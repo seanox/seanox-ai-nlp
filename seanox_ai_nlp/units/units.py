@@ -42,7 +42,7 @@ def _re_compile(expression: str, debug: bool = False) -> re.Pattern:
 
 def _re_reverse_units(expression: str) -> str:
     units = expression[3:-1].split("|")
-    units = sorted(units, key=str.lower, reverse=True)
+    units = sorted(units, key=lambda string: string.lower(), reverse=True)
     return f"(?:{'|'.join(units)})"
 
 
@@ -254,7 +254,7 @@ _UNIT_WITH_INVALID_SPACES_ALL_PATTERN = _re_compile(rf"""
     (?:
       (?:(?<=\d)(\s{{2,}})?{_UNIT_EXPRESSION_RAW_PATTERN})
       |(?:\s{{2,}}{_UNIT_EXPRESSION_RAW_PATTERN})
-      |(?:(?<![\w/*]){_UNIT_EXPRESSION_RAW_PATTERN})
+      |(?:(?<=[.,:;!?%])(\s{{2,}})?{_UNIT_EXPRESSION_RAW_PATTERN})
     )
     {_UNIT_LOOK_BEHIND_PATTERN}  
 """)

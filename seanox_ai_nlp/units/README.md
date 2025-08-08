@@ -59,17 +59,13 @@ expressions from natural language.
   - [IEC Prefixes for Multiples & Parts](#iec-prefixes-for-multiples--parts)
   - [Mathematical Operators](#mathematical-operators)
   - [Informal Prefix & Exponents](#informal-prefix--exponents)
-- [Usage](#example-usage)
+- [Usage](#usage)
   - [Unit Extraction Note](#unit-extraction-note)
   - [Integration in NLP-Workflows](#integration-in-nlp-workflows)
   - [Downstream Processing with pandas](#downstream-processing-with-pandas)
 - [Known Limitations](#known-limitations)
   - [Unit Recognition Without Semantic Context](#unit-recognition-without-semantic-context)
   - [Ambiguous Unit Symbols](#ambiguous-unit-symbols)
-- [Integration in NLP-Workflows](#integration-in-nlp-workflows)
-  - [Example spaCy pipeline](#example-spacy-pipeline)
-  - [Example of using pandas](#example-of-using-pandas)
-- [Installation & Setup](#installation--setup)
 - [API Reference](#api-reference)
   - [`units(text: str) -> list[Unit]`](#unitstext-str---listunit)
   - [`spacing(text: str, mode: SpacingMode = SpacingMode.NUMERIC) -> str`](#spacingtext-str-mode-spacingmode--spacingmodenumeric---str)
@@ -375,9 +371,9 @@ TODO: Teaser
 The module operates purely on rule-based pattern matching without semantic
 interpretation. This means unit-like expressions are extracted context-free,
 regardless of their actual meaning in the sentence. For [example, the word
-    __in__](#example-usage) may be matched as a unit due to its spelling, even
-when used as a preposition. Such cases are not false positives in a technical
-sense, but rather edge cases that require downstream filtering.
+    __in__](#usage) may be matched as a unit due to its spelling, even when used
+as a preposition. Such cases are not false positives in a technical sense, but
+rather edge cases that require downstream filtering.
 
 ## Ambiguous Unit Symbols
 
@@ -477,8 +473,8 @@ text = (
     "It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
 )
 doc = nlp(text)
-units_entites = units(text)
-for units_entity in units_entites:
+units_entities = units(text)
+for units_entity in units_entities:
     span = doc.char_span(
         units_entity.start,
         units_entity.end,
@@ -510,8 +506,8 @@ mph                  | label: UNIT       | value:            | unit: mph    | ca
 ## Downstream Processing with pandas
 
 Example for downstream processing with pandas.  
-see also [example-pandas.p](
-../../examples/units/../../examples/units/example-pandas.py) with comments.
+see also [example-pandas.py](
+    ../../examples/units/example-pandas.py) with comments.
 
 ```python
 import pandas as pd

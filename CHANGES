@@ -4,6 +4,9 @@ BF: units Corrections/optimizations of categorization
     e.g. mph (as m), was not correctly determined as length + time
     or dB (as B), was incorrectly assigned to acoustics + it + storage
 BF: Documentation: Corrections/optimizations
+BF: Build: Corrections/optimizations in pyproject.toml/setup.py
+    - topic
+    - project name
 
 1.0.0 20250808
 NT: Release is available

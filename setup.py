@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="seanox_ai_nlp",
-    version="1.0.0",
+    name = "seanox-ai-nlp",
+    version="1.0.1",
     packages=find_packages(),
     author="Seanox Software Solutions",
     description=(
@@ -16,8 +16,10 @@ setup(
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
-        "Topic :: Scientific/Engineering :: Information Analysis",
-        "Topic :: Text Processing",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Text Processing :: Linguistic",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Natural Language :: English",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.9",

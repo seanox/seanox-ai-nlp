@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "seanox-ai-nlp"
-version = "1.0.0"
+version = "1.0.1"
 description = "Lightweight NLP components for semantic processing of domain-specific content."
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -16,8 +16,10 @@ keywords = [
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "Topic :: Scientific/Engineering :: Information Analysis",
-    "Topic :: Text Processing",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Natural Language :: English",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",

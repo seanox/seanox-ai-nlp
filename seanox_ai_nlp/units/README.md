@@ -119,7 +119,6 @@ Validation
 Unit Categorization (Tagging)
     &darr;
 Structured Output: Unit entries
-
 ```
 
 ## Data Management
@@ -410,31 +409,31 @@ for entity in entities:
   {
     "label": "UNIT-VALUE",
     "start": 54, "end": 62, "text": "900 km/h",
-    "value": "900", "unit": "km/h",
+    "unit": "km/h", "value": "900",
     "categories": ["length", "time"]
   },
   {
     "label": "UNIT-VALUE",
     "start": 64, "end": 71, "text": "559 mph",
-    "value": "559", "unit": "mph",
+    "unit": "mph", "value": "559",
     "categories": ["length", "time"]
   },
   {
     "label": "UNIT",
     "start": 99, "end": 101, "text": "in",
-    "unit": "in",
+    "unit": "in", "value": null,
     "categories": ["length"]
   },
   {
     "label": "UNIT",
     "start": 123, "end": 127, "text": "km/h",
-    "unit": "km/h",
+    "unit": "km/h", "value": null,
     "categories": ["length", "time"]
   },
   {
     "label": "UNIT",
     "start": 149, "end": 152, "text": "mph",
-    "unit": "mph",
+    "unit": "mph", "value": null,
     "categories": ["length", "time"]
   }
 ]

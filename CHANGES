@@ -1,2 +1,7 @@
+1.0.1 202509xx
+BF: units Corrections/optimizations of categorization
+    e.g. mph was not correctly determined as length + time despite correct data
+BF: Documentation: Corrections/optimizations
+
 1.0.0 20250808
 NT: Release is available

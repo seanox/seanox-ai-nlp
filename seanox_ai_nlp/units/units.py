@@ -363,15 +363,7 @@ _UNIT_IEC_CLASSIFICATION_PATTERN = rf"""
 """
 
 # RegEx for classification with OR linked named groups.
-UNIT_CLASSIFICATION_PATTERN = _re_compile(rf"""
-    (?:
-      {_UNIT_SI_CLASSIFICATION_PATTERN}
-      |{_UNIT_INFORMAL_CLASSIFICATION_PATTERN}
-      |{_UNIT_IEC_CLASSIFICATION_PATTERN}
-      |{_UNIT_COMMON_CLASSIFICATION_PATTERN}
-    )
-""")
-
+UNIT_CLASSIFICATION_PATTERN = UNIT_SYMBOLS_PATTERN
 
 def _dict_from_comma_separated_pairs(data: str) -> dict[str, str]:
     result = {}
@@ -479,16 +471,7 @@ def _get_categories_for_unit(unit: str) -> tuple[str, ...]:
     unit = UNIT_SYMBOLS_PATTERN.sub(r" \1 ", unit).strip()
     for unitEntry in UNIT_OPERATORS_PATTERN.split(unit):
         match = UNIT_CLASSIFICATION_PATTERN.search(unitEntry)
-        symbol = (
-            match.group("unit_si_prefix_suffix_symbol")
-            or match.group("unit_si_prefix_symbol")
-            or match.group("unit_si_suffix_symbol")
-            or match.group("unit_si_symbol")
-            or match.group("unit_common_symbol")
-            or match.group("unit_informal_symbol")
-            or match.group("unit_iec_symbol")
-        )
-        categories.update(_UNIT_CLASSIFICATION_DICT.get(symbol, []))
+        categories.update(_UNIT_CLASSIFICATION_DICT.get(match.group(0), []))
     return tuple(sorted(categories))
 
 

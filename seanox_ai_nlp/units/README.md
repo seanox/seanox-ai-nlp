@@ -504,7 +504,7 @@ Boeing               | label: ORG
 in                   | label: UNIT       | value:            | unit: in     | categories: ['length']
 kilometers per hour  | label: TIME
 km/h                 | label: UNIT       | value:            | unit: km/h   | categories: ['length', 'time']
-mph                  | label: UNIT       | value:            | unit: mph    | categories: ['length']
+mph                  | label: UNIT       | value:            | unit: mph    | categories: ['length', 'time']
 ```
 
 ## Downstream Processing with pandas
@@ -534,13 +534,13 @@ for index, row in df.iterrows():
 Text: The cruising speed of the Boeing 747 is approximately 900 - 950 km/h (559 mph).
 Extracted units:
 - UNIT-VALUE | text: 900 - 950 km/h  | value: 900 - 950  | unit: km/h   | categories: length, time
-- UNIT-VALUE | text: 559 mph         | value: 559        | unit: mph    | categories: length
+- UNIT-VALUE | text: 559 mph         | value: 559        | unit: mph    | categories: length, time
 
 Text: It is typically expressed in kilometers per hour (km/h) and miles per hour (mph).
 Extracted units:
 - UNIT       | text: in              | value:            | unit: in     | categories: length
 - UNIT       | text: km/h            | value:            | unit: km/h   | categories: length, time
-- UNIT       | text: mph             | value:            | unit: mph    | categories: length
+- UNIT       | text: mph             | value:            | unit: mph    | categories: length, time
 ```
 
 # API Reference

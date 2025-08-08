@@ -15,7 +15,7 @@ Developed for practitioners and developers, the module extracts constructs like
 wide range of applications, including general, semi-technical, and semi-academic
 content.
 
-The module integrates smoothly with tools like spaCy’s __EntityRuler__, and fits
+The module integrates smoothly with tools like spaCy's __EntityRuler__, and fits
 into workflows involving __annotation__, __filtering__, or __token alignment__
 -- where clarity and control are key. It does not perform semantic analysis
 itself, but provides clean, structured output to support downstream semantic
@@ -37,10 +37,10 @@ expressions from natural language.
 - __Support for compound expressions__  
   Recognizes both unit combinations (_km/h, kWh/m&sup2;, g/cm&sup3;_) and
   numerical constructs using signs and operators: _&plusmn;, &times;, &middot;,
-  :, /, ^, –_ and more.
+  :, /, ^, -_ and more.
 
 - __Integration-ready output__  
-  Returns structured results compatible with tools like spaCy’s EntityRuler for
+  Returns structured results compatible with tools like spaCy's EntityRuler for
   use in pipelines.
 
 - __Transparent design__  

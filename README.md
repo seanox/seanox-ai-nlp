@@ -12,10 +12,9 @@
 </p>
 
 # Description
-
 This package addresses challenges in semantic processing of domain-specific
 content within NLP pipelines. It aims to improve the connection between semantic
-user queries and structured, technically rich data—especially where traditional
+user queries and structured, technically rich dataâ€”especially where traditional
 embedding models and similarity metrics reach their limits.
 
 The approach combines:
@@ -36,7 +35,6 @@ Further modules are planned to extend the package's capabilities, including:
   structured formats (e.g. SQL, JSON, YAML, etc.)
 
 # Licence Agreement
-
 LIZENZBEDINGUNGEN - Seanox Software Solutions ist ein Open-Source-Projekt, im
 Folgenden Seanox Software Solutions oder kurz Seanox genannt.
 
@@ -56,11 +54,9 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 
 # System Requirement
-
 - Python 3.9 or higher
 
 # Installation & Setup
-
 ```
 pip install seanox-ai-nlp
 ```
@@ -68,19 +64,17 @@ pip install seanox-ai-nlp
 # Packages & Modules
 
 ## [units](seanox_ai_nlp/units/README.md)
-
 The units module uses __rule-based__, __deterministic pattern recognition__ to
 identify numerical expressions and units in text. It does not rely on __large
 language models (LLMs)__ and is suitable for integration into __lightweight NLP
 pipelines__. Its language-agnostic design and adaptable formatting support a
 wide range of applications, including general, semi-technical, and semi-academic
-content. The module can be integrated with tools like spaCy’s __EntityRuler__,
+content. The module can be integrated with tools like spaCyâ€™s __EntityRuler__,
 supporting __annotation__, __filtering__, and __token alignment__ workflows with
 structured output for downstream semantic analysis -- without performing it
 itself.
 
 ### Features
-
 - __Pattern-based extraction__  
   Identifies constructs like _5 km_, _-20 &ordm;C_, or _1000 hPa_ using regular
   expressions and token patterns -- no training required.
@@ -92,10 +86,10 @@ itself.
 - __Support for compound expressions__  
   Recognizes both unit combinations (_km/h, kWh/m&sup2;, g/cm&sup3;_) and
   numerical constructs using signs and operators: _&plusmn;, &times;, &middot;,
-  :, /, ^, –_ and more.
+  :, /, ^, â€“_ and more.
   
 - __Integration-ready output__  
-  Returns structured results compatible with tools like spaCy’s EntityRuler for
+  Returns structured results compatible with tools like spaCyâ€™s EntityRuler for
   use in pipelines.
   
 - __Transparent design__  
@@ -103,7 +97,6 @@ itself.
   reliable and auditable processing.
 
 ### Quickstart
-
 - [Usage](seanox_ai_nlp/units/README.md#usage)
 - [Integration in NLP Workflows](
   seanox_ai_nlp/units/README.md#integration-in-nlp-workflows)
@@ -111,11 +104,11 @@ itself.
   seanox_ai_nlp/units/README.md#downstream-processing-with-pandas)
 
 # Changes
-
-TODO:
+## 1.0.0 20250808
+NT: Release is available
+[Read more](https://raw.githubusercontent.com/seanox/seanox-ai-nlp/main/CHANGES)
 
 # Contact
-
 [Issues](https://github.com/seanox/seanox-ai-nlp/issues)  
 [Requests](https://github.com/seanox/seanox-ai-nlp/pulls)  
 [Mail](https://seanox.com/contact)

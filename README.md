@@ -105,7 +105,7 @@ itself.
 ## 1.0.0 20250808
 NT: Release is available
 
-[Read more](https://raw.githubusercontent.com/seanox/seanox-ai-nlp/main/CHANGES)
+[Read more](https://raw.githubusercontent.com/seanox/seanox-ai-nlp/refs/heads/master/CHANGES)
 
 # Contact
 [Issues](https://github.com/seanox/seanox-ai-nlp/issues)  

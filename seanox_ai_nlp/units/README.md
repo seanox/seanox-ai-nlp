@@ -4,7 +4,7 @@ Measurement expressions appear across domains like weather, medicine,
 e-commerce, and social media. Their formats are often inconsistent and informal,
 which complicates automated extraction.
 
-The __units__ module offers a __rule-based__, __transparent__ approach to
+The __units__ module provides a __rule-based__, __transparent__ approach to
 identifying such expressions -- without relying on large language models (LLMs).
 It uses deterministic pattern recognition to support __lightweight__ NLP
 workflows.
@@ -12,35 +12,40 @@ workflows.
 Developed for practitioners and developers, the module extracts constructs like
 `1000 hPa`, `-20 &ordm;C`, or `km/h`, and also handles standalone units (`in`,
 `cm`, etc.). Its language-agnostic design and adaptable formatting support a
-wide range of applications, including general, semi-technical, and semi-academi
+wide range of applications, including general, semi-technical, and semi-academic
 content.
 
 The module integrates smoothly with tools like spaCy’s __EntityRuler__, and fits
-into workflows involving __annotation__, __filtering__, or __spacing__ -- where
-clarity and control are key. It does not perform semantic analysis itself, but
-provides clean, structured output to support downstream semantic processing.
+into workflows involving __annotation__, __filtering__, or __token alignment__
+-- where clarity and control are key. It does not perform semantic analysis
+itself, but provides clean, structured output to support downstream semantic
+processing.
 
 # Features
 
 __units__ provides a deterministic mechanism for extracting measurement
 expressions from natural language.
 
-- __Pattern-based extraction__ Identifies constructs like _5 km_, _-20 &ordm;C_,
-  or _1000 hPa_ using regular expressions and token patterns -- no training
-  required.
+- __Pattern-based extraction__  
+  Identifies constructs like _5 km_, _-20 &ordm;C_, or _1000 hPa_ using regular
+  expressions and token patterns -- no training required.
 
-- __Language-independent architecture__ Operates at token and character level,
-  making it effective across multilingual content.
+- __Language-independent architecture__  
+  Operates at token and character level, making it effective across multilingual
+  content.
 
-- __Support for compound expressions__ Recognizes both unit combinations (_km/h,
-  kWh/m&sup2;, g/cm&sup3;_) and numerical constructs using signs and operators:
-  _&plusmn;, &times;, &middot;, :, /, ^, –_ and more.
+- __Support for compound expressions__  
+  Recognizes both unit combinations (_km/h, kWh/m&sup2;, g/cm&sup3;_) and
+  numerical constructs using signs and operators: _&plusmn;, &times;, &middot;,
+  :, /, ^, –_ and more.
 
-- __Integration-ready output__ Returns structured results compatible with tools
-  like spaCy’s EntityRuler for use in pipelines.
+- __Integration-ready output__  
+  Returns structured results compatible with tools like spaCy’s EntityRuler for
+  use in pipelines.
 
-- __Transparent design__ Fully interpretable and deterministic -- avoids
-  black-box ML, supporting reliable and auditable processing.
+- __Transparent design__  
+  Fully interpretable and deterministic -- avoids black-box ML, supporting
+  reliable and auditable processing.
 
 # Table Of Contents
 
@@ -93,7 +98,7 @@ dependencies -- ensuring transparency and reproducibility.
 
 | Component                     | Description                                                                                                                                |
 |-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| __Text Normalization__        | Detects and corrects typographic inconsistencies -- such as missing spaces between numbers and units -- to improve recognition robustness. |
+| __Token Normalization__       | Detects and corrects typographic inconsistencies -- such as missing spaces between numbers and units -- to improve recognition robustness. |
 | __Unit Extraction__           | Applies structured regular expressions to detect SI, informal, and compound unit formats in natural language.                              |
 | __Semantic Categorization__   | Assigns domain-specific categories (e.g., *mass*, *energy*, *length*) to recognized units via a static lookup table.                       |
 | __Structured Representation__ | Creates structured entities from matched expressions -- designed for downstream processing in NLP pipelines or annotation tools.           |

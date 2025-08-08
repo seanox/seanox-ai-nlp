@@ -63,7 +63,7 @@ pip install seanox-ai-nlp
 
 # Packages & Modules
 
-## [units](seanox_ai_nlp/units/README.md)
+## [units](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/units/README.md)
 The units module uses __rule-based__, __deterministic pattern recognition__ to
 identify numerical expressions and units in text. It does not rely on __large
 language models (LLMs)__ and is suitable for integration into __lightweight NLP
@@ -97,15 +97,14 @@ itself.
   reliable and auditable processing.
 
 ### Quickstart
-- [Usage](seanox_ai_nlp/units/README.md#usage)
-- [Integration in NLP Workflows](
-  seanox_ai_nlp/units/README.md#integration-in-nlp-workflows)
-- [Downstream Processing with pandas](
-  seanox_ai_nlp/units/README.md#downstream-processing-with-pandas)
+- [Usage](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/units/README.md#usage)
+- [Integration in NLP Workflows](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/units/README.md#integration-in-nlp-workflows)
+- [Downstream Processing with pandas](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/units/README.md#downstream-processing-with-pandas)
 
 # Changes
 ## 1.0.0 20250808
 NT: Release is available
+
 [Read more](https://raw.githubusercontent.com/seanox/seanox-ai-nlp/main/CHANGES)
 
 # Contact

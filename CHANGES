@@ -1,6 +1,8 @@
 1.0.1 202509xx
 BF: units Corrections/optimizations of categorization
-    e.g. mph was not correctly determined as length + time despite correct data
+    The short RegEx was incorrectly prioritized instead of the qualified one.
+    e.g. mph (as m), was not correctly determined as length + time
+    or dB (as B), was incorrectly assigned to acoustics + it + storage
 BF: Documentation: Corrections/optimizations
 
 1.0.0 20250808

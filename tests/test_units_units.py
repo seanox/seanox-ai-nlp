@@ -69,7 +69,7 @@ def test_units_01(text):
         Unit(label='UNIT-VALUE', start=400, end=405, text='100km', categories=('length',), unit='km', value='100'),
         Unit(label='UNIT-VALUE', start=434, end=445, text='35×22×12 cm', categories=('length',), unit='cm', value='35×22×12'),
         Unit(label='UNIT-VALUE', start=470, end=476, text='9.24 l', categories=('volume',), unit='l', value='9.24'),
-        Unit(label='UNIT-VALUE', start=496, end=500, text='34dB', categories=('acoustics', 'it', 'storage'), unit='dB', value='34'),
+        Unit(label='UNIT-VALUE', start=496, end=500, text='34dB', categories=('acoustics',), unit='dB', value='34'),
         Unit(label='UNIT-VALUE', start=567, end=574, text='12–14 h', categories=('time',), unit='h', value='12–14'),
         Unit(label='UNIT', start=610, end=612, text='in', categories=('length',), unit='in', value=None),
         Unit(label='UNIT', start=651, end=652, text='C', categories=('electricity',), unit='C', value=None),
@@ -100,7 +100,7 @@ def test_units_01(text):
         Unit(label='UNIT-VALUE', start=1689, end=1693, text='22nm', categories=('length',), unit='nm', value='22'),
         Unit(label='UNIT-VALUE', start=1732, end=1736, text='33nm', categories=('length',), unit='nm', value='33'),
         Unit(label='UNIT', start=1738, end=1740, text='Em', categories=('length',), unit='Em', value=None),
-        Unit(label='UNIT-VALUE', start=1774, end=1778, text='44nm', categories=('length',), unit='nm', value='44'),
+        Unit(label='UNIT-VALUE', start=1774, end=1778, text='44nm', categories=('length',), unit='nm', value='44')
     ]
     actual = [
         Unit(
@@ -126,10 +126,10 @@ def test_units_01(text):
 def test_units_02(text):
     expected = [
         Unit(label='UNIT-VALUE', start=54, end=68, text='900 - 950 km/h', categories=('length', 'time'), unit='km/h', value='900 - 950'),
-        Unit(label='UNIT-VALUE', start=70, end=77, text='559 mph', categories=('length',), unit='mph', value='559'),
+        Unit(label='UNIT-VALUE', start=70, end=77, text='559 mph', categories=('length', 'time'), unit='mph', value='559'),
         Unit(label='UNIT', start=105, end=107, text='in', categories=('length',), unit='in', value=None),
         Unit(label='UNIT', start=129, end=133, text='km/h', categories=('length', 'time'), unit='km/h', value=None),
-        Unit(label='UNIT', start=155, end=158, text='mph', categories=('length',), unit='mph', value=None)
+        Unit(label='UNIT', start=155, end=158, text='mph', categories=('length', 'time'), unit='mph', value=None)
     ]
     actual = [
         Unit(

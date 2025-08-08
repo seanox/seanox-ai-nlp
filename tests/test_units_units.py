@@ -47,7 +47,12 @@ class Unit(NamedTuple):
     "Der Durchmesser misst ca. 1\u002d11nm (Hyphen-Minus)"
     "Der Durchmesser misst ca. 2 \u2013 22nm (En Dash)"
     "Der Durchmesser misst ca. 3\u2014 33nm (Em Dash)"
-    "Der Durchmesser misst ca. 4 \u221244nm (Minus Sign	)"
+    "Der Durchmesser misst ca. 4 \u221244nm (Minus Sign)"
+
+    "Die Difference betr\u00e4gt ca. \u002d11nm (Hyphen-Minus)"
+    "Die Difference betr\u00e4gt ca. \u2013 22nm (En Dash)"
+    "Die Difference betr\u00e4gt ca. \u2014 33nm (Em Dash)"
+    "Die Difference betr\u00e4gt ca. \u221244nm (Minus Sign)"
 )])
 def test_units_01(text):
     expected = [
@@ -86,11 +91,16 @@ def test_units_01(text):
         Unit(label='UNIT-VALUE', start=1326, end=1332, text='512MiB', categories=('acoustics', 'it', 'storage'), unit='MiB', value='512'),
         Unit(label='UNIT-VALUE', start=1351, end=1362, text='10×20×30 cm', categories=('length',), unit='cm', value='10×20×30'),
         Unit(label='UNIT-VALUE', start=1387, end=1390, text='6 l', categories=('volume',), unit='l', value='6'),
-        Unit(label='UNIT', start=1463, end=1465, text='nm', categories=('length',), unit='nm', value=None),
+        Unit(label='UNIT-VALUE', start=1459, end=1465, text='1-11nm', categories=('length',), unit='nm', value='1-11'),
         Unit(label='UNIT-VALUE', start=1506, end=1514, text='2 – 22nm', categories=('length',), unit='nm', value='2 – 22'),
         Unit(label='UNIT-VALUE', start=1550, end=1557, text='3— 33nm', categories=('length',), unit='nm', value='3— 33'),
         Unit(label='UNIT', start=1559, end=1561, text='Em', categories=('length',), unit='Em', value=None),
-        Unit(label='UNIT-VALUE', start=1593, end=1600, text='4 −44nm', categories=('length',), unit='nm', value='4 −44')
+        Unit(label='UNIT-VALUE', start=1593, end=1600, text='4 −44nm', categories=('length',), unit='nm', value='4 −44'),
+        Unit(label='UNIT-VALUE', start=1640, end=1645, text='-11nm', categories=('length',), unit='nm', value='-11'),
+        Unit(label='UNIT-VALUE', start=1689, end=1693, text='22nm', categories=('length',), unit='nm', value='22'),
+        Unit(label='UNIT-VALUE', start=1732, end=1736, text='33nm', categories=('length',), unit='nm', value='33'),
+        Unit(label='UNIT', start=1738, end=1740, text='Em', categories=('length',), unit='Em', value=None),
+        Unit(label='UNIT-VALUE', start=1774, end=1778, text='44nm', categories=('length',), unit='nm', value='44'),
     ]
     actual = [
         Unit(
@@ -110,16 +120,16 @@ def test_units_01(text):
 
 
 @pytest.mark.parametrize("text", [(
-    "The cruising speed of the Boeing 747 is approximately 900 km/h (559 mph)."
+    "The cruising speed of the Boeing 747 is approximately 900 - 950 km/h (559 mph)."
     "It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
 )])
 def test_units_02(text):
     expected = [
-        Unit(label='UNIT-VALUE', start=54, end=62, text='900 km/h', categories=('length', 'time'), unit='km/h', value='900'),
-        Unit(label='UNIT-VALUE', start=64, end=71, text='559 mph', categories=('length',), unit='mph', value='559'),
-        Unit(label='UNIT', start=99, end=101, text='in', categories=('length',), unit='in', value=None),
-        Unit(label='UNIT', start=123, end=127, text='km/h', categories=('length', 'time'), unit='km/h', value=None),
-        Unit(label='UNIT', start=149, end=152, text='mph', categories=('length',), unit='mph', value=None)
+        Unit(label='UNIT-VALUE', start=54, end=68, text='900 - 950 km/h', categories=('length', 'time'), unit='km/h', value='900 - 950'),
+        Unit(label='UNIT-VALUE', start=70, end=77, text='559 mph', categories=('length',), unit='mph', value='559'),
+        Unit(label='UNIT', start=105, end=107, text='in', categories=('length',), unit='in', value=None),
+        Unit(label='UNIT', start=129, end=133, text='km/h', categories=('length', 'time'), unit='km/h', value=None),
+        Unit(label='UNIT', start=155, end=158, text='mph', categories=('length',), unit='mph', value=None)
     ]
     actual = [
         Unit(

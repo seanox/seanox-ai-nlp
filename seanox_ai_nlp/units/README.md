@@ -6,8 +6,8 @@ which complicates automated extraction.
 
 The __units__ module offers a __rule-based__, __transparent__ approach to
 identifying such expressions -- without relying on large language models (LLMs).
-It uses deterministic pattern recognition to support __lightweight__,
-__production-ready__ NLP workflows.
+It uses deterministic pattern recognition to support __lightweight__ NLP
+workflows.
 
 Developed for practitioners and developers, the module extracts constructs like
 `1000 hPa`, `-20 &ordm;C`, or `km/h`, and also handles standalone units (`in`,
@@ -16,9 +16,9 @@ wide range of applications, including general, semi-technical, and semi-academi
 content.
 
 The module integrates smoothly with tools like spaCy’s __EntityRuler__, and fits
-into workflows involving __normalization__, __annotation__, or __filtering__ --
-where clarity and control are key. It does not perform semantic analysis itself,
-but provides clean, structured output to support downstream semantic processing.
+into workflows involving __annotation__, __filtering__, or __spacing__ -- where
+clarity and control are key. It does not perform semantic analysis itself, but
+provides clean, structured output to support downstream semantic processing.
 
 # Features
 
@@ -46,8 +46,6 @@ expressions from natural language.
 
 - [Introduction](#introduction)
 - [Features](#features)
-- [Example Usage](#example-usage)
-  - [Unit Extraction Note](#unit-extraction-note)
 - [Technical Architecture](#technical-architecture)
   - [Components Overview](#components-overview)
   - [Processing Workflow](#processing-workflow)
@@ -61,6 +59,10 @@ expressions from natural language.
   - [IEC Prefixes for Multiples & Parts](#iec-prefixes-for-multiples--parts)
   - [Mathematical Operators](#mathematical-operators)
   - [Informal Prefix & Exponents](#informal-prefix--exponents)
+- [Usage](#example-usage)
+  - [Unit Extraction Note](#unit-extraction-note)
+  - [Integration in NLP-Workflows](#integration-in-nlp-workflows)
+  - [Downstream Processing with pandas](#downstream-processing-with-pandas)
 - [Known Limitations](#known-limitations)
   - [Unit Recognition Without Semantic Context](#unit-recognition-without-semantic-context)
   - [Ambiguous Unit Symbols](#ambiguous-unit-symbols)
@@ -83,73 +85,6 @@ expressions from natural language.
   - [`UNIT_OPERATORS_PATTERN`](#unit_operators_pattern)
 - [Maintenance & Extensibility](#maintenance--extensibility)
 - [Sources & References](#sources--references)
-
-# Example Usage
-
-```python
-from seanox_ai_nlp.units import units
-
-text = (
-    "The cruising speed of the Boeing 747 is approximately 900 km/h (559 mph)."
-    "It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
-)
-
-entities = units(text)
-for entity in entities:
-    print(entity)
-```
-
-```json
-[
-  {
-    "label": "UNIT-VALUE",
-    "start": 54, "end": 62, "text": "900 km/h",
-    "value": "900", "unit": "km/h",
-    "categories": ["length", "time"]
-  },
-  {
-    "label": "UNIT-VALUE",
-    "start": 64, "end": 71, "text": "559 mph",
-    "value": "559", "unit": "mph",
-    "categories": ["length", "time"]
-  },
-  {
-    "label": "UNIT",
-    "start": 99, "end": 101, "text": "in",
-    "unit": "in",
-    "categories": ["length"]
-  },
-  {
-    "label": "UNIT",
-    "start": 123, "end": 127, "text": "km/h",
-    "unit": "km/h",
-    "categories": ["length", "time"]
-  },
-  {
-    "label": "UNIT",
-    "start": 149, "end": 152, "text": "mph",
-    "unit": "mph",
-    "categories": ["length", "time"]
-  }
-]
-```
-
-## Unit Extraction Note
-
-The module identifies units and values using rule-based pattern recognition. In
-the preceding example, the word __in__ is extracted as a unit __(inch)__, even
-though it is used as a preposition in the context.
-
-Since the module does __not perform semantic analysis__, such edge cases are
-extracted __context-free__. Semantic interpretation is intentionally delegated to
-the application layer -- typically based on:
-
-- the presence of a __numeric value (value)__, if available
-- and the assigned __categories (categories)__, such as __length__ or __time__
-
-For example, an entry like __15 in__ can be interpreted as a valid unit
-__(inch)__, while a standalone __in__ without a value or matching context may be
-treated as a preposition.
 
 # Technical Architecture
 
@@ -454,11 +389,78 @@ attribute will contain all relevant classifications, e.g. '["acoustics", "it",
 "storage"]'. Therefore, downstream applications should apply domain-specific
 filtering or interpretation as needed.
 
-# Integration in NLP-Workflows
+# Usage
 
-## Example spaCy pipeline
+```python
+from seanox_ai_nlp.units import units
 
-[Link to source example-spaCy-pipeline.py with comments.](../../examples/units/example-spaCy-pipeline.py)
+text = (
+    "The cruising speed of the Boeing 747 is approximately 900 km/h (559 mph)."
+    "It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
+)
+
+entities = units(text)
+for entity in entities:
+    print(entity)
+```
+
+```json
+[
+  {
+    "label": "UNIT-VALUE",
+    "start": 54, "end": 62, "text": "900 km/h",
+    "value": "900", "unit": "km/h",
+    "categories": ["length", "time"]
+  },
+  {
+    "label": "UNIT-VALUE",
+    "start": 64, "end": 71, "text": "559 mph",
+    "value": "559", "unit": "mph",
+    "categories": ["length", "time"]
+  },
+  {
+    "label": "UNIT",
+    "start": 99, "end": 101, "text": "in",
+    "unit": "in",
+    "categories": ["length"]
+  },
+  {
+    "label": "UNIT",
+    "start": 123, "end": 127, "text": "km/h",
+    "unit": "km/h",
+    "categories": ["length", "time"]
+  },
+  {
+    "label": "UNIT",
+    "start": 149, "end": 152, "text": "mph",
+    "unit": "mph",
+    "categories": ["length", "time"]
+  }
+]
+```
+
+## Unit Extraction Note
+
+The module identifies units and values using rule-based pattern recognition. In
+the preceding example, the word __in__ is extracted as a unit __(inch)__, even
+though it is used as a preposition in the context.
+
+Since the module does __not perform semantic analysis__, such edge cases are
+extracted __context-free__. Semantic interpretation is intentionally delegated to
+the application layer -- typically based on:
+
+- the presence of a __numeric value (value)__, if available
+- and the assigned __categories (categories)__, such as __length__ or __time__
+
+For example, an entry like __15 in__ can be interpreted as a valid unit
+__(inch)__, while a standalone __in__ without a value or matching context may be
+treated as a preposition.
+
+## Integration in NLP-Workflows
+
+Example for a spaCy pipeline.  
+see also [example-spaCy-pipeline.py](
+    ../../examples/units/example-spaCy-pipeline.py) with comments.
 
 ```python
 import spacy
@@ -505,9 +507,11 @@ km/h                 | label: UNIT       | value:            | unit: km/h   | ca
 mph                  | label: UNIT       | value:            | unit: mph    | categories: ['length']
 ```
 
-## Example of using pandas
+## Downstream Processing with pandas
 
-[Link to source example-pandas.py with comments.](../../examples/units/example-pandas.py)
+Example for downstream processing with pandas.  
+see also [example-pandas.p](
+../../examples/units/../../examples/units/example-pandas.py) with comments.
 
 ```python
 import pandas as pd
@@ -538,11 +542,6 @@ Extracted units:
 - UNIT       | text: km/h            | value:            | unit: km/h   | categories: length, time
 - UNIT       | text: mph             | value:            | unit: mph    | categories: length
 ```
-
-# Installation & Setup
-
-TODO: pip-Install, Setup-Schritte
-TODO: Projektstruktur / Verzeichnisübersicht
 
 # API Reference
 

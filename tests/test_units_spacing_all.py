@@ -288,49 +288,49 @@ def test_spacing_27(input, expected):
 
 @pytest.mark.parametrize(
     "input, expected",
-    _generate_spacing_variants("xxx 100.m xxx", r"(?<=100\.)(?=m)", False))
+    _generate_spacing_variants("xxx 100.m xxx", r"(?<=100\.)(?=m)", True))
 def test_spacing_28(input, expected):
     assert spacing(input, SpacingMode.ALL) == expected
 
 
 @pytest.mark.parametrize(
     "input, expected",
-    _generate_spacing_variants("xxx 100.km xxx", r"(?<=100\.)(?=km)", False))
+    _generate_spacing_variants("xxx 100.km xxx", r"(?<=100\.)(?=km)", True))
 def test_spacing_29(input, expected):
     assert spacing(input, SpacingMode.ALL) == expected
 
 
 @pytest.mark.parametrize(
     "input, expected",
-    _generate_spacing_variants("xxx 100.km/s xxx", r"(?<=100\.)(?=km)", False))
+    _generate_spacing_variants("xxx 100.km/s xxx", r"(?<=100\.)(?=km)", True))
 def test_spacing_30(input, expected):
     assert spacing(input, SpacingMode.ALL) == expected
 
 
 @pytest.mark.parametrize(
     "input, expected",
-    _generate_spacing_variants("xxx 100.km\u00B7s/ft", r"(?<=100\.)(?=km)", False))
+    _generate_spacing_variants("xxx 100.km\u00B7s/ft", r"(?<=100\.)(?=km)", True))
 def test_spacing_31(input, expected):
     assert spacing(input, SpacingMode.ALL) == expected
 
 
 @pytest.mark.parametrize(
     "input, expected",
-    _generate_spacing_variants("xxx 100.km\u00B7s", r"(?<=100\.)(?=km)", False))
+    _generate_spacing_variants("xxx 100.km\u00B7s", r"(?<=100\.)(?=km)", True))
 def test_spacing_32(input, expected):
     assert spacing(input, SpacingMode.ALL) == expected
 
 
 @pytest.mark.parametrize(
     "input, expected",
-    _generate_spacing_variants("xxx 100.km/s/ft", r"(?<=100\.)(?=km)", False))
+    _generate_spacing_variants("xxx 100.km/s/ft", r"(?<=100\.)(?=km)", True))
 def test_spacing_33(input, expected):
     assert spacing(input, SpacingMode.ALL) == expected
 
 
 @pytest.mark.parametrize(
     "input, expected",
-    _generate_spacing_variants("xxx 100.km/s", r"(?<=100\.)(?=km)", False))
+    _generate_spacing_variants("xxx 100.km/s", r"(?<=100\.)(?=km)", True))
 def test_spacing_34(input, expected):
     assert spacing(input, SpacingMode.ALL) == expected
 

@@ -35,7 +35,7 @@ for units_entity in units_entites:
 
 # Formatted output
 for ent in doc.ents:
-    if ent.label_ in ["UNIT", "UNIT-VALUE"]:
+    if ent.label_ in ["UNIT", "MEASURE"]:
         print(f"{ent.text:<20} | label: {ent.label_:<10} | value: {ent._.value or '':<10} | unit: {ent._.unit:<6} | categories: {ent._.categories}")
     else:
         print(f"{ent.text:<20} | label: {ent.label_}")
@@ -43,7 +43,7 @@ for ent in doc.ents:
 # Output:
 # Boeing               | label: ORG
 # 747                  | label: PRODUCT
-# 900 - 950 km/h       | label: UNIT-VALUE | value: 900 - 950  | unit: km/h   | categories: ['length', 'time']
+# 900 - 950 km/h       | label: MEASURE    | value: 900 - 950  | unit: km/h   | categories: ['length', 'time']
 # 559                  | label: CARDINAL
 # in                   | label: UNIT       | value:            | unit: in     | categories: ['length']
 # kilometers per hour  | label: TIME

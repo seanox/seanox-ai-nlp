@@ -448,7 +448,7 @@ class Unit(NamedTuple):
     Represents a recognized unit entity extracted from text.
 
     Attributes:
-        label (str): Classification label, e.g. 'UNIT-VALUE'.
+        label (str): Classification label, e.g. 'MEASURE'.
         start (int): Start index of the unit in the original text.
         end (int): End index of the unit in the original text.
         text (str): Raw text fragment containing the unit.
@@ -506,7 +506,7 @@ def units(text: str) -> list[Unit]:
         if numeric:
             entities.append(
                 Unit(
-                    label="UNIT-VALUE",
+                    label="MEASURE",
                     start=match.start(),
                     end=match.end(),
                     text=match.group(),

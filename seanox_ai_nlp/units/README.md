@@ -407,13 +407,13 @@ for entity in entities:
 ```json
 [
   {
-    "label": "UNIT-VALUE",
+    "label": "MEASURE",
     "start": 54, "end": 62, "text": "900 km/h",
     "unit": "km/h", "value": "900",
     "categories": ["length", "time"]
   },
   {
-    "label": "UNIT-VALUE",
+    "label": "MEASURE",
     "start": 64, "end": 71, "text": "559 mph",
     "unit": "mph", "value": "559",
     "categories": ["length", "time"]
@@ -490,7 +490,7 @@ for units_entity in units_entities:
         span._.categories = list(units_entity.categories)
         doc.ents += (span,)
 for ent in doc.ents:
-    if ent.label_ in ["UNIT", "UNIT-VALUE"]:
+    if ent.label_ in ["UNIT", "MEASURE"]:
         print(f"{ent.text:<20} | label: {ent.label_:<10} | value: {ent._.value or '':<10} | unit: {ent._.unit:<6} | categories: {ent._.categories}")
     else:
         print(f"{ent.text:<20} | label: {ent.label_}")
@@ -499,7 +499,7 @@ for ent in doc.ents:
 ```text
 Boeing               | label: ORG
 747                  | label: PRODUCT
-900 - 950 km/h       | label: UNIT-VALUE | value: 900 - 950  | unit: km/h   | categories: ['length', 'time']
+900 - 950 km/h       | label: MEASURE    | value: 900 - 950  | unit: km/h   | categories: ['length', 'time']
 559                  | label: CARDINAL
 in                   | label: UNIT       | value:            | unit: in     | categories: ['length']
 kilometers per hour  | label: TIME
@@ -533,8 +533,8 @@ for index, row in df.iterrows():
 ```text
 Text: The cruising speed of the Boeing 747 is approximately 900 - 950 km/h (559 mph).
 Extracted units:
-- UNIT-VALUE | text: 900 - 950 km/h  | value: 900 - 950  | unit: km/h   | categories: length, time
-- UNIT-VALUE | text: 559 mph         | value: 559        | unit: mph    | categories: length, time
+- MEASURE    | text: 900 - 950 km/h  | value: 900 - 950  | unit: km/h   | categories: length, time
+- MEASURE    | text: 559 mph         | value: 559        | unit: mph    | categories: length, time
 
 Text: It is typically expressed in kilometers per hour (km/h) and miles per hour (mph).
 Extracted units:
@@ -595,7 +595,7 @@ __Returns:__
 Represents a recognized unit entity.
 
 __Attributes:__
-- `label` (`str`): Entity type (`UNIT` or `UNIT-VALUE`)
+- `label` (`str`): Entity type (`UNIT` or `MEASURE`)
 - `start` / `end` (`int`): Character offsets in the original text
 - `text` (`str`): Raw matched fragment
 - `unit` (`str`): Extracted unit expression
@@ -638,7 +638,7 @@ units.
 
 ## `UNIT_PATTERN`
 
-Matches both standalone units and unit-value pairs (e.g. `15 cm`, `?20 &ordm;C`).
+Matches both standalone units and measure pairs (e.g. `15 cm`, `?20 &ordm;C`).
 
 ---
 

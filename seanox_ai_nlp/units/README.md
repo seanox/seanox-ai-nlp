@@ -305,7 +305,8 @@ rather than a formally authoritative one.
 
 ## SI Prefixes for Multiples & Parts
 
-TODO: Teaser
+Internationally defined SI prefixes for multiples and submultiples of units of
+measurement.
 
 | Multiplicative | Symbol | Submultiplicative | Symbol  |
 |----------------|--------|-------------------|---------|
@@ -324,7 +325,7 @@ TODO: Teaser
 
 ## SI Exponents
 
-TODO: Teaser
+Exponents commonly used in everyday life in combining to SI units.
 
 | Positive Exponents | Negative Exponents |
 |--------------------|--------------------|
@@ -334,7 +335,8 @@ TODO: Teaser
 
 ## IEC Prefixes for Multiples & Parts
 
-TODO: Teaser
+International Electrotechnical Commission (IEC) prefixes for indicating
+multiples and fractions in data processing.
 
 | Multiplicative | Symbol | Submultiplicative | Symbol |
 |----------------|--------|-------------------|--------|
@@ -349,7 +351,7 @@ TODO: Teaser
 
 ## Mathematical Operators
 
-TODO: Teaser
+Mathematical operators for combining units into expressions.
 
 | Operator                                | Symbol   |
 |-----------------------------------------|----------|
@@ -361,12 +363,14 @@ TODO: Teaser
 
 ## Informal Prefix & Exponents
 
-TODO: Teaser
+Everyday informal prefixes and exponents that are commonly used in certain
+contexts but are not part of the official SI system.
 
 | Prefix       | Symbol | Exponents | Symbol | 
 |--------------|--------|-----------|--------|
 | Cubic        | c      | Cubic     | 2      |
 | Square (lat) | q      | Square    | 3      |
+| Square (en)  | sq     |           |        |
 
 # Known Limitations
 

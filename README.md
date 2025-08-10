@@ -12,11 +12,20 @@
 </p>
 
 # Description
-This package addresses challenges in semantic alignment within NLP pipelines,
-particularly when working with structured, domain-specific data. It aims to
-improve the connection between user queries and technically rich content --
-especially in cases where embedding-based similarity reaches its limits -- by
-introducing a transparent, rule-based processing layer.
+__Working with structured, domain-specific data__ presents a persistent
+challenge for semantic alignment in NLP pipelines. Embedding-based similarity in
+__Retrieval-Augmented Generation (RAG)__ systems often fails to adequately
+capture the nuanced semantics these data entail—such as technical units in
+industrial contexts, product specifications in e-commerce, clinical lab values
+in medical records, or meteorological parameters like wind direction and UV
+index. 
+
+This package concentrates on a __hybrid approach__ that combines __rule-based__
+processing with __NLP-driven preselection__. The core idea is that __semantic
+matching__ can be improved when domain-specific entities are identified and made
+available across multiple levels of abstraction. By simplifying the provision
+and detection of these entities, the package can enhance the
+__interpretability__ and __precision of__ retrieval workflows.
 
 The approach combines:
 
@@ -24,9 +33,10 @@ The approach combines:
 - __Rule-based enhancements__ to detect technical terms and units
 - __Modular components__ that integrate easily into existing retrieval systems
 
-The package attempts to support existing NLP workflows through lightweight
-components designed to better handle domain-specific terminology, structured
-data, and semantic matching.
+The package can contribute to __narrowing the gap__ between structured data and
+semantically rich queries by supporting existing NLP workflows with lightweight
+components tailored for domain-specific terminology and semantic matching --
+without relying on opaque models or extensive training.
 
 Further modules are planned to extend the package's capabilities, including:
 

@@ -44,8 +44,8 @@ def units_detector(doc):
         span._.categories = list(units_entity.categories)
         units_spans.append(span)
 
-    # Remove any overlapping spaCy entities before adding new units entities.
-    doc.ents = filter_spans(units_spans + list(doc.ents))
+    # Store unit spans separately (instead of merging into doc.ents)
+    doc.spans["units"] = filter_spans(units_spans)
     return doc
 
 # Loading model and text

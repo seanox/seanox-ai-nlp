@@ -107,17 +107,17 @@ dependencies -- ensuring transparency and reproducibility.
 
 ```text
 Text Input
-    &darr;
+    |
 Normalization (Spacing Correction)
-    &darr;
+    |
 Pattern Matching (RegEx Engine)
-    &rarr; quick rough pattern search
-    &darr;
+    +- quick rough pattern search
+    |
 Validation
-    &rarr; slower detailed pattern search
-    &darr;
+    +- slower detailed pattern search
+    |
 Unit Categorization (Tagging)
-    &darr;
+    |
 Structured Output: Unit entries
 ```
 
@@ -408,39 +408,12 @@ for entity in entities:
     print(entity)
 ```
 
-```json
-[
-  {
-    "label": "MEASURE",
-    "start": 54, "end": 62, "text": "900 km/h",
-    "unit": "km/h", "value": "900",
-    "categories": ["length", "time"]
-  },
-  {
-    "label": "MEASURE",
-    "start": 64, "end": 71, "text": "559 mph",
-    "unit": "mph", "value": "559",
-    "categories": ["length", "time"]
-  },
-  {
-    "label": "UNIT",
-    "start": 99, "end": 101, "text": "in",
-    "unit": "in", "value": null,
-    "categories": ["length"]
-  },
-  {
-    "label": "UNIT",
-    "start": 123, "end": 127, "text": "km/h",
-    "unit": "km/h", "value": null,
-    "categories": ["length", "time"]
-  },
-  {
-    "label": "UNIT",
-    "start": 149, "end": 152, "text": "mph",
-    "unit": "mph", "value": null,
-    "categories": ["length", "time"]
-  }
-]
+```text
+Unit(label='MEASURE', start=54, end=62, text='900 km/h', categories=('length', 'time'), unit='km/h', value='900')
+Unit(label='MEASURE', start=64, end=71, text='559 mph', categories=('length', 'time'), unit='mph', value='559')
+Unit(label='UNIT', start=100, end=102, text='in', categories=('length',), unit='in', value=None)
+Unit(label='UNIT', start=124, end=128, text='km/h', categories=('length', 'time'), unit='km/h', value=None)
+Unit(label='UNIT', start=150, end=153, text='mph', categories=('length', 'time'), unit='mph', value=None)
 ```
 
 ## Unit Extraction Note
@@ -567,8 +540,6 @@ The __units__ module provides a compact API for extracting unit expressions from
 natural language. It is suitable for NLP pipelines, preprocessing workflows, and
 annotation tools.
 
----
-
 ## `units(text: str) -> list[Unit]`
 
 Extracts valid unit expressions and associated numerical values from a given
@@ -589,8 +560,6 @@ __Notes:__
 - Semantic categories (e.g. `mass`, `length`, `energy`) are assigned via static
   lookup.
 
----
-
 ## `spacing(text: str, mode: SpacingMode = SpacingMode.NUMERIC) -> str`
 
 Corrects invalid spacing between numeric/alphanumeric expressions and unit
@@ -606,8 +575,6 @@ __Parameters:__
 __Returns:__
 - `str`: Text with corrected spacing.
 
----
-
 ## `Unit` (NamedTuple)
 
 Represents a recognized unit entity.
@@ -620,70 +587,48 @@ __Attributes:__
 - `value` (`Optional[str]`): Associated numeric value, if present
 - `categories` (`tuple[str, ...]`): Semantic categories assigned to the unit
 
----
-
-_It also includes a set of precompiled regular expressions and static patterns
-for efficient unit detection. These constants are not typically used directly,
-but are available for advanced customization or verification._
-
----
-
 ## `NUMERIC_PATTERN`
 
-Matches numeric values in various locale-specific formats (e.g. `1,000.5`,
-`1.000,5`, `1 000.5`).
-
----
+Precompiled regular expressions, matches numeric values in various
+locale-specific formats (e.g. `1,000.5`, `1.000,5`, `1 000.5`).
 
 ## `NUMERIC_VALIDATION_PATTERN`
 
-Validates a single numeric value.
-
----
+Precompiled regular expressions, validates a single numeric value.
 
 ## `NUMERIC_EXPRESSION_VALIDATION_PATTERN`
 
-Validates compound numeric expressions (e.g. `5 x 10`, `3.5/2`).
-
----
+Precompiled regular expressions, validates compound numeric expressions (e.g.
+`5 x 10`, `3.5/2`).
 
 ## `UNIT_SYMBOLS_PATTERN`
 
-Matches all supported unit symbols, including SI, IEC, informal, and common
-units.
-
----
+Precompiled regular expressions, matches all supported unit symbols, including
+SI, IEC, informal, and common units.
 
 ## `UNIT_PATTERN`
 
-Matches both standalone units and measure pairs (e.g. `15 cm`, `?20 &ordm;C`).
-
----
+Precompiled regular expressions, matches both standalone units and measure pairs
+(e.g. `15 cm`, `?20 &ordm;C`).
 
 ## `UNIT_VALIDATION_PATTERN`
 
-Validates a single unit symbol.
-
----
+Precompiled regular expressions, validates a single unit symbol.
 
 ## `UNIT_EXPRESSION_VALIDATION_PATTERN`
 
-Validates compound unit expressions (e.g. `km/h`, `mol&middot;L?&sup1;`).
-
----
+Precompiled regular expressions, validates compound unit expressions (e.g.
+`km/h`, `mol&middot;L?&sup1;`).
 
 ## `UNIT_CLASSIFICATION_PATTERN`
 
-Named group-based pattern for classifying units into semantic categories (e.g.
-`mass`, `length`, `energy`).
-
----
+Precompiled regular expressions, named group-based pattern for classifying units
+into semantic categories (e.g. `mass`, `length`, `energy`).
 
 ## `UNIT_OPERATORS_PATTERN`
 
-Matches operators used in compound units (e.g. `/`, `&middot;`, `x`).
-
----
+Precompiled regular expressions, matches operators used in compound units (e.g.
+`/`, `&middot;`, `x`).
 
 # Maintenance & Extensibility
 

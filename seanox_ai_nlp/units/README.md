@@ -482,7 +482,7 @@ see also:
 - [example-spaCy-pipeline.py](
     ../../examples/units/example-spaCy-pipeline.py) with comments
 - [example-spaCy-pipeline-component.py](
-    ../../examples/units/example-spaCy-pipeline-component.py) as spaCy pipeline
+    ../../examples/units/example-spaCy-component.py) as spaCy pipeline
 component with comments
 
 ```python
@@ -584,8 +584,11 @@ annotation tools.
 
 ## `units(text: str) -> list[Unit]`
 
+<details>
+  <summary>
 Extracts valid unit expressions and associated numerical values from a given
 text.
+  </summary>
 
 __Parameters:__
 - `text` (`str`): Input text for analysis.
@@ -602,10 +605,15 @@ __Notes:__
 - Semantic categories (e.g. `mass`, `length`, `energy`) are assigned via static
   lookup.
 
+</details> 
+
 ## `spacing(text: str, mode: SpacingMode = SpacingMode.NUMERIC) -> str`
 
+<details>
+  <summary>
 Corrects invalid spacing between numeric/alphanumeric expressions and unit
 identifiers.
+  </summary>
 
 __Parameters:__
 - `text` (`str`): Input string to normalize.
@@ -617,9 +625,14 @@ __Parameters:__
 __Returns:__
 - `str`: Text with corrected spacing.
 
+</details>
+
 ## `Unit` (NamedTuple)
 
+<details>
+  <summary>
 Represents a recognized unit entity.
+  </summary>
 
 __Attributes:__
 - `label` (`str`): Entity type (`UNIT` or `MEASURE`)
@@ -628,6 +641,8 @@ __Attributes:__
 - `unit` (`str`): Extracted unit expression
 - `value` (`Optional[str]`): Associated numeric value, if present
 - `categories` (`tuple[str, ...]`): Semantic categories assigned to the unit
+
+</details>
 
 ## `NUMERIC_PATTERN`
 

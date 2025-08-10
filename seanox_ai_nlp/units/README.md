@@ -400,7 +400,7 @@ from seanox_ai_nlp.units import units
 
 text = (
     "The cruising speed of the Boeing 747 is approximately 900 km/h (559 mph)."
-    "It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
+    " It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
 )
 
 entities = units(text)
@@ -469,6 +469,7 @@ see also [example-spaCy-pipeline.py](
 ```python
 import spacy
 from spacy.tokens import Span
+from spacy.util import filter_spans
 from seanox_ai_nlp.units import units
 
 Span.set_extension("value", default=None)
@@ -478,7 +479,7 @@ Span.set_extension("categories", default=None)
 nlp = spacy.load("en_core_web_md")
 text = (
     "The cruising speed of the Boeing 747 is approximately 900 - 950 km/h (559 mph)."
-    "It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
+    " It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
 )
 doc = nlp(text)
 units_entities = units(text)
@@ -489,26 +490,26 @@ for units_entity in units_entities:
         label=units_entity.label
     )
     if span:
-        span._.value = units_entity.value
-        span._.unit = units_entity.unit
-        span._.categories = list(units_entity.categories)
-        doc.ents += (span,)
+      span._.value = units_entity.value
+      span._.unit = units_entity.unit
+      span._.categories = list(units_entity.categories)
+      doc.ents = filter_spans([span] + list(doc.ents))
 for ent in doc.ents:
-    if ent.label_ in ["UNIT", "MEASURE"]:
-        print(f"{ent.text:<20} | label: {ent.label_:<10} | value: {ent._.value or '':<10} | unit: {ent._.unit:<6} | categories: {ent._.categories}")
-    else:
-        print(f"{ent.text:<20} | label: {ent.label_}")
+  if ent.label_ in ["UNIT", "MEASURE"]:
+    print(f"{ent.text:{20}} | label: {ent.label_:{10}} | value: {ent._.value or '':{10}} | unit: {ent._.unit:{5}} | categories: {ent._.categories}")
+  else:
+    print(f"{ent.text:{20}} | label: {ent.label_}")
 ```
 
 ```text
 Boeing               | label: ORG
 747                  | label: PRODUCT
-900 - 950 km/h       | label: MEASURE    | value: 900 - 950  | unit: km/h   | categories: ['length', 'time']
-559                  | label: CARDINAL
-in                   | label: UNIT       | value:            | unit: in     | categories: ['length']
+900 - 950 km/h       | label: MEASURE    | value: 900 - 950  | unit: km/h  | categories: ['length', 'time']
+559 mph              | label: MEASURE    | value: 559        | unit: mph   | categories: ['length', 'time']
+in                   | label: UNIT       | value:            | unit: in    | categories: ['length']
 kilometers per hour  | label: TIME
-km/h                 | label: UNIT       | value:            | unit: km/h   | categories: ['length', 'time']
-mph                  | label: UNIT       | value:            | unit: mph    | categories: ['length', 'time']
+km/h                 | label: UNIT       | value:            | unit: km/h  | categories: ['length', 'time']
+mph                  | label: UNIT       | value:            | unit: mph   | categories: ['length', 'time']
 ```
 
 ## Downstream Processing with pandas
@@ -522,7 +523,7 @@ import pandas as pd
 from seanox_ai_nlp.units import units
 texts = [
     "The cruising speed of the Boeing 747 is approximately 900 - 950 km/h (559 mph).",
-    "It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
+    " It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
 ]
 df = pd.DataFrame(texts, columns=["text"])
 df["units"] = df["text"].apply(units)
@@ -531,20 +532,20 @@ for index, row in df.iterrows():
     print(f"\nText: {row['text']}")
     print("Extracted units:")
     for unit in row["units"]:
-        print(f"- {unit.label:<10} | text: {unit.text:<15} | value: {unit.value or '':<10} | unit: {unit.unit or '':<6} | categories: {', '.join(unit.categories)}")
+      print(f"- {unit.label:{10}} | text: {unit.text:{15}} | value: {unit.value or '':{10}} | unit: {unit.unit or '':{5}} | categories: {', '.join(unit.categories)}")
 ```
 
 ```text
 Text: The cruising speed of the Boeing 747 is approximately 900 - 950 km/h (559 mph).
 Extracted units:
-- MEASURE    | text: 900 - 950 km/h  | value: 900 - 950  | unit: km/h   | categories: length, time
-- MEASURE    | text: 559 mph         | value: 559        | unit: mph    | categories: length, time
+- MEASURE    | text: 900 - 950 km/h  | value: 900 - 950  | unit: km/h  | categories: length, time
+- MEASURE    | text: 559 mph         | value: 559        | unit: mph   | categories: length, time
 
-Text: It is typically expressed in kilometers per hour (km/h) and miles per hour (mph).
+Text:  It is typically expressed in kilometers per hour (km/h) and miles per hour (mph).
 Extracted units:
-- UNIT       | text: in              | value:            | unit: in     | categories: length
-- UNIT       | text: km/h            | value:            | unit: km/h   | categories: length, time
-- UNIT       | text: mph             | value:            | unit: mph    | categories: length, time
+- UNIT       | text: in              | value:            | unit: in    | categories: length
+- UNIT       | text: km/h            | value:            | unit: km/h  | categories: length, time
+- UNIT       | text: mph             | value:            | unit: mph   | categories: length, time
 ```
 
 # API Reference

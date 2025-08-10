@@ -191,8 +191,9 @@ structured spatial information in a concise format.
 
 <details>
   <summary>
-Supported unit symbols (SI, IEC, common & informal)
+Supported unit symbols (SI, IEC, common & informal)  
   </summary>
+
 
 __Note__ These are base units only. Variants result from the additional
 properties recorded (e.g. km as a combination of kilo and meter). There is no

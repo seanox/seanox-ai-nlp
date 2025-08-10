@@ -136,9 +136,12 @@ controlled integration.
 
 ## Numeric Values
 
+<details>
+  <summary>
 Measurement values appear in diverse numeric formats depending on locale,
 notation, and domain. __units__ supports common representations, including signs
 and tolerance indicators.
+  </summary>
 
 | Locale | Signs          | Format                   | 
 |--------|----------------|--------------------------|
@@ -149,6 +152,8 @@ and tolerance indicators.
 | ISO    | + - &plusmn; ~ | 1 000 000.00             |
 | plain  | + - &plusmn; ~ | 1000000.00               |
 | plain  | + - &plusmn; ~ | 1000000,00               |
+
+</details>
 
 ## Dimensional Separators
 

@@ -121,7 +121,7 @@ def test_units_01(text):
 
 @pytest.mark.parametrize("text", [(
     "The cruising speed of the Boeing 747 is approximately 900 - 950 km/h (559 mph)."
-    "It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
+    " It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
 )])
 def test_units_02(text):
     expected = [

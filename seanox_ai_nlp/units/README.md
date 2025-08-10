@@ -195,6 +195,7 @@ Supported unit symbols (SI, IEC, common & informal)
   </summary>
 
 <br/>
+
 __Note__ These are base units only. Variants result from the additional
 properties recorded (e.g. km as a combination of kilo and meter). There is no
 claim to interpretation, classification, or complete standardization of the

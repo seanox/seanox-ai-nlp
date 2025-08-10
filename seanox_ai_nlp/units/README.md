@@ -428,7 +428,14 @@ interpretation. This means unit-like expressions are extracted context-free,
 regardless of their actual meaning in the sentence. For [example, the word
     __in__](#usage) may be matched as a unit due to its spelling, even when used
 as a preposition. Such cases are not false positives in a technical sense, but
-rather edge cases that require downstream filtering.
+rather edge cases that require downstream filtering, e.g. via stop words or
+Part-of-Speech (PoS) tags.
+
+see also:
+- [example-spaCy-pipeline.py](
+    ../../examples/units/example-spaCy-pipeline.py) with comments
+- [example-spaCy-pipeline-component.py](
+    ../../examples/units/example-spaCy-component.py) as spaCy pipeline
 
 ## Ambiguous Unit Symbols
 

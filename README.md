@@ -97,6 +97,14 @@ itself.
   reliable and auditable processing.
 
 ### Quickstart
+
+```python
+from seanox_ai_nlp.units import units
+text = "The cruising speed of the Boeing 747 is approximately 900 km/h (559 mph)."
+for entity in units(text):
+    print(entity)
+```
+
 - [Usage](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/units/README.md#usage)
 - [Integration in NLP Workflows](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/units/README.md#integration-in-nlp-workflows)
 - [Downstream Processing with pandas](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/units/README.md#downstream-processing-with-pandas)

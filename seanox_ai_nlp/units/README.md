@@ -68,6 +68,9 @@ expressions from natural language.
   - [Unit Extraction Note](#unit-extraction-note)
   - [Integration in NLP-Workflows](#integration-in-nlp-workflows)
   - [Downstream Processing with pandas](#downstream-processing-with-pandas)
+- [Benchmark](#benchmark)
+  - [Single-Pass Evaluation](#single-pass-evaluation) 
+  - [Scaled Evaluation &times;10](#scaled-evaluation-10)
 - [Known Limitations](#known-limitations)
   - [Unit Recognition Without Semantic Context](#unit-recognition-without-semantic-context)
   - [Ambiguous Unit Symbols](#ambiguous-unit-symbols)
@@ -575,6 +578,34 @@ Extracted units:
 - UNIT       | text: km/h            | value:            | unit: km/h  | categories: length, time
 - UNIT       | text: mph             | value:            | unit: mph   | categories: length, time
 ```
+
+# Benchmark
+
+The module was tested on an Intel Core i5-12400 with Windows 11 and 16 GB RAM.  
+
+## Single-Pass Evaluation
+
+[test_units_benchmark_01](../../tests/test_units_units.py)
+
+| Metric                         | Value               |
+|--------------------------------|---------------------|
+| Varied text without repetition | 1,983 characters    |
+| Detections                     | 51 units + measures |
+| Processing time                | 1.02 ms             |
+| Avg. time per unit             | ~0.020 ms           |
+| Theoretical throughput         | ~50,000 units/s     |
+
+## Scaled Evaluation (&times;10)
+
+[test_units_benchmark_02](../../tests/test_units_units.py)
+
+| Metric                              | Value                |
+|-------------------------------------|----------------------|
+| Scaled text (10&times; single test) | 19,830 characters    |
+| Detections                          | 510 units + measures |
+| Processing time                     | 9.09 ms              |
+| Avg. time per unit                  | ~0.0178 ms           |
+| Theoretical throughput              | ~56,100 units/s      |
 
 # API Reference
 

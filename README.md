@@ -12,10 +12,11 @@
 </p>
 
 # Description
-This package addresses challenges in semantic processing of domain-specific
-content within NLP pipelines. It aims to improve the connection between semantic
-user queries and structured, technically rich data—especially where traditional
-embedding models and similarity metrics reach their limits.
+This package addresses challenges in semantic alignment within NLP pipelines,
+particularly when working with structured, domain-specific data. It aims to
+improve the connection between user queries and technically rich content --
+especially in cases where embedding-based similarity reaches its limits -- by
+introducing a transparent, rule-based processing layer.
 
 The approach combines:
 

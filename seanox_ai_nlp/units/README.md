@@ -136,6 +136,18 @@ controlled integration.
 
 ## Numeric Values
 
+Text vor der Box.
+
+<details>
+  <summary>Licence Agreement (Apache 2.0)</summary>
+
+Vollständiger Lizenztext hier…
+
+</details>
+
+Text danach.
+
+
 <details>
   <summary>
 Measurement values appear in diverse numeric formats depending on locale,

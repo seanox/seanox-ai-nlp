@@ -136,18 +136,6 @@ controlled integration.
 
 ## Numeric Values
 
-Text vor der Box.
-
-<details>
-  <summary>Licence Agreement (Apache 2.0)</summary>
-
-Vollständiger Lizenztext hier…
-
-</details>
-
-Text danach.
-
-
 <details>
   <summary>
 Measurement values appear in diverse numeric formats depending on locale,
@@ -169,10 +157,13 @@ and tolerance indicators.
 
 ## Dimensional Separators
 
+<details>
+  <summary>
 Dimensional separators link numerical values to compact measurements such as
 __10 &times; 20 &times; 30 cm__, where each value represents a distinct
 dimension (e.g. width &times height &times depth). These separators help convey
 structured spatial information in a concise format.
+  </summary>
 
 | Separator                   | Symbol   |
 |-----------------------------|----------|
@@ -191,13 +182,20 @@ structured spatial information in a concise format.
 | En Dash / Range             | &ndash;  |
 | Em Dash / Dash              | &mdash;  |
 
+</details>
+
 ## Units
+
+<details>
+  <summary>
+Supported unit symbols (SI, IEC, common & informal)
 
 __Note__ These are base units only. Variants result from the additional
 properties recorded (e.g. km as a combination of kilo and meter). There is no
 claim to interpretation, classification, or complete standardization of the
 units (e.g. [IEC](https://iec.ch/si), [BIPM](
 https://www.bipm.org/en/measurement-units)).
+  </summary>
 
 | Unit                                 | Symbol&nbsp;&blacktriangledown; | Classification (Categories) | SI Base | SI Derivation | SI Extension | SI relevant | SI with Prefix | SI with Exponents | IEC relevant | Common Units | Informal  |
 |--------------------------------------|---------------------------------|-----------------------------|---------|---------------|--------------|-------------|----------------|-------------------|--------------|--------------|-----------|
@@ -315,15 +313,20 @@ https://www.bipm.org/en/measurement-units)).
 | Ohm                                  | &Omega;                         | electricity                 |         | x             |              | x           | x              | x                 |              |              |           |
 
 The units and prefixes included were compiled from publicly available sources,
-including technical references (e.g. Wikipedia, national standards, product
-catalogs), as well as commonly observed usage. In the absence of a unified
-standard, this dataset aims to offer a practical and extensible collection
-rather than a formally authoritative one.
+including technical references (e.g. Wikipedia, national standards, public
+websites on the subject), as well as commonly observed usage. In the absence of
+a unified standard, this dataset aims to offer a practical and extensible
+collection rather than a formally authoritative one.
+
+</details>
 
 ## SI Prefixes for Multiples & Parts
 
+<details>
+  <summary>
 Internationally defined SI prefixes for multiples and submultiples of units of
 measurement.
+  </summary>
 
 | Multiplicative | Symbol | Submultiplicative | Symbol  |
 |----------------|--------|-------------------|---------|
@@ -340,9 +343,14 @@ measurement.
 | Hekto          | h      | Ronto             | r       |
 | Deka           | da     | Quekto            | q       |
 
+</details>
+
 ## SI Exponents
 
+<details>
+  <summary>
 Exponents commonly used in everyday life in combining to SI units.
+  </summary>
 
 | Positive Exponents | Negative Exponents |
 |--------------------|--------------------|
@@ -350,10 +358,15 @@ Exponents commonly used in everyday life in combining to SI units.
 | &sup2;             | &#x207B;&sup2;     |
 | &sup3;             | &#x207B;&sup3;     |
 
+</details>
+
 ## IEC Prefixes for Multiples & Parts
 
+<details>
+  <summary>
 International Electrotechnical Commission (IEC) prefixes for indicating
 multiples and fractions in data processing.
+  </summary>
 
 | Multiplicative | Symbol | Submultiplicative | Symbol |
 |----------------|--------|-------------------|--------|
@@ -366,9 +379,14 @@ multiples and fractions in data processing.
 | Zebi           | Zi     |                   |        |
 | Yobi           | Yi     |                   |        |
 
+</details>
+
 ## Mathematical Operators
 
+<details>
+  <summary>
 Mathematical operators for combining units into expressions.
+  </summary>
 
 | Operator                                | Symbol   |
 |-----------------------------------------|----------|
@@ -378,16 +396,23 @@ Mathematical operators for combining units into expressions.
 | Multiplication point /<br/>Center point | &middot; |
 | Multiplication sign                     | &times;  |
 
+</details>
+
 ## Informal Prefix & Exponents
 
+<details>
+  <summary>
 Everyday informal prefixes and exponents that are commonly used in certain
 contexts but are not part of the official SI system.
+  </summary>
 
 | Prefix       | Symbol | Exponents | Symbol | 
 |--------------|--------|-----------|--------|
 | Cubic        | c      | Cubic     | 2      |
 | Square (lat) | q      | Square    | 3      |
 | Square (en)  | sq     |           |        |
+
+</details>
 
 # Known Limitations
 

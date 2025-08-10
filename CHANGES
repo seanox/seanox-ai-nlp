@@ -1,4 +1,4 @@
-1.0.1 202509xx
+1.1.0 202509xx
 BF: units Corrections/optimizations of categorization
     The short RegEx was incorrectly prioritized instead of the qualified one.
     e.g. mph (as m), was not correctly determined as length + time
@@ -7,6 +7,12 @@ BF: Documentation: Corrections/optimizations
 BF: Build: Corrections/optimizations in pyproject.toml/setup.py
     - topic
     - project name
+CR: units Renaming of the UNIT-VALUE label to MEASURE
+    MEASURE is more intuitive in spaCy/NLP than UNIT-VALUE.
+CR: units Added unit hl / hL for Hectoliters
+CR: units Separation of SI prefixes: Multiples / Submultiples
+    - Minimizes edge cases such as “das" (decay second)
+      which are theoretically possible but not relevant
 
 1.0.0 20250808
 NT: Release is available

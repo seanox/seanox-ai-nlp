@@ -1,6 +1,6 @@
-# examples/units/example-spaCy-pipeline.py
+# examples/units/example-spaCy-pipeline-component.py
 # Run: python -m spacy download en_core_web_md
-#      python examples/units/example-spaCy-pipeline.py
+#      python examples/units/example-spaCy-pipeline-component.py
 
 import spacy
 from spacy.tokens import Span
@@ -12,44 +12,51 @@ Span.set_extension("value", default=None)
 Span.set_extension("unit", default=None)
 Span.set_extension("categories", default=None)
 
+@spacy.language.Language.component("units_detector")
+def units_detector(doc):
+
+    units_spans = []
+
+    # Detecting entities in text
+    for units_entity in units(doc.text):
+        span = doc.char_span(
+            units_entity.start,
+            units_entity.end,
+            label=units_entity.label)
+
+        # Theoretically, if the start and end positions of the units entity do not
+        # align with spaCy's token boundaries, doc.char_span will return None, and
+        # no span will be created.
+        if not span:
+            continue
+
+        if not span:
+            continue
+
+        # Without semantic analysis, units that are actually stop words are also
+        # found. These can be filtered out in a language-specific manner.
+        if units_entity.label == "UNIT" and units_entity.unit in STOP_WORDS:
+            continue
+
+        # Extension of the span
+        span._.value = units_entity.value
+        span._.unit = units_entity.unit
+        span._.categories = list(units_entity.categories)
+        units_spans.append(span)
+
+    # Store unit spans separately (instead of merging into doc.ents)
+    doc.spans["units"] = filter_spans(units_spans)
+    return doc
+
 # Loading model and text
+# and adding the units detector as a pipe
 nlp = spacy.load("en_core_web_md")
+nlp.add_pipe("units_detector", last=True)
 text = (
     "The cruising speed of the Boeing 747 is approximately 900 - 950 km/h (559 mph)."
     " It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
 )
 doc = nlp(text)
-
-# Detecting entities in text
-units_entities = units(text)
-for units_entity in units_entities:
-    span = doc.char_span(
-        units_entity.start,
-        units_entity.end,
-        label=units_entity.label
-    )
-
-    # Theoretically, if the start and end positions of the units entity do not
-    # align with spaCy's token boundaries, doc.char_span will return None, and
-    # no span will be created.
-    if not span:
-        continue
-
-    # Without semantic analysis, units that are actually stop words are also
-    # found. These can be filtered out in a language-specific manner.
-    if units_entity.label == "UNIT" and units_entity.unit in STOP_WORDS:
-        continue
-
-    # Extension of the span
-    span._.value = units_entity.value
-    span._.unit = units_entity.unit
-    span._.categories = list(units_entity.categories)
-    # Remove any overlapping spaCy entities before adding new units entities.
-    doc.ents = filter_spans([span] + list(doc.ents))
-    # Optimization tip (see also example-spaCy-component.py):
-    # First collect all new spans (e.g. from the EntityRuler) and then merge
-    # them into doc.ents in a single step using filter_spans.
-    # e.g. QUANTITY 559 mph  -> MEASURE 559 mph
 
 # Formatted output
 for ent in doc.ents:

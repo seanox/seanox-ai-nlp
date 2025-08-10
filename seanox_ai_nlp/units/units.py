@@ -47,16 +47,17 @@ def _re_reverse_units(expression: str) -> str:
 
 
 # Patterns generated from the Excel file
-_UNIT_SYMBOLS_PATTERN = r"(?:\'|\"|%|\u2032|\u2033|A|a|AE|Ah|atm|At\u00FC|AU|b|B|B|bar|baud|bbl|Bit|bps|Bq|Byte|C|cd|cd|ct|d|Da|dam|dB|db\(A\)|db\(C\)|db\(G\)|db\(Z\)|dpi|DPI|dpt|dz|dz|eV|F|FLOPS|fps|ft|g|g|gal|Gy|H|h|ha|hp|Hz|in|J|K|K|kat|kn|kt|kt|l|L|lb|lj|lm|ls|lx|m|m|mel|mi|mile|min|MIPS|mol|mol|mph|N|Np|\u00BA|\u00BAC|oz|oz.|oz\. tr\.|p|Pa|pc|PPI|ppi|PS|pt|px|rad|rm|RPM|s|s|S|sone|sr|St|Sv|t|T|tex|u|V|VA|Var|vCore|W|Wb|Wh|yd|Z|\u03C9|\u03A9)"
-_UNIT_SI_SYMBOLS_BASE_PATTERN = r"(?:cd|g|K|m|mol|s)"
-_UNIT_SI_SYMBOLS_DERIVATION_PATTERN = r"(?:Bq|C|F|Gy|H|Hz|J|kat|lm|lx|N|\u00BAC|Pa|rad|S|sr|Sv|T|V|W|Wb)"
-_UNIT_SI_SYMBOLS_EXTENSION_PATTERN = r"(?:a|AE|Ah|AU|b|B|bar|ct|d|Da|dB|db\(A\)|db\(C\)|db\(G\)|db\(Z\)|dpt|eV|h|ha|kn|kt|l|L|mel|min|Np|oz\. tr\.|PS|pt|sone|tex|VA|Wh)"
-_UNIT_SI_SYMBOLS_RELEVANT_PATTERN = r"(?:a|AE|Ah|AU|b|B|B|bar|baud|Bit|bps|Bq|Byte|C|cd|ct|d|Da|dB|db\(A\)|db\(C\)|db\(G\)|db\(Z\)|dpt|eV|F|FLOPS|g|Gy|H|h|ha|Hz|J|K|kat|kn|kt|l|L|lm|lx|m|mel|min|MIPS|mol|N|Np|\u00BAC|oz\. tr\.|Pa|PS|pt|rad|s|S|sone|sr|Sv|T|tex|V|VA|W|Wb|Wh)"
-_UNIT_SI_SYMBOLS_PREFIX_PATTERN = r"(?:AE|AU|b|B|Bit|bps|Bq|Byte|C|cd|ct|Da|eV|F|FLOPS|g|Gy|H|h|Hz|J|K|kat|l|L|lm|lx|m|MIPS|mol|N|oz\. tr\.|Pa|rad|s|S|sr|Sv|t|T|V|VA|W|Wb|Wh)"
-_UNIT_SI_SYMBOLS_SUFFIX_PATTERN = r"(?:Bq|C|F|g|H|J|kat|l|L|lm|lx|m|mol|Pa|s|S|sr|T|V|W|Wb)"
-_UNIT_SI_SYMBOLS_PREFIX_SUFFIX_PATTERN = r"(?:Bq|C|F|g|H|J|kat|l|L|lm|lx|m|mol|Pa|s|S|sr|T|V|W|Wb)"
+_UNIT_SYMBOLS_PATTERN = r"(?:\'|\"|%|\u2032|\u2033|A|A|a|AE|Ah|atm|At\u00FC|AU|b|B|B|bar|baud|bbl|Bit|bps|Bq|Byte|C|cd|cd|ct|d|Da|dam|dB|db\(A\)|db\(C\)|db\(G\)|db\(Z\)|dpi|DPI|dpt|dz|dz|eV|F|FLOPS|fps|ft|g|g|gal|Gy|H|h|ha|hL|hl|hp|Hz|in|J|K|K|kat|kn|kt|kt|l|L|lb|lj|lm|ls|lx|m|m|mel|mi|mile|min|MIPS|mol|mol|mph|N|Np|\u00BA|\u00BAC|oz|oz.|oz\. tr\.|p|Pa|pc|PPI|ppi|PS|pt|px|rad|rm|RPM|s|s|S|sone|sr|St|Sv|t|T|tex|u|V|VA|Var|vCore|W|Wb|Wh|yd|Z|\u03C9|\u03A9)"
+_UNIT_SI_SYMBOLS_BASE_PATTERN = r"(?:A|cd|g|K|m|mol|s)"
+_UNIT_SI_SYMBOLS_DERIVATION_PATTERN = r"(?:Bq|C|F|Gy|H|Hz|J|kat|lm|lx|N|\u00BAC|Pa|rad|S|sr|Sv|T|V|W|Wb|\u03A9)"
+_UNIT_SI_SYMBOLS_EXTENSION_PATTERN = r"(?:a|AE|Ah|AU|b|B|bar|ct|d|Da|dB|db\(A\)|db\(C\)|db\(G\)|db\(Z\)|dpt|eV|h|ha|hL|hl|kn|kt|l|L|mel|min|Np|oz\. tr\.|PS|pt|sone|tex|VA|Wh)"
+_UNIT_SI_SYMBOLS_RELEVANT_PATTERN = r"(?:A|a|AE|Ah|AU|b|B|B|bar|baud|Bit|bps|Bq|Byte|C|cd|ct|d|Da|dB|db\(A\)|db\(C\)|db\(G\)|db\(Z\)|dpt|eV|F|FLOPS|g|Gy|H|h|ha|hL|hl|Hz|J|K|kat|kn|kt|l|L|lm|lx|m|mel|min|MIPS|mol|N|Np|\u00BAC|oz\. tr\.|Pa|PS|pt|rad|s|S|sone|sr|Sv|T|tex|V|VA|W|Wb|Wh|\u03A9)"
+_UNIT_SI_SYMBOLS_PREFIX_M_PATTERN = r"(?:A|b|B|Bit|bps|Bq|Byte|C|cd|Da|eV|F|FLOPS|g|Gy|H|Hz|J|kat|lm|lx|m|MIPS|N|Pa|S|Sv|T|V|VA|W|Wb|Wh|\u03A9)"
+_UNIT_SI_SYMBOLS_PREFIX_S_PATTERN = r"(?:A|b|B|Bit|bps|Bq|Byte|C|cd|Da|eV|F|FLOPS|g|Gy|H|Hz|J|kat|l|L|lm|lx|m|MIPS|N|Pa|s|S|Sv|T|V|VA|W|Wb|Wh|\u03A9)"
+_UNIT_SI_SYMBOLS_SUFFIX_PATTERN = r"(?:A|Bq|C|F|g|H|J|kat|l|L|lm|lx|m|mol|Pa|s|S|sr|T|V|W|Wb|\u03A9)"
+_UNIT_SI_SYMBOLS_PREFIX_SUFFIX_PATTERN = r"(?:A|Bq|C|F|g|H|J|kat|lm|lx|m|Pa|S|T|V|W|Wb|\u03A9)"
 _UNIT_IEC_SYMBOLS_PATTERN = r"(?:B)"
-_UNIT_COMMON_SYMBOLS_PATTERN = r"(?:\'|%|\u2033|a|Ah|atm|At\u00FC|B|bar|bbl|d|dam|dB|db\(A\)|db\(C\)|db\(G\)|db\(Z\)|dpi|DPI|dpt|dz|dz|fps|ft|gal|ha|hp|in|kn|kt|kt|lb|lj|ls|mel|mi|min|Np|\u00BA|\u00BAC|oz|oz.|p|pc|PPI|ppi|PS|pt|px|rm|RPM|sone|St|tex|u|Var|vCore|yd|Z|\u03C9)"
+_UNIT_COMMON_SYMBOLS_PATTERN = r"(?:\'|\"|%|\u2032|\u2033|a|AE|Ah|atm|At\u00FC|AU|B|bar|bbl|ct|d|dam|dB|db\(A\)|db\(C\)|db\(G\)|db\(Z\)|dpi|DPI|dpt|dz|dz|fps|ft|gal|h|ha|hp|in|K|kn|kt|kt|l|L|lb|lj|ls|mel|mi|min|mol|Np|\u00BA|\u00BAC|oz|oz.|oz\. tr\.|p|pc|PPI|ppi|PS|pt|px|rad|rm|RPM|s|sone|sr|St|t|tex|u|Var|vCore|yd|Z|\u03C9)"
 _UNIT_INFORMAL_SYMBOLS_PATTERN = r"(?:ft|in|m|mi|mile|mph|yd)"
 
 # The units are sorted alphabetically, which means that shorter ones such as "p"
@@ -70,14 +71,16 @@ _UNIT_SI_SYMBOLS_BASE_PATTERN = _re_reverse_units(_UNIT_SI_SYMBOLS_BASE_PATTERN)
 _UNIT_SI_SYMBOLS_DERIVATION_PATTERN = _re_reverse_units(_UNIT_SI_SYMBOLS_DERIVATION_PATTERN)
 _UNIT_SI_SYMBOLS_EXTENSION_PATTERN = _re_reverse_units(_UNIT_SI_SYMBOLS_EXTENSION_PATTERN)
 _UNIT_SI_SYMBOLS_RELEVANT_PATTERN = _re_reverse_units(_UNIT_SI_SYMBOLS_RELEVANT_PATTERN)
-_UNIT_SI_SYMBOLS_PREFIX_PATTERN = _re_reverse_units(_UNIT_SI_SYMBOLS_PREFIX_PATTERN)
+_UNIT_SI_SYMBOLS_M_PREFIX_PATTERN = _re_reverse_units(_UNIT_SI_SYMBOLS_PREFIX_M_PATTERN)
+_UNIT_SI_SYMBOLS_S_PREFIX_PATTERN = _re_reverse_units(_UNIT_SI_SYMBOLS_PREFIX_S_PATTERN)
 _UNIT_SI_SYMBOLS_SUFFIX_PATTERN = _re_reverse_units(_UNIT_SI_SYMBOLS_SUFFIX_PATTERN)
 _UNIT_SI_SYMBOLS_PREFIX_SUFFIX_PATTERN = _re_reverse_units(_UNIT_SI_SYMBOLS_PREFIX_SUFFIX_PATTERN)
 _UNIT_IEC_SYMBOLS_PATTERN = _re_reverse_units(_UNIT_IEC_SYMBOLS_PATTERN)
 _UNIT_COMMON_SYMBOLS_PATTERN = _re_reverse_units(_UNIT_COMMON_SYMBOLS_PATTERN)
 _UNIT_INFORMAL_SYMBOLS_PATTERN = _re_reverse_units(_UNIT_INFORMAL_SYMBOLS_PATTERN)
 
-_UNIT_SI_PREFIX_PATTERN = r"(?:Q|R|Y|Z|E|P|T|G|M|k|h|da|d|c|m|\u00B5|n|p|f|a|z|y|r|q)"
+_UNIT_SI_PREFIX_M_PATTERN = r"(?:Q|R|Y|Z|E|P|T|G|M|k|h|da)"
+_UNIT_SI_PREFIX_S_PATTERN = r"(?:d|c|m|\u00B5|n|p|f|a|z|y|r|q)"
 _UNIT_SI_SUFFIX_PATTERN = r"(?:\u207B?[\u00B9\u00B2\u00B3])"
 _UNIT_SI_SYMBOLS_RELEVANT_SET = set(_UNIT_SI_SYMBOLS_RELEVANT_PATTERN[3:-1].split("|"))
 
@@ -145,7 +148,7 @@ UNIT_SYMBOLS_PATTERN = _re_compile(rf"({_UNIT_SYMBOLS_PATTERN})")
 _UNIT_INFORMAL_SI_RAW_PATTERN = rf"""
     (?:
       {_UNIT_INFORMAL_PREFIX_PATTERN}?
-      {_UNIT_SI_PREFIX_PATTERN}?
+      (?:{_UNIT_SI_PREFIX_M_PATTERN}|{_UNIT_SI_PREFIX_S_PATTERN})?
       {_UNIT_INFORMAL_SI_SYMBOLS_PATTERN}
       (?:
         {_UNIT_INFORMAL_SUFFIX_PATTERN}
@@ -180,7 +183,7 @@ _UNIT_LOOK_BEHIND_PATTERN = r"(?:(?=[^\w\u00B7\u002F])|$)"
 _UNIT_MULTIPLE_SPACES = r"(?:\s{2,})"
 
 _UNIT_SI_RAW_PATTERN = rf"""
-    (?:{_UNIT_SI_PREFIX_PATTERN}?
+    (?:(?:{_UNIT_SI_PREFIX_M_PATTERN}|{_UNIT_SI_PREFIX_S_PATTERN})?
     {_UNIT_SI_SYMBOLS_RELEVANT_PATTERN}
     {_UNIT_SI_SUFFIX_PATTERN}?)
 """
@@ -262,14 +265,19 @@ _UNIT_WITH_INVALID_SPACES_ALL_PATTERN = _re_compile(rf"""
 _UNIT_SI_VALIDATION_PATTERN = rf"""
     (?:
       (?:
-        {_UNIT_SI_PREFIX_PATTERN}
+        (?:{_UNIT_SI_PREFIX_M_PATTERN}|{_UNIT_SI_PREFIX_S_PATTERN})
         {_UNIT_SI_SYMBOLS_PREFIX_SUFFIX_PATTERN}
         {_UNIT_SI_SUFFIX_PATTERN}
       )
       |
       (?:
-        {_UNIT_SI_PREFIX_PATTERN}
-        {_UNIT_SI_SYMBOLS_PREFIX_PATTERN}
+        {_UNIT_SI_PREFIX_M_PATTERN}
+        {_UNIT_SI_SYMBOLS_PREFIX_M_PATTERN}
+      )
+      |
+      (?:
+        {_UNIT_SI_PREFIX_S_PATTERN}
+        {_UNIT_SI_SYMBOLS_PREFIX_S_PATTERN}
       )
       |
       (?:
@@ -325,14 +333,19 @@ UNIT_EXPRESSION_VALIDATION_PATTERN = _re_compile(rf"""
 _UNIT_SI_CLASSIFICATION_PATTERN = rf"""
     (?:
       (?:
-        (?P<unit_si_prefix_suffix_prefix>{_UNIT_SI_PREFIX_PATTERN})
+        (?P<unit_si_prefix_suffix_prefix>(?:{_UNIT_SI_PREFIX_M_PATTERN}|{_UNIT_SI_PREFIX_S_PATTERN}))
         (?P<unit_si_prefix_suffix_symbol>{_UNIT_SI_SYMBOLS_PREFIX_SUFFIX_PATTERN})
         (?P<unit_si_prefix_suffix_suffix>{_UNIT_SI_SUFFIX_PATTERN})
       )
       |
       (?:
-        (?P<unit_si_prefix_prefix>{_UNIT_SI_PREFIX_PATTERN})
-        (?P<unit_si_prefix_symbol>{_UNIT_SI_SYMBOLS_PREFIX_PATTERN})
+        (?P<unit_si_prefix_prefix>{_UNIT_SI_PREFIX_M_PATTERN})
+        (?P<unit_si_prefix_symbol>{_UNIT_SI_SYMBOLS_PREFIX_M_PATTERN})
+      )
+      |
+      (?:
+        (?P<unit_si_prefix_prefix>{_UNIT_SI_PREFIX_S_PATTERN})
+        (?P<unit_si_prefix_symbol>{_UNIT_SI_SYMBOLS_PREFIX_S_PATTERN})
       )
       |
       (?:
@@ -381,31 +394,31 @@ def _dict_from_comma_separated_pairs(data: str) -> dict[str, str]:
 # that is not CSV is deliberately used, as it is only used internally and the
 # format is fully controlled.
 _UNIT_CLASSIFICATION_DICT = _dict_from_comma_separated_pairs(r"""
-| '         | length                        | d         | time                          | Hz        | frequency                     | \u00BA    | angle                         | u         | mass atomic                   |
-| "         | length                        | Da        | mass atomic                   | in        | length                        | \u00BAC   | temperature                   | V         | electricity                   |
-| %         | ratio                         | dam       | length                        | J         | energy                        | oz        | mass                          | VA        | electricity power             |
-| \u2032    | length                        | dB        | acoustics                     | K         | temperature                   | oz.       | mass                          | Var       | electricity power             |
-| \u2033    | length                        | db(A)     | acoustics                     | kat       | amount                        | oz. tr.   | mass                          | vCore     | it processing amount          |
-| A         | electricity                   | db(C)     | acoustics                     | kn        | speed                         | p         | force                         | W         | power                         |
-| a         | area                          | db(G)     | acoustics                     | kt        | mass                          | Pa        | pressure                      | Wb        | magnetism                     |
-| AE        | length astronomy              | db(Z)     | acoustics                     | kt        | speed                         | pc        | length astronomy              | Wh        | energy                        |
-| Ah        | electricity                   | dpi       | it graphics                   | l         | volume                        | PPI       | it graphics area              | yd        | length                        |
-| atm       | pressure                      | DPI       | it graphics                   | L         | volume                        | ppi       | it graphics area              | Z         | mass                          |
-| At\u00FC  | pressure                      | dpt       | optics                        | lb        | mass                          | PS        | power                         | \u03C9    | frequency rotation            |
-| AU        | length astronomy              | dz        | quantity                      | lj        | length astronomy              | pt        | volume                        | \u03A9    | electricity                   |
-| b         | area radiation                | dz        | quantity                      | lm        | light                         | px        | it graphics                   |           |                               |
-| B         | acoustics                     | eV        | energy                        | ls        | light energy                  | rad       | angle                         |           |                               |
-| B         | it storage                    | F         | electricity capacitance       | lx        | light                         | rm        | volume                        |           |                               |
-| bar       | pressure                      | FLOPS     | it processing time            | m         | length                        | RPM       | it frequency rotation time    |           |                               |
-| baud      | It network time               | fps       | it graphics video time        | mel       | acoustics                     | s         | time                          |           |                               |
-| bbl       | volume                        | ft        | length                        | mi        | length                        | S         | electricity conductance       |           |                               |
-| Bit       | it storage                    | g         | mass                          | mile      | length                        | sone      | acoustics                     |           |                               |
-| bps       | it network time               | gal       | volume                        | min       | time                          | sr        | angle                         |           |                               |
-| Bq        | radiation                     | Gy        | radiation                     | MIPS      | it processing time            | St        | volume                        |           |                               |
-| Byte      | it storage                    | H         | electricity                   | mol       | amount                        | Sv        | radiation                     |           |                               |
-| C         | electricity                   | h         | time                          | mph       | length time                   | t         | mass                          |           |                               |
-| cd        | light                         | ha        | area                          | N         | force                         | T         | magnetic field                |           |                               |
-| ct        | mass                          | hp        | power                         | Np        | acoustics                     | tex       | mass                          |           |                               |
+| '         | length                        | d         | time                          | hl        | volume                        | N         | force                         | T         | magnetic field                |
+| "         | length                        | Da        | mass atomic                   | hp        | power                         | Np        | acoustics                     | tex       | mass                          |
+| %         | ratio                         | dam       | length                        | Hz        | frequency                     | \u00BA    | angle                         | u         | mass atomic                   |
+| \u2032    | length                        | dB        | acoustics                     | in        | length                        | \u00BAC   | temperature                   | V         | electricity                   |
+| \u2033    | length                        | db(A)     | acoustics                     | J         | energy                        | oz        | mass                          | VA        | electricity power             |
+| A         | electricity                   | db(C)     | acoustics                     | K         | temperature                   | oz.       | mass                          | Var       | electricity power             |
+| a         | area                          | db(G)     | acoustics                     | kat       | amount                        | oz. tr.   | mass                          | vCore     | it processing amount          |
+| AE        | length astronomy              | db(Z)     | acoustics                     | kn        | speed                         | p         | force                         | W         | power                         |
+| Ah        | electricity                   | dpi       | it graphics                   | kt        | mass                          | Pa        | pressure                      | Wb        | magnetism                     |
+| atm       | pressure                      | DPI       | it graphics                   | kt        | speed                         | pc        | length astronomy              | Wh        | energy                        |
+| At\u00FC  | pressure                      | dpt       | optics                        | l         | volume                        | PPI       | it graphics area              | yd        | length                        |
+| AU        | length astronomy              | dz        | quantity                      | L         | volume                        | ppi       | it graphics area              | Z         | mass                          |
+| b         | area radiation                | dz        | quantity                      | lb        | mass                          | PS        | power                         | \u03C9    | frequency rotation            |
+| B         | acoustics                     | eV        | energy                        | lj        | length astronomy              | pt        | volume                        | \u03A9    | electricity                   |
+| B         | it storage                    | F         | electricity capacitance       | lm        | light                         | px        | it graphics                   |           |                               |
+| bar       | pressure                      | FLOPS     | it processing time            | ls        | light energy                  | rad       | angle                         |           |                               |
+| baud      | It network time               | fps       | it graphics video time        | lx        | light                         | rm        | volume                        |           |                               |
+| bbl       | volume                        | ft        | length                        | m         | length                        | RPM       | it frequency rotation time    |           |                               |
+| Bit       | it storage                    | g         | mass                          | mel       | acoustics                     | s         | time                          |           |                               |
+| bps       | it network time               | gal       | volume                        | mi        | length                        | S         | electricity conductance       |           |                               |
+| Bq        | radiation                     | Gy        | radiation                     | mile      | length                        | sone      | acoustics                     |           |                               |
+| Byte      | it storage                    | H         | electricity                   | min       | time                          | sr        | angle                         |           |                               |
+| C         | electricity                   | h         | time                          | MIPS      | it processing time            | St        | volume                        |           |                               |
+| cd        | light                         | ha        | area                          | mol       | amount                        | Sv        | radiation                     |           |                               |
+| ct        | mass                          | hL        | volume                        | mph       | length time                   | t         | mass                          |           |                               |
 """)
 
 
@@ -448,7 +461,7 @@ class Unit(NamedTuple):
     Represents a recognized unit entity extracted from text.
 
     Attributes:
-        label (str): Classification label, e.g. 'UNIT-VALUE'.
+        label (str): Classification label, e.g. 'MEASURE'.
         start (int): Start index of the unit in the original text.
         end (int): End index of the unit in the original text.
         text (str): Raw text fragment containing the unit.
@@ -506,7 +519,7 @@ def units(text: str) -> list[Unit]:
         if numeric:
             entities.append(
                 Unit(
-                    label="UNIT-VALUE",
+                    label="MEASURE",
                     start=match.start(),
                     end=match.end(),
                     text=match.group(),

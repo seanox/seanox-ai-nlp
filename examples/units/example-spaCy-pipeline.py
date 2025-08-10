@@ -46,7 +46,7 @@ for units_entity in units_entities:
     span._.categories = list(units_entity.categories)
     # Remove any overlapping spaCy entities before adding new units entities.
     doc.ents = filter_spans([span] + list(doc.ents))
-    # Optimization tip:
+    # Optimization tip (see also example-spaCy-component.py):
     # First collect all new spans (e.g. from the EntityRuler) and then merge
     # them into doc.ents in a single step using filter_spans.
     # e.g. QUANTITY 559 mph  -> MEASURE 559 mph

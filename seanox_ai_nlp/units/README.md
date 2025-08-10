@@ -463,8 +463,12 @@ treated as a preposition.
 ## Integration in NLP-Workflows
 
 Example for a spaCy pipeline.  
-see also [example-spaCy-pipeline.py](
-    ../../examples/units/example-spaCy-pipeline.py) with comments.
+see also:
+- [example-spaCy-pipeline.py](
+    ../../examples/units/example-spaCy-pipeline.py) with comments
+- [example-spaCy-pipeline-component.py](
+    ../../examples/units/example-spaCy-pipeline-component.py) as spaCy pipeline
+component with comments
 
 ```python
 import spacy

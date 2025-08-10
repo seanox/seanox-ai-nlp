@@ -516,6 +516,15 @@ km/h                 | label: UNIT       | value:            | unit: km/h  | cat
 mph                  | label: UNIT       | value:            | unit: mph   | categories: ['length', 'time']
 ```
 
+The approach with spaCy-Retokenizer can be problematic.
+- Token structure is changed globally, previously calculated offsets and spans
+  become invalid.
+- Overlapping entities are not allowed in spaCy, and merges of MEASURE collide
+  with existing NER spans.
+- After each merge, all affected spans must be recalculated, which is
+  error-prone and resource-intensive.
+- Unexpected side effects can occur, such as incorrect labels in unwanted places.
+
 ## Downstream Processing with pandas
 
 Example for downstream processing with pandas.  

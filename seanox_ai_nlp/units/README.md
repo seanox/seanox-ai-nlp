@@ -192,13 +192,13 @@ structured spatial information in a concise format.
 <details>
   <summary>
 Supported unit symbols (SI, IEC, common & informal)
+  </summary>
 
 __Note__ These are base units only. Variants result from the additional
 properties recorded (e.g. km as a combination of kilo and meter). There is no
 claim to interpretation, classification, or complete standardization of the
 units (e.g. [IEC](https://iec.ch/si), [BIPM](
 https://www.bipm.org/en/measurement-units)).
-  </summary>
 
 | Unit                                 | Symbol&nbsp;&blacktriangledown; | Classification (Categories) | SI Base | SI Derivation | SI Extension | SI relevant | SI with Prefix | SI with Exponents | IEC relevant | Common Units | Informal  |
 |--------------------------------------|---------------------------------|-----------------------------|---------|---------------|--------------|-------------|----------------|-------------------|--------------|--------------|-----------|

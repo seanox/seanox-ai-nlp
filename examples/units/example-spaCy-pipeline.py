@@ -4,6 +4,8 @@
 
 import spacy
 from spacy.tokens import Span
+from spacy.util import filter_spans
+from spacy.lang.en.stop_words import STOP_WORDS
 from seanox_ai_nlp.units import units
 
 Span.set_extension("value", default=None)
@@ -14,38 +16,49 @@ Span.set_extension("categories", default=None)
 nlp = spacy.load("en_core_web_md")
 text = (
     "The cruising speed of the Boeing 747 is approximately 900 - 950 km/h (559 mph)."
-    "It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
+    " It is typically expressed in kilometers per hour (km/h) and miles per hour (mph)."
 )
 doc = nlp(text)
 
 # Detecting entities in text
-units_entites = units(text)
-for units_entity in units_entites:
+units_entities = units(text)
+for units_entity in units_entities:
     span = doc.char_span(
         units_entity.start,
         units_entity.end,
         label=units_entity.label
     )
+
+    # Without semantic analysis, units that are actually stop words are also
+    # found. These can be filtered out in a language-specific manner.
+    if units_entity.label == "UNIT" and units_entity.unit in STOP_WORDS:
+        continue
+
     if span:
         # Enrichment of the spans
         span._.value = units_entity.value
         span._.unit = units_entity.unit
         span._.categories = list(units_entity.categories)
-        doc.ents += (span,)
+        # Remove any overlapping spaCy entities before adding new units entities.
+        doc.ents = filter_spans([span] + list(doc.ents))
+        # Optimization tip:
+        # First collect all new spans (e.g. from the EntityRuler) and then merge
+        # them into doc.ents in a single step using filter_spans.
+        # e.g. QUANTITY 559 mph  -> MEASURE 559 mph
 
 # Formatted output
 for ent in doc.ents:
     if ent.label_ in ["UNIT", "MEASURE"]:
-        print(f"{ent.text:<20} | label: {ent.label_:<10} | value: {ent._.value or '':<10} | unit: {ent._.unit:<6} | categories: {ent._.categories}")
+        print(f"{ent.text:{20}} | label: {ent.label_:{10}} | value: {ent._.value or '':{10}} | unit: {ent._.unit:{5}} | categories: {ent._.categories}")
     else:
-        print(f"{ent.text:<20} | label: {ent.label_}")
+        print(f"{ent.text:{20}} | label: {ent.label_}")
 
 # Output:
 # Boeing               | label: ORG
 # 747                  | label: PRODUCT
-# 900 - 950 km/h       | label: MEASURE    | value: 900 - 950  | unit: km/h   | categories: ['length', 'time']
-# 559                  | label: CARDINAL
-# in                   | label: UNIT       | value:            | unit: in     | categories: ['length']
+# 900 - 950 km/h       | label: MEASURE    | value: 900 - 950  | unit: km/h  | categories: ['length', 'time']
+# 559 mph              | label: MEASURE    | value: 559        | unit: mph   | categories: ['length', 'time']
+# in                   | label: UNIT       | value:            | unit: in    | categories: ['length']
 # kilometers per hour  | label: TIME
-# km/h                 | label: UNIT       | value:            | unit: km/h   | categories: ['length', 'time']
-# mph                  | label: UNIT       | value:            | unit: mph    | categories: ['length']
+# km/h                 | label: UNIT       | value:            | unit: km/h  | categories: ['length', 'time']
+# mph                  | label: UNIT       | value:            | unit: mph   | categories: ['length', 'time']

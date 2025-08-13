@@ -15,7 +15,7 @@
 __Working with structured, domain-specific data__ presents a persistent
 challenge for semantic alignment in NLP pipelines. Embedding-based similarity in
 __Retrieval-Augmented Generation (RAG)__ systems often fails to adequately
-capture the nuanced semantics these data entail—such as technical units in
+capture the nuanced semantics these data entail -- such as technical units in
 industrial contexts, product specifications in e-commerce, clinical lab values
 in medical records, or meteorological parameters like wind direction and UV
 index. 
@@ -119,6 +119,25 @@ for entity in units(text):
 - [Usage](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/units/README.md#usage)
 - [Integration in NLP Workflows](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/units/README.md#integration-in-nlp-workflows)
 - [Downstream Processing with pandas](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/units/README.md#downstream-processing-with-pandas)
+
+## synthetics
+
+The __synthetics__ module uses __template-based__, __rule-driven generation__ to
+transform structured domain data into annotated natural language. It does not
+rely on __large language models (LLMs)__ and is designed for use in
+__controlled, domain-specific NLP pipelines__. Through __stochastic variation__
+and __semantic recombination__, it produces linguistically rich sentences from
+precise input. The module supports __fine-tuning__, __evaluation__, and __data
+augmentation__ workflows by enhancing semantic coverage and contextual
+adaptability -- without performing interpretation itself.
+
+### Features
+
+TODO:
+
+### Quickstart
+
+TODO:
 
 # Changes
 ## 1.0.0 20250808

@@ -1,0 +1,74 @@
+- name: Beispiel 01
+  condition: type != "Gesteinsplanet"
+  template: |
+    Ist {{ planet }} ein Gesteinsplanet?
+    Nein, {{ planet }} {{ ["ist ein", "gehört zur Gruppe"] | random  }} {{ type }}.
+    {{ [
+        "Wusstest Du schon Folgendes dazu:",
+        "Er hat zudem interessante Merkmale:",
+        "Interessant dazu ist auch:",
+        "Dazu habe ich noch Folgendes gefunden:"
+      ] | random }}
+    {% for item in characteristics %}\
+    - {{ item }}
+    {% endfor %}
+
+- name: Beispiel 02
+  condition: moons != 1
+  template: |
+    {% set characteristic = characteristics | random %}
+    Was kannst Du mir zu "{{ characteristic }} in unserem {{ ["Planetensystem", "Sonnensystem"] | random }}" sagen?
+    {{ characteristic }} trifft auf {{ ["den Planeten", ""] | random }} {{ planet }} zu.
+    {{ ["Das ist ein", "Damit gehört der Planet zur Gruppe" ] | random }} {{ type }}.
+    {% set facts = [
+        "hat einen Durchmesser von " ~ diameter ~ " km",
+        "besitzt " ~ (moons == 0 and "keine" or moons) ~ " Monde",
+        "hat eine Umlaufzeit von " ~ turnover ~ " Tagen"
+    ] %}\
+    {% set facts = random_set(facts, 2) %}\
+    {{ ["Er", "Der Planet"] | random }} {{ facts[0] }} und {{ facts[1] }}.
+
+- name: Beispiel 03
+  condition: moons != 1
+  template: |
+    {{ ["Der Planet", ""] | random }} {{ planet }} ist ein {{ type }} \
+    {% set facts = [
+        "mit einem Durchmesser von " ~ diameter ~ " km",
+        "besitzt " ~ (moons == 0 and "keine" or moons) ~ " Monde",
+        "mit einer Umlaufzeit von " ~ turnover ~ " Tagen"
+    ] %}\
+    {{ facts[0] }} und {{ facts[1] }}.
+    Die Atmosphäre {{ ["besteht", "setzt sich zusammen"] | random }} aus: {{ random_join(", ", atmosphere) }}.
+    {{ ["Typisch", "Charakteristisch", "Markant"] | random}} für {{ planet }} sind Merkmale wie:
+    {% for item in characteristics %}\
+    - {{ item }}
+    {% endfor %}
+
+- name: Beispiel 04
+  condition: turnover > 365
+  template: |
+    Gibt es Vorschläge zur Optimierung der Prozesse beim Management?
+    Ja -- Wir planen die Verlagerung der Besprechungsräume auf den {{ planet }}.
+    Dort hat das Jahr {{ turnover }} Tage, was die längeren Besprechungen kompensieren.
+
+- name: Beispiel 05
+  condition: moons > 2
+  template: |
+    Hat {{ planet }} mehre Monde?
+    Ja und zwar genau {{ moons }} {{ ["davon", ""] | random}}.
+
+- name: Beispiel 06
+  condition: True
+  template: |
+    {% set facts = random_set(characteristics | default([], true), 2) %}
+    {{ facts[0] }} \
+    {{ ["und", "sowie", "wie auch"] | random }} \
+    {{ facts[1] }} \
+    {{ ["sind charakteristisch für", "kennzeichnen"] | random }} \
+    {{ planet }}.
+
+- name: Beispiel 07
+  condition: turnover > 365
+  template: |
+    {% set turnover_diff = (turnover | default(0, true) | int) - 365 %}
+    Im Vergleich zur Erde benötigt {{ planet }} {{ turnover_diff }} Tage länger für sein Umlaufbahn.

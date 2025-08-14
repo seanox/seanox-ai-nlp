@@ -86,3 +86,26 @@ templates:
     benötigt {{ planet }}  \
     {{ turnover_diff }} Tage \
     länger für seine {{ "Umlaufbahn" }}.
+
+# In addition to named entities, custom spans can be defined between entities
+# using regular expressions. Regex patterns should be applied to the text
+# between entities and must accurately match the desired span. This is useful
+# for extracting relational or contextual information not covered by standard
+# NER.
+- name: Beispiel 08
+  condition: True
+  spans:
+  - label: "PAIR"
+    pattern: (?<=\")\w+\s:\s.*?(?=\s\")
+  template: |
+    'planet: {{ planet }}', \
+    'type: {{ type }}', \
+    'diameter: {{ diameter }}', \
+    'turnover: {{ turnover }}', \
+    'moons: {{ moons }}'\
+    {% for item in atmosphere %}\
+    , 'atmosphere: {{ item }}'\
+    {% endfor %}\
+    {% for item in characteristics %}\
+    , 'characteristics: {{ item }}'\
+    {% endfor %}

@@ -104,3 +104,26 @@ templates:
     {{ planet | annotate("planet") }} takes \
     {{ turnover_diff | annotate("turnover") }} more days \
     to complete its {{ "orbit" | annotate("term") }}.
+
+# In addition to named entities, custom spans can be defined between entities
+# using regular expressions. Regex patterns should be applied to the text
+# between entities and must accurately match the desired span. This is useful
+# for extracting relational or contextual information not covered by standard
+# NER.
+- name: Example 08
+  condition: True
+  spans:
+  - label: "PAIR"
+    pattern: (?<=\")\w+\s:\s.*?(?=\s\")
+  template: |
+    '{{ "planet" | annotate("terms") }}: {{ planet | annotate("planet") }}', \
+    '{{ "type" | annotate("terms") }}: {{ type | annotate("type") }}', \
+    '{{ "diameter" | annotate("terms") }}: {{ diameter | annotate("diameter") }}', \
+    '{{ "turnover" | annotate("terms") }}: {{ turnover | annotate("turnover") }}', \
+    '{{ "moons" | annotate("terms") }}: {{ moons | annotate("moons") }}'\
+    {% for item in atmosphere %}\
+    , '{{ "atmosphere" | annotate("terms") }}: {{ item | annotate("atmosphere") }}'\
+    {% endfor %}\
+    {% for item in characteristics %}\
+    , '{{ "characteristics" | annotate("terms") }}: {{ item | annotate("characteristics") }}'\
+    {% endfor %}

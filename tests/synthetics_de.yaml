@@ -1,8 +1,9 @@
+templates:
 - name: Beispiel 01
   condition: type != "Gesteinsplanet"
   template: |
     Ist {{ planet }} ein Gesteinsplanet?
-    Nein, {{ planet }} {{ ["ist ein", "gehört zur Gruppe"] | random  }} {{ type }}.
+    Nein, {{ planet }} {{ ["ist ein", "gehört zur Gruppe"] | random }} {{ type }}.
     {{ [
         "Wusstest Du schon Folgendes dazu:",
         "Er hat zudem interessante Merkmale:",
@@ -38,7 +39,7 @@
         "mit einer Umlaufzeit von " ~ turnover ~ " Tagen"
     ] %}\
     {{ facts[0] }} und {{ facts[1] }}.
-    Die Atmosphäre {{ ["besteht", "setzt sich zusammen"] | random }} aus: {{ random_join(", ", atmosphere) }}.
+    Die Atmosphäre {{ ["besteht", "setzt sich zusammen"] | random }} aus {{ random_join_phrase(", ", "und", atmosphere) }}.
     {{ ["Typisch", "Charakteristisch", "Markant"] | random}} für {{ planet }} sind Merkmale wie:
     {% for item in characteristics %}\
     - {{ item }}
@@ -57,6 +58,11 @@
     Hat {{ planet }} mehre Monde?
     Ja und zwar genau {{ moons }} {{ ["davon", ""] | random}}.
 
+# During template validation, fields may be undefined if no data is provided.
+# This becomes problematic when those fields are used in functions rather than
+# just printed. To prevent errors during validation, default values are
+# assigned. These defaults ensure the template compiles correctly but are
+# ignored during actual rendering.
 - name: Beispiel 06
   condition: True
   template: |
@@ -67,8 +73,16 @@
     {{ ["sind charakteristisch für", "kennzeichnen"] | random }} \
     {{ planet }}.
 
+# During template validation, fields may be undefined if no data is provided.
+# This becomes problematic when those fields are used in functions rather than
+# just printed. To prevent errors during validation, default values are
+# assigned. These defaults ensure the template compiles correctly but are
+# ignored during actual rendering.
 - name: Beispiel 07
   condition: turnover > 365
   template: |
     {% set turnover_diff = (turnover | default(0, true) | int) - 365 %}
-    Im Vergleich zur Erde benötigt {{ planet }} {{ turnover_diff }} Tage länger für sein Umlaufbahn.
+    Im Vergleich zur Erde \
+    benötigt {{ planet }}  \
+    {{ turnover_diff }} Tage \
+    länger für seine {{ "Umlaufbahn" }}.

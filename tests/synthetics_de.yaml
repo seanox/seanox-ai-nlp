@@ -96,7 +96,7 @@ templates:
   condition: True
   spans:
   - label: "PAIR"
-    pattern: (?<=\")\w+\s:\s.*?(?=\s\")
+    pattern: (?<=[\"\'])\w+:\s.*?(?=[\"\'])
   template: |
     'planet: {{ planet }}', \
     'type: {{ type }}', \

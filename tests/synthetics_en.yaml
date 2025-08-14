@@ -1,0 +1,88 @@
+templates:
+- name: Example 01
+  condition: type != "terrestrial planet"
+  template: |
+    Is {{ planet }} a terrestrial planet?
+    No, {{ planet }} {{ ["is a", "belongs to the group of"] | random }} {{ type }}.
+    {{ [
+        "Did you know this about it?",
+        "It also has some interesting features:",
+        "Here's something else that's fascinating:",
+        "I found the following details as well:"
+      ] | random }}
+    {% for item in characteristics %}\
+    - {{ item }}
+    {% endfor %}
+
+- name: Example 02
+  condition: moons != 1
+  template: |
+    {% set characteristic = characteristics | random %}
+    What can you tell me about "{{ characteristic }}" in our {{ ["planetary system", "solar system"] | random }}?
+    "{{ characteristic }}" is a feature of {{ ["the planet", ""] | random }} {{ planet }}.
+    {{ ["It is a", "This means the planet belongs to the group of"] | random }} {{ type }}.
+    {% set facts = [
+        "has a diameter of " ~ diameter ~ " km",
+        moons == 0 and "does not have any moons" or "has " ~ moons ~ " moons",
+        "has an orbital period of " ~ turnover ~ " days"
+    ] %}\
+    {% set facts = random_set(facts, 2) %}\
+    {{ ["It", "The planet"] | random }} {{ facts[0] }} and {{ facts[1] }}.
+
+- name: Example 03
+  condition: moons != 1
+  template: |
+    {{ ["The planet", ""] | random }} {{ planet }} is a {{ type }} \
+    {% set facts = [
+        "with a diameter of " ~ diameter ~ " km",
+        moons == 0 and "does not have any moons" or "has " ~ moons ~ " moons",
+        "with an orbital period of " ~ turnover ~ " days"
+    ] %}\
+    {{ facts[0] }} and {{ facts[1] }}.
+    The atmosphere {{ ["consists of", "is composed of"] | random }} {{ random_join_phrase(", ", "and", atmosphere) }}.
+    {{ ["Typical", "Characteristic", "Striking"] | random }} features of {{ planet }} include:
+    {% for item in characteristics %}\
+    - {{ item }}
+    {% endfor %}
+
+- name: Example 04
+  condition: turnover > 365
+  template: |
+    Are there any suggestions for optimizing management processes?
+    Yes -- we are planning to relocate the meeting rooms to {{ planet }}.
+    A year there lasts {{ turnover }} days, which helps compensate for longer meetings.
+
+- name: Example 05
+  condition: moons > 2
+  template: |
+    Does {{ planet }} have multiple moons?
+    Yes, exactly {{ moons }} {{ ["of them", ""] | random }}.
+
+# During template validation, fields may be undefined if no data is provided.
+# This becomes problematic when those fields are used in functions rather than
+# just printed. To prevent errors during validation, default values are
+# assigned. These defaults ensure the template compiles correctly but are
+# ignored during actual rendering.
+- name: Example 06
+  condition: True
+  template: |
+    {% set facts = random_set(characteristics | default([], true), 2) %}
+    {{ facts[0] }} \
+    {{ ["and", "as well as", "just like"] | random }} \
+    {{ facts[1] }} \
+    {{ ["are characteristic of", "define"] | random }} \
+    {{ planet }}.
+
+# During template validation, fields may be undefined if no data is provided.
+# This becomes problematic when those fields are used in functions rather than
+# just printed. To prevent errors during validation, default values are
+# assigned. These defaults ensure the template compiles correctly but are
+# ignored during actual rendering.
+- name: Example 07
+  condition: turnover > 365
+  template: |
+    {% set turnover_diff = (turnover | default(0, true) | int) - 365 %}
+    Compared to Earth, \
+    {{ planet }} takes \
+    {{ turnover_diff }} more days \
+    to complete its orbit.

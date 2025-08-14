@@ -1,0 +1,106 @@
+templates:
+- name: Example 01
+  condition: type != "terrestrial planet"
+  template: |
+    Is {{ planet | annotate("planet") }} a {{ "terrestrial planet" | annotate("type") }}?
+    No, {{ planet | annotate("planet") }} {{ ["is a", "belongs to the group of"] | random }} {{ type | annotate("type") }}.
+    {{ [
+        "Did you know this about it:",
+        "It also has some interesting features:",
+        "Here's something else that's fascinating:",
+        "I found the following details as well:"
+      ] | random }}
+    {% for item in characteristics %}\
+    - {{ item | annotate("characteristics") }}
+    {% endfor %}
+
+- name: Example 02
+  condition: moons != 1
+  template: |
+    {% set characteristic = characteristics | random %}
+    What can you tell me about "{{ characteristic | annotate("characteristics") }}" in our {{ ["planetary system", "solar system"] | random | annotate("term") }}?
+    {{ characteristic | annotate("characteristics") }} is a feature of {{ ["the planet", ""] | random }} {{ planet | annotate("planet") }}.
+    {{ ["It is a", "This means the planet belongs to the group of"] | random }} {{ type | annotate("type") }}.
+    {% set facts = [
+        "has a diameter of " ~ (diameter | annotate("diameter")) ~ " km",
+        moons == 0 and "does not have any moons" or "has " ~ (moons | annotate("moons")) ~ " moons",
+        "has an orbital period of " ~ (turnover | annotate("turnover")) ~ " days"
+    ] %}\
+    {% set facts = random_set(facts, 2) %}\
+    {{ ["It", "The planet"] | random }} {{ facts[0] }} and {{ facts[1] }}.
+
+# Annotating lists in templates requires a bit more effort, but it's not
+# technically complex. Two key aspects come into play: template validation and
+# the use of generator values.
+#
+# Every template is validated at load time to catch syntax errors early. This
+# validation uses an empty data object. If fields are only printed, this causes
+# no issues. However, if fields are used inside functions (e.g. map, join, len),
+# they are undefined during validation, which can lead to runtime errors. To
+# avoid this, default values are provided for validation purposes. These
+# defaults are not used during actual rendering and are simply placeholders to
+# ensure the template compiles.
+#
+# The second aspect involves generator values, which are often produced by
+# functions like map. While generators behave similarly to lists, they do not
+# support essential operations like len(). Attempting to use such operations on
+# a generator will result in errors. Therefore, generator values must be
+# explicitly converted into lists using list() before further processing.
+- name: Example 03
+  condition: moons != 1
+  template: |
+    {{ ["The planet", ""] | random }} {{ planet | annotate("planet") }} is a {{ type | annotate("type") }} \
+    {% set facts = [
+        "with a diameter of " ~ (diameter | annotate("diameter")) ~ " km",
+        moons == 0 and "does not have any moons" or "has " ~ (moons | annotate("moons")) ~ " moons",
+        "with an orbital period of " ~ (turnover | annotate("turnover")) ~ " days"
+    ] %}\
+    {{ facts[0] }} and {{ facts[1] }}.
+    {% set atmosphere = atmosphere | default([]) | map('annotate', 'atmosphere') | list %}
+    The atmosphere {{ ["consists of", "is composed of"] | random }} {{ random_join_phrase(", ", "and", atmosphere) }}.
+    {{ ["Typical", "Characteristic", "Striking"] | random }} features of {{ planet | annotate("planet") }} include:
+    {% for item in characteristics %}\
+    - {{ item | annotate("characteristics") }}
+    {% endfor %}
+
+- name: Example 04
+  condition: turnover > 365
+  template: |
+    Are there any suggestions for optimizing management processes?
+    Yes -- we are planning to relocate the meeting rooms to {{ planet | annotate("planet") }}.
+    A year there lasts {{ turnover | annotate("turnover") }} days, which helps compensate for longer meetings.
+
+- name: Example 05
+  condition: moons > 2
+  template: |
+    Does {{ planet | annotate("planet") }} have multiple {{ "moons" | annotate("term") }}?
+    Yes, exactly {{ moons | annotate("moons") }} {{ ["of them", ""] | random }}.
+
+# During template validation, fields may be undefined if no data is provided.
+# This becomes problematic when those fields are used in functions rather than
+# just printed. To prevent errors during validation, default values are
+# assigned. These defaults ensure the template compiles correctly but are
+# ignored during actual rendering.
+- name: Example 06
+  condition: True
+  template: |
+    {% set facts = random_set(characteristics | default([], true), 2) %}
+    {{ facts[0] | annotate("characteristics") }} \
+    {{ ["and", "as well as", "just like"] | random }} \
+    {{ facts[1] | annotate("characteristics") }} \
+    {{ ["are characteristic of", "define"] | random }} \
+    {{ planet | annotate("planet") }}.
+
+# During template validation, fields may be undefined if no data is provided.
+# This becomes problematic when those fields are used in functions rather than
+# just printed. To prevent errors during validation, default values are
+# assigned. These defaults ensure the template compiles correctly but are
+# ignored during actual rendering.
+- name: Example 07
+  condition: turnover > 365
+  template: |
+    {% set turnover_diff = (turnover | default(0, true) | int) - 365 %}
+    Compared to {{ "Earth" | annotate("term") }}, \
+    {{ planet | annotate("planet") }} takes \
+    {{ turnover_diff | annotate("turnover") }} more days \
+    to complete its {{ "orbit" | annotate("term") }}.

@@ -120,7 +120,7 @@ for entity in units(text):
 - [Integration in NLP Workflows](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/units/README.md#integration-in-nlp-workflows)
 - [Downstream Processing with pandas](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/units/README.md#downstream-processing-with-pandas)
 
-## synthetics
+## [synthetics](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md)
 
 The __synthetics__ module uses __template-based__, __rule-driven generation__ to
 transform structured domain data into annotated natural language. It does not

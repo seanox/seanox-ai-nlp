@@ -15,7 +15,13 @@ from seanox_ai_nlp.units import (
     spacing
 )
 
+from .synthetics import (
+    synthetics,
+    SyntheticResult
+)
+
 __all__ = [
+    # units
     "UNIT_PATTERN",
     "UNIT_CLASSIFICATION_PATTERN",
     "UNIT_OPERATORS_PATTERN",
@@ -27,5 +33,9 @@ __all__ = [
     "NUMERIC_EXPRESSION_VALIDATION_PATTERN",
     "units",
     "SpacingMode",
-    "spacing"
+    "spacing",
+
+    # synthetics
+    "synthetics",
+    "SyntheticResult"
 ]

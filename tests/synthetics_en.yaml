@@ -19,27 +19,27 @@ templates:
   template: |
     {% set characteristic = characteristics | random %}
     What can you tell me about "{{ characteristic }}" in our {{ ["planetary system", "solar system"] | random }}?
-    "{{ characteristic }}" is a feature of {{ ["the planet", ""] | random }} {{ planet }}.
+    "{{ characteristic }}" is a feature of{{ [" the planet", ""] | random }} {{ planet }}.
     {{ ["It is a", "This means the planet belongs to the group of"] | random }} {{ type }}.
     {% set facts = [
         "has a diameter of " ~ diameter ~ " km",
         moons == 0 and "does not have any moons" or "has " ~ moons ~ " moons",
         "has an orbital period of " ~ turnover ~ " days"
     ] %}\
-    {% set facts = random_set(facts, 2) %}\
+    {% set facts = facts | random_set(2) %}\
     {{ ["It", "The planet"] | random }} {{ facts[0] }} and {{ facts[1] }}.
 
 - name: Example 03
   condition: moons != 1
   template: |
-    {{ ["The planet", ""] | random }} {{ planet }} is a {{ type }} \
+    {{ ["The planet ", ""] | random }}{{ planet }} is a {{ type }} \
     {% set facts = [
         "with a diameter of " ~ diameter ~ " km",
         moons == 0 and "does not have any moons" or "has " ~ moons ~ " moons",
         "with an orbital period of " ~ turnover ~ " days"
     ] %}\
     {{ facts[0] }} and {{ facts[1] }}.
-    The atmosphere {{ ["consists of", "is composed of"] | random }} {{ random_join_phrase(", ", "and", atmosphere) }}.
+    The atmosphere {{ ["consists of", "is composed of"] | random }} {{ atmosphere | random_join_phrase(", ", "and") }}.
     {{ ["Typical", "Characteristic", "Striking"] | random }} features of {{ planet }} include:
     {% for item in characteristics %}\
     - {{ item }}
@@ -56,17 +56,12 @@ templates:
   condition: moons > 2
   template: |
     Does {{ planet }} have multiple moons?
-    Yes, exactly {{ moons }} {{ ["of them", ""] | random }}.
+    Yes, exactly {{ moons }}{{ [" of them", ""] | random }}.
 
-# During template validation, fields may be undefined if no data is provided.
-# This becomes problematic when those fields are used in functions rather than
-# just printed. To prevent errors during validation, default values are
-# assigned. These defaults ensure the template compiles correctly but are
-# ignored during actual rendering.
 - name: Example 06
   condition: True
   template: |
-    {% set facts = random_set(characteristics | default([], true), 2) %}
+    {% set facts = characteristics | random_set(2) %}
     {{ facts[0] }} \
     {{ ["and", "as well as", "just like"] | random }} \
     {{ facts[1] }} \

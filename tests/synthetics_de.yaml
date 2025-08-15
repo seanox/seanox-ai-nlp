@@ -19,27 +19,27 @@ templates:
   template: |
     {% set characteristic = characteristics | random %}
     Was kannst Du mir zu "{{ characteristic }} in unserem {{ ["Planetensystem", "Sonnensystem"] | random }}" sagen?
-    {{ characteristic }} trifft auf {{ ["den Planeten", ""] | random }} {{ planet }} zu.
+    {{ characteristic }} trifft auf{{ [" den Planeten", ""] | random }} {{ planet }} zu.
     {{ ["Das ist ein", "Damit gehört der Planet zur Gruppe" ] | random }} {{ type }}.
     {% set facts = [
         "hat einen Durchmesser von " ~ diameter ~ " km",
         "besitzt " ~ (moons == 0 and "keine" or moons) ~ " Monde",
         "hat eine Umlaufzeit von " ~ turnover ~ " Tagen"
     ] %}\
-    {% set facts = random_set(facts, 2) %}\
+    {% set facts = facts | random_set(2) %}\
     {{ ["Er", "Der Planet"] | random }} {{ facts[0] }} und {{ facts[1] }}.
 
 - name: Beispiel 03
   condition: moons != 1
   template: |
-    {{ ["Der Planet", ""] | random }} {{ planet }} ist ein {{ type }} \
+    {{ ["Der Planet ", ""] | random }}{{ planet }} ist ein {{ type }} \
     {% set facts = [
         "mit einem Durchmesser von " ~ diameter ~ " km",
         "besitzt " ~ (moons == 0 and "keine" or moons) ~ " Monde",
         "mit einer Umlaufzeit von " ~ turnover ~ " Tagen"
     ] %}\
     {{ facts[0] }} und {{ facts[1] }}.
-    Die Atmosphäre {{ ["besteht", "setzt sich zusammen"] | random }} aus {{ random_join_phrase(", ", "und", atmosphere) }}.
+    Die Atmosphäre {{ ["besteht", "setzt sich zusammen"] | random }} aus {{ atmosphere | random_join_phrase(", ", "und") }}.
     {{ ["Typisch", "Charakteristisch", "Markant"] | random}} für {{ planet }} sind Merkmale wie:
     {% for item in characteristics %}\
     - {{ item }}
@@ -55,18 +55,13 @@ templates:
 - name: Beispiel 05
   condition: moons > 2
   template: |
-    Hat {{ planet }} mehre Monde?
-    Ja und zwar genau {{ moons }} {{ ["davon", ""] | random}}.
+    Hat {{ planet }} mehrere Monde?
+    Ja und zwar genau {{ moons }}{{ [" davon", ""] | random}}.
 
-# During template validation, fields may be undefined if no data is provided.
-# This becomes problematic when those fields are used in functions rather than
-# just printed. To prevent errors during validation, default values are
-# assigned. These defaults ensure the template compiles correctly but are
-# ignored during actual rendering.
 - name: Beispiel 06
   condition: True
   template: |
-    {% set facts = random_set(characteristics | default([], true), 2) %}
+    {% set facts = characteristics | random_set(2) %}
     {{ facts[0] }} \
     {{ ["und", "sowie", "wie auch"] | random }} \
     {{ facts[1] }} \
@@ -83,9 +78,9 @@ templates:
   template: |
     {% set turnover_diff = (turnover | default(0, true) | int) - 365 %}
     Im Vergleich zur Erde \
-    benötigt {{ planet }}  \
+    benötigt {{ planet }} \
     {{ turnover_diff }} Tage \
-    länger für seine {{ "Umlaufbahn" }}.
+    länger für seine Umlaufbahn.
 
 # In addition to named entities, custom spans can be defined between entities
 # using regular expressions. Regex patterns should be applied to the text

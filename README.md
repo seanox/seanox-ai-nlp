@@ -40,8 +40,6 @@ without relying on opaque models or extensive training.
 
 Further modules are planned to extend the package's capabilities, including:
 
-- __Sentence Generator__: For creating synthetic, recombinable training data to
-  support model fine-tuning
 - __Logic Query Composer__: For transforming natural-language queries into
   structured formats (e.g. SQL, JSON, YAML, etc.)
 
@@ -133,7 +131,37 @@ adaptability -- without performing interpretation itself.
 
 ### Features
 
-TODO:
+- __Template-Based Text Generation__  
+  The module uses YAML-defined templates with Jinja2 syntax to generate
+  controlled natural language from structured input. It supports conditional
+  template selection based on input attributes, enabling flexible and
+  context-sensitive generation.
+
+- __Stochastic Variation__  
+  Lexical and syntactic diversity is introduced through built-in filters such as 
+  __random_join__, __random_set__, and __random_join_phrase__, allowing the
+  generation of semantically varied sentences from identical data structures.
+
+- __Domain-Specific Annotation__  
+  Entities are annotated using structured markers which facilitates precise
+  extraction and provides fine-grained control over entity types and their
+  placement within the text.
+
+- __Rule-Based Span Detection__  
+  The module applies regular expressions to identify semantic spans in annotated 
+  text, enabling the definition of complex patterns independently of
+  tokenization or linguistic parsing.
+
+- __Interpretation-Free Generation__  
+  No semantic interpretation or analysis is performed during generation,
+  ensuring that the output remains deterministic, transparent, and suitable for
+  controlled NLP workflows.
+
+- __Compatibility with NLP Workflows__  
+  The output object __SyntheticResult__ includes raw text, annotated text,
+  entity spans with labels and positions, and regex-based semantic spans. This
+  structure supports fine-tuning, evaluation, and data augmentation in
+  domain-specific NLP pipelines, including spaCy-style frameworks.
 
 ### Quickstart
 

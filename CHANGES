@@ -11,8 +11,9 @@ CR: units Renaming of the UNIT-VALUE label to MEASURE
     MEASURE is more intuitive in spaCy/NLP than UNIT-VALUE.
 CR: units Added unit hl / hL for Hectoliters
 CR: units Separation of SI prefixes: Multiples / Submultiples
-    - Minimizes edge cases such as “das" (decay second)
+    - Minimizes edge cases such as “das" (deca second)
       which are theoretically possible but not relevant
+CR: synthetics: Added to generate semantic sentences
 
 1.0.0 20250808
 NT: Release is available

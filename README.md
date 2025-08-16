@@ -132,36 +132,32 @@ adaptability -- without performing interpretation itself.
 ### Features
 
 - __Template-Based Text Generation__  
-  The module uses YAML-defined templates with Jinja2 syntax to generate
-  controlled natural language from structured input. It supports conditional
-  template selection based on input attributes, enabling flexible and
-  context-sensitive generation.
+  Generates controlled content in natural language from structured input using
+  YAML-defined Jinja2 templates. Template selection is context-sensitive based
+  on input attributes.
 
 - __Stochastic Variation__  
-  Lexical and syntactic diversity is introduced through built-in filters such as 
-  __random_join__, __random_set__, and __random_join_phrase__, allowing the
-  generation of semantically varied sentences from identical data structures.
+  Built-in filters like __random_join__, __random_set__ and
+  __random_join_phrase__ introduce lexical and syntactic diversity from
+  identical data structures.
 
 - __Domain-Specific Annotation__  
-  Entities are annotated using structured markers which facilitates precise
-  extraction and provides fine-grained control over entity types and their
-  placement within the text.
+  Entities are annotated with structured markers for precise extraction and
+  fine-grained control over type and placement.
 
 - __Rule-Based Span Detection__  
-  The module applies regular expressions to identify semantic spans in annotated 
-  text, enabling the definition of complex patterns independently of
-  tokenization or linguistic parsing.
+  Uses regular expressions to identify semantic spans in annotated text,
+  independent of tokenization or linguistic parsing.
 
 - __Interpretation-Free Generation__  
-  No semantic interpretation or analysis is performed during generation,
-  ensuring that the output remains deterministic, transparent, and suitable for
-  controlled NLP workflows.
+  No semantic analysis is performed during generation. Output remains
+  deterministic, transparent, and suitable for controlled NLP workflows.
 
 - __Compatibility with NLP Workflows__  
-  The output object __SyntheticResult__ includes raw text, annotated text,
-  entity spans with labels and positions, and regex-based semantic spans. This
-  structure supports fine-tuning, evaluation, and data augmentation in
-  domain-specific NLP pipelines, including spaCy-style frameworks.
+  The __Synthetic__ object includes raw text, annotated text, entity spans with
+  labels and positions, and regex-based semantic spans. Supports fine-tuning, 
+  evaluation, and data augmentation in domain-specific NLP pipelines, including
+  spaCy-style frameworks.
 
 ### Quickstart
 

@@ -179,7 +179,7 @@ def _random_range_join_phrase(items: list[str], separator: str, word: str, limit
     elif len(selection) == 2:
         return f"{selection[0]} {word} {selection[1]}"
     else:
-        return f"{separator.join(selection[:-1])}{separator}{word} {selection[-1]}"
+        return f"{separator.join(selection[:-1])} {word} {selection[-1]}"
 
 
 def _random_set(items: list[str], count: int = 0) -> list[str]:

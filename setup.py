@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name = "seanox-ai-nlp",
+    name="seanox-ai-nlp",
     version="1.1.0",
     packages=find_packages(),
     author="Seanox Software Solutions",

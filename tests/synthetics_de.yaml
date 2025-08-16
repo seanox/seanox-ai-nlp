@@ -39,7 +39,7 @@ templates:
         "mit einer Umlaufzeit von " ~ turnover ~ " Tagen"
     ] %}\
     {{ facts[0] }} und {{ facts[1] }}.
-    Die Atmosphäre {{ ["besteht", "setzt sich zusammen"] | random }} aus {{ atmosphere | random_join_phrase(", ", "und") }}.
+    Die Atmosphäre {{ ["besteht", "setzt sich zusammen"] | random }} aus {{ atmosphere | random_range_join_phrase(", ", "und") }}.
     {{ ["Typisch", "Charakteristisch", "Markant"] | random}} für {{ planet }} sind Merkmale wie:
     {% for item in characteristics %}\
     - {{ item }}

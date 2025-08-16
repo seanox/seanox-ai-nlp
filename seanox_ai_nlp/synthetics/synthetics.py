@@ -44,24 +44,6 @@ _ENTITY_MARKER_RAW_PATTERN = rf"""
     (?P<entity_intermediate_text>.*?)
     (?P<entity_end_tag>{_ENTITY_MARKER_END_RAW_PATTERN})
 """
-# TODO Test edge cases and clarify whether this is necessary
-_ENTITY_MARKER_SPACE_PATTERN = [
-    #    _re_compile(rf"""
-    #        (?P<entity_space_prefix>
-    #          {_re_unnamed_groups(_ENTITY_MARKER_START_RAW_PATTERN)}
-    #          .*?
-    #          {_re_unnamed_groups(_ENTITY_MARKER_END_RAW_PATTERN)})
-    #        (?P<entity_space_suffix>[\.\,\:/])
-    #    """),
-    #    _re_compile(rf"""
-    #        (?P<entity_space_prefix>[\)\]\s]/)
-    #        (?P<entity_space_suffix>{_re_unnamed_groups(_ENTITY_MARKER_START_RAW_PATTERN)})
-    #    """),
-    #    _re_compile(rf"""
-    #        (?P<entity_space_prefix>{_re_unnamed_groups(_ENTITY_MARKER_END_RAW_PATTERN)})
-    #        (?P<entity_space_suffix>[\)\]\"\'])
-    #    """)
-]
 
 _ENTITY_MARKER_NAME_PATTERN = re.compile(rf"^{_ENTITY_MARKER_NAME_RAW_PATTERN}$")
 _ENTITY_MARKER_PATTERN = _re_compile(_ENTITY_MARKER_RAW_PATTERN)
@@ -200,7 +182,7 @@ def _random_join_phrase(items: list[str], separator: str, word: str, limit: int 
         return f"{separator.join(selection[:-1])}{separator}{word} {selection[-1]}"
 
 
-def _random_set(items: list[str], count: int) -> list[str]:
+def _random_set(items: list[str], count: int = 0) -> list[str]:
     """
     The method is intended as a function in the template. It randomly selects a
     subset of items from the provided list.
@@ -225,11 +207,21 @@ def _random_set(items: list[str], count: int) -> list[str]:
     Returns:
         list[str]: A randomly selected subset of items, or an empty list if `items` is empty.
     """
-    if not items:
+    if not items or count <= 0:
         return []
     max_items = len(items)
     actual_count = min(count, max_items)
     return random.sample(items, actual_count)
+
+
+class TemplateException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+
+class TemplateConditionException(TemplateException):
+    def __init__(self, message):
+        super().__init__(message)
 
 
 class _Template:
@@ -259,16 +251,21 @@ class _Template:
         for index, part in enumerate(parts):
             if not part["template"]:
                 continue
-            name = part["condition"] or f"#{str(index)}"
+            name = part["name"] or f"#{str(index)}"
             condition = str(part["condition"]) or "True"
-            template = self.environment.from_string(part["template"].strip())
 
             try:
-                if re.search(r"\b(__|import|exec|open|os|sys)\b", condition):
-                    raise ValueError(f"Unsafe token in condition: {condition}")
+                template = self.environment.from_string(part["template"].strip())
+            except Exception as exception:
+                raise TemplateException(f"[{name}] Template error ({type(exception).__name__}): {str(exception)}")
+
+            if re.search(r"\b(__|import|exec|open|os|sys)\b", condition):
+                raise TemplateConditionException(f"[{name}] Condition token error: {str(condition)}")
+
+            try:
                 compile(condition, "<condition>", "eval")
             except Exception as exception:
-                raise SyntaxError(f"Template {name} () {type(exception).__name__} occurred: {exception}")
+                raise TemplateConditionException(f"[{name}] Condition error ({type(exception).__name__}): {str(exception)}")
 
             patterns = {}
             labels = []
@@ -319,10 +316,10 @@ _TEMPLATES: dict[tuple[str, str], _Template] = {}
 
 
 @dataclass
-class SyntheticResult:
+class Synthetic:
     """
-    Represents the result of a synthetic text generation process,
-    including both raw and annotated text, as well as entity and span metadata.
+    Represents the result of a synthetic text generation process including both
+    raw and annotated text, as well as entity and span metadata.
 
     Attributes:
         text (str): The raw generated text without annotations.
@@ -341,26 +338,13 @@ class SyntheticResult:
     spans: list[tuple[int, int, str]]
 
 
-def _extract_entities(text: str, patterns: dict[str, Any] = None) -> SyntheticResult:
+def _extract_entities(text: str, patterns: dict[str, Any] = None) -> Synthetic:
 
     if patterns is None:
         patterns = []
     entities: list[tuple[int, int, str]] = []
     plaintext = ""
     last_end = 0
-
-    # In the context of text processing, a targeted search is made for
-    # constellations in which markers are combined with decimal numbers,
-    # enumerations, abbreviations or initials. In such cases, there is a risk
-    # that spaCy will interpret the adjacent dot as part of a token, thereby
-    # shifting the token boundaries.
-    #
-    # To avoid this, an additional space is inserted between the entity and the
-    # punctuation mark when a punctuation mark immediately follows a tag. This
-    # ensures that spaCy correctly recognizes the punctuation marks as separate
-    # tokens and that the entity spans can be calculated reliably.
-    for pattern in _ENTITY_MARKER_SPACE_PATTERN:
-        text = pattern.sub(r"\g<entity_space_prefix> \g<entity_space_suffix>", text)
 
     for match in _ENTITY_MARKER_PATTERN.finditer(text):
         span_start, span_end = match.span()
@@ -400,10 +384,10 @@ def _extract_entities(text: str, patterns: dict[str, Any] = None) -> SyntheticRe
             if start in entity_starts and end in entity_ends:
                 spans.append((start, end, label))
 
-    return SyntheticResult(plaintext, text, entities, spans)
+    return Synthetic(plaintext, text, entities, spans)
 
 
-def synthetics(datasource: str, language: str, data: dict[str, Any]) -> SyntheticResult:
+def synthetics(datasource: str, language: str, data: dict[str, Any]) -> Synthetic:
     """
     Generates synthetic text using predefined YAML templates.
 
@@ -423,11 +407,10 @@ def synthetics(datasource: str, language: str, data: dict[str, Any]) -> Syntheti
             template.
 
     Returns:
-        SyntheticResult: A dataclass containing the generated synthetic text,
-        its annotated version, and metadata about entities and spans.
+        Synthetic: A dataclass containing the generated synthetic text, itsannotated version, and metadata about entities and spans.
 
         Example:
-            SyntheticResult(
+            Synthetic(
                 text="The Earth is a planet.",
                 annotation="The [[[PLANET]]]Earth[[[-]]] is a [[[TERM]]]planet[[[-]]].",
                 entities=[(4, 9, "PLANET"), (15, 21, "TERM")],
@@ -435,12 +418,12 @@ def synthetics(datasource: str, language: str, data: dict[str, Any]) -> Syntheti
             )
     """
     if not language or not language.strip():
-        return SyntheticResult("", "", [], [])
+        return Synthetic("", "", [], [])
     signature = (datasource or "", language)
     if signature not in _TEMPLATES:
         _TEMPLATES[signature] = _Template(datasource=datasource, language=language)
     template = _TEMPLATES[signature]
     template, condition, spans, content = template.generate(data)
     if not template:
-        return SyntheticResult("", "", [], [])
+        return Synthetic("", "", [], [])
     return _extract_entities(content, spans)

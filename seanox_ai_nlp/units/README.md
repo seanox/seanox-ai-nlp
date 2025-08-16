@@ -51,7 +51,7 @@ expressions from natural language.
 
 - [Introduction](#introduction)
 - [Features](#features)
-- [Technical Architecture](#technical-architecture)
+- [System Design](#system-design)
   - [Components Overview](#components-overview)
   - [Processing Workflow](#processing-workflow)
   - [Data Management](#data-management)
@@ -90,7 +90,7 @@ expressions from natural language.
 - [Maintenance & Extensibility](#maintenance--extensibility)
 - [Sources & References](#sources--references)
 
-# Technical Architecture
+# System Design
 
 The module adopts a minimalist, rule-based design focused on regular expressions
 to identify and classify measurement units in unstructured text. Its behavior is

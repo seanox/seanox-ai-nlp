@@ -2,10 +2,14 @@
 
 from .synthetics import (
     synthetics,
-    SyntheticResult
+    Synthetic,
+    TemplateException,
+    TemplateConditionException
 )
 
 __all__ = [
     "synthetics",
-    "SyntheticResult"
+    "Synthetic",
+    "TemplateException",
+    "TemplateConditionException"
 ]

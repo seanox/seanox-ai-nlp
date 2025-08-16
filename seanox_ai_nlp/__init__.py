@@ -17,7 +17,9 @@ from seanox_ai_nlp.units import (
 
 from .synthetics import (
     synthetics,
-    SyntheticResult
+    Synthetic,
+    TemplateException,
+    TemplateConditionException
 )
 
 __all__ = [
@@ -37,5 +39,7 @@ __all__ = [
 
     # synthetics
     "synthetics",
-    "SyntheticResult"
+    "Synthetic",
+    "TemplateException",
+    "TemplateConditionException"
 ]

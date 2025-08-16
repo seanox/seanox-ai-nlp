@@ -89,7 +89,7 @@ def _annotate(value: Any, label: str = "") -> str:
     )
 
 
-def _random_join(items: list[str], separator: str, limit: int = -1) -> str:
+def _random_range_join(items: list[str], separator: str, limit: int = -1) -> str:
     """
     The method is intended as a function in the template. It randomly selects
     and joins a subset of strings from the provided list using the given
@@ -104,7 +104,7 @@ def _random_join(items: list[str], separator: str, limit: int = -1) -> str:
     all items are considered.
 
     Example:
-        {{ ["apple", "banana", "cherry"] | random_join(",", 2) }}
+        {{ ["apple", "banana", "cherry"] | random_range_join(",", 2) }}
         might produce: "cherry, apple"
 
     Args:
@@ -128,7 +128,7 @@ def _random_join(items: list[str], separator: str, limit: int = -1) -> str:
     return separator.join(selection)
 
 
-def _random_join_phrase(items: list[str], separator: str, word: str, limit: int = -1) -> str:
+def _random_range_join_phrase(items: list[str], separator: str, word: str, limit: int = -1) -> str:
     """
     The method is intended as a function in the template. It randomly selects
     and joins a subset of strings from the provided list into a natural-language
@@ -148,7 +148,7 @@ def _random_join_phrase(items: list[str], separator: str, word: str, limit: int 
     all items are considered.
 
     Example:
-        {{ items | random_join_phrase(", ", "and", 3) }}
+        {{ items | random_range_join_phrase(", ", "and", 3) }}
         might produce: "banana, cherry and apple"
 
     Args:
@@ -192,7 +192,7 @@ def _random_set(items: list[str], count: int = 0) -> list[str]:
     number of available items, all items are returned in random order. If the
     input list is empty, an empty list is returned.
 
-    Unlike `_random_join` or `_random_join_phrase`, this function returns the
+    Unlike `_random_range_join` or `_random_range_join_phrase`, this function returns the
     raw list of selected items for further processing or formatting.
 
     Example:
@@ -234,8 +234,8 @@ class _Template:
         self.environment = Environment(loader=BaseLoader(), trim_blocks=False, lstrip_blocks=False)
         self.environment.filters["annotate"] = _annotate
         self.environment.filters["random_set"] = _random_set
-        self.environment.filters["random_join"] = _random_join
-        self.environment.filters["random_join_phrase"] = _random_join_phrase
+        self.environment.filters["random_range_join"] = _random_range_join
+        self.environment.filters["random_range_join_phrase"] = _random_range_join_phrase
 
         filename = f"synthetics_{language.lower()}.yaml"
         path = os.path.join(datasource, filename)

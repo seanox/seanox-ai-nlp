@@ -39,7 +39,7 @@ templates:
         "with an orbital period of " ~ turnover ~ " days"
     ] %}\
     {{ facts[0] }} and {{ facts[1] }}.
-    The atmosphere {{ ["consists of", "is composed of"] | random }} {{ atmosphere | random_join_phrase(", ", "and") }}.
+    The atmosphere {{ ["consists of", "is composed of"] | random }} {{ atmosphere | random_range_join_phrase(", ", "and") }}.
     {{ ["Typical", "Characteristic", "Striking"] | random }} features of {{ planet }} include:
     {% for item in characteristics %}\
     - {{ item }}

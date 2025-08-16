@@ -13,6 +13,9 @@ setup(
     url="https://github.com/seanox/seanox-ai-nlp",
     license="Apache-2.0",
     python_requires=">=3.9",
+    install_requires=[
+        "pyyaml>=6.0"
+    ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
@@ -28,6 +31,18 @@ setup(
         "Operating System :: OS Independent"
     ],
     keywords=[
-        "NLP", "semantic", "units", "domain-specific", "text processing", "information extraction"
-    ],
+        # NLP pipeline
+        "NLP", "fine-tuning", "information retrieval", "preprocessing",
+        "semantic retrieval", "retrieval optimization",
+        # Package focus
+        "domain-specific", "structured data",
+        "semantic processing", "text processing",
+        "information extraction", "entity extraction",
+        # units
+        "measurement units", "measurement extraction",
+        # synthetics
+        "synthetic data", "data generation", "synthetic text", "template engine",
+        "data annotation", "semantic labeling", "pretraining data",
+        "training data augmentation"
+    ]
 )

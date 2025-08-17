@@ -137,9 +137,9 @@ adaptability -- without performing interpretation itself.
   on input attributes.
 
 - __Stochastic Variation__  
-  Built-in filters like __random_join__, __random_set__ and
-  __random_join_phrase__ introduce lexical and syntactic diversity from
-  identical data structures.
+  Built-in filters like __random_set__, __random_range__, __random_range_join__
+  and __random_range_join_phrase__ introduce lexical and syntactic diversity
+  from identical data structures.
 
 - __Domain-Specific Annotation__  
   Entities are annotated with structured markers for precise extraction and

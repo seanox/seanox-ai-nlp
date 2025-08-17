@@ -60,7 +60,7 @@ flowchart TD
     end
     subgraph Training Pipeline
         A[Structured Data] --> B[Synthetic Annotated Sentences]
-        B --> B1 [synthetics + units]
+        B --> B1[synthetics + units]
         B1 --> C[NLP Component Update]
     end
 ```

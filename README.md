@@ -48,9 +48,9 @@ config:
 ---
 flowchart TD
     subgraph subGraph3["Feedback Loop (optional)"]
-        L["New Data + Natural-language Query"]
+        L["New Structured Data + Natural-language Query"]
         subgraph subGraph3-1["synthetics + units"]
-            M["Synthetic Annotated Training Sentences Update"]
+            M["Update of Synthetic Annotated Training Sentences"]
         end
         N["NLP Component Update"]
     end

@@ -43,6 +43,24 @@ Further modules are planned to extend the package's capabilities, including:
 - __Logic Query Composer__: For transforming natural-language queries into
   structured formats (e.g. SQL, JSON, YAML, etc.)
 
+__Example Pipeline: Structured NLP Workflow__
+
+```mermaid
+flowchart TD
+    A[Structured Data] --> B[Synthetic Annotated Sentences<br/>(synthetics + units)]
+    B --> C[NLP Model Training]
+
+    D[Natural-language Query] --> E[Entity Extraction]
+    E --> F[Logic Query<br/>(logic query composer)]
+    F --> G[SQL]
+    G --> H[Retrieval]
+
+    I[New Data + User Queries] --> J[Synthetic Updates<br/>(synthetics + units)]
+    J --> K[Model Retraining]
+```
+
+_Example workflow that this package focuses on._
+
 # Licence Agreement
 LIZENZBEDINGUNGEN - Seanox Software Solutions ist ein Open-Source-Projekt, im
 Folgenden Seanox Software Solutions oder kurz Seanox genannt.

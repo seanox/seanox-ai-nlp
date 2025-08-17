@@ -46,17 +46,25 @@ Further modules are planned to extend the package's capabilities, including:
 __Example Pipeline: Structured NLP Workflow__
 
 ```mermaid
+---
+config:
+  theme: neutral
+---
 flowchart TD
-    A[Structured Data] --> B[Synthetic Annotated Sentences synthetics + units]
-    B --> C[NLP Model Training]
-
-    D[Natural-language Query] --> E[Entity Extraction]
-    E --> F[Logic Query logic query composer]
-    F --> G[SQL]
-    G --> H[Retrieval]
-
-    I[New Data + User Queries] --> J[Synthetic Updates synthetics + units]
-    J --> K[Model Retraining]
+    subgraph Feedback Loop 
+        I[New Data + User Queries] --> J[Synthetic Updates &#40;synthetics + units&#41;]
+        J --> K[Model Retraining]
+    end
+    subgraph Retrieval Process
+        D[Natural-language Query] --> E[Entity Extraction]
+        E --> F[Logic Query Composer]
+        F --> G[SQL]
+        G --> H[Retrieval]
+    end
+    subgraph Training Pipeline
+        A[Structured Data] --> B[Synthetic Annotated Sentences &#40;synthetics + units&#41;]
+        B --> C[NLP Model Training]
+    end
 ```
 
 _Example workflow that this package focuses on._

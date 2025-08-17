@@ -23,7 +23,7 @@ Instead, it explicitly identifies domain-specific entities and organizes them
 across multiple abstraction levels to support interpretable and reproducible
 retrieval workflows.
 
-The system integrates lightweight components into existing NLP pipelines. These
+The package integrates lightweight components into existing NLP pipelines. These
 components operate independently of large language models (LLMs) and are
 designed to structure relevant data using deterministic and auditable
 mechanisms.
@@ -35,7 +35,8 @@ including:__
   structure enriched with extracted entities. This structure can be used as a
   basis for formats such as SQL, JSON or YAML.
 
-__Example Pipeline: Structured NLP Workflow__
+__Example Pipeline: Structured NLP Workflow__  
+What the package focuses on
 
 ```mermaid
 ---
@@ -46,7 +47,7 @@ flowchart TD
     subgraph subGraph3["Feedback Loop (optional)"]
         L["New Data + Natural-language Query"]
         subgraph subGraph3-1["synthetics + units"]
-            M["Synthetics Updates"]
+            M["Synthetic Annotated Training Sentences - Update"]
         end
         N["NLP Component Update"]
     end
@@ -65,7 +66,7 @@ flowchart TD
     subgraph subGraph1["Training Pipeline"]
         A["Structured Data"]
         subgraph subGraph1-1["synthetics + units"]
-            B["Synthetic Annotated Sentences"]
+            B["Synthetic Annotated Training Sentences"]
         end
         C["NLP Component Update"]
     end
@@ -80,16 +81,19 @@ flowchart TD
     J --> K
     L --> M
     M --> N
-    style subGraph1-1 fill:#BBDEFB
+    style subGraph1-1 fill:#BBDEFB    
     style subGraph2-1 fill:#BBDEFB
     style subGraph3-1 fill:#BBDEFB
+    style A fill:#FFFFFF
+    style B fill:#FFFFFF
+    style D fill:#FFFFFF
+    style F fill:#FFFFFF
+    style G fill:#FFFFFF
+    style I fill:#FFFFFF
+    style K fill:#FFFFFF
+    style L fill:#FFFFFF
+    style M fill:#FFFFFF
 ```
-
-> [!NOTE] 
-> __NLP Component__ refers to configurable elements within the pipeline,
-> including rule-based extractors, template-driven generators, and optionally
-> small-scale NLP models (e.g. spaCy pipelines). These components are
-> transparent, auditable, and do not rely on large language models (LLMs).
 
 # Licence Agreement
 Seanox Software Solutions is an open-source project, hereinafter referred to as

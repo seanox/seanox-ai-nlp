@@ -35,8 +35,11 @@ including:__
   structure enriched with extracted entities. This structure can be used as a
   basis for formats such as SQL, JSON or YAML.
 
-__Example Pipeline: Structured NLP Workflow__  
-What the package focuses on
+## Structured NLP Workflow
+
+The illustration below presents the core motivation and design focus of this
+package. It outlines the typical stages of a structured NLP pipeline and
+highlights the specific components where this package provides support.
 
 ```mermaid
 ---
@@ -94,6 +97,9 @@ flowchart TD
     style L fill:#FFFFFF
     style M fill:#FFFFFF
 ```
+
+This conceptual overview serves as a foundation for understanding the individual
+components, which are detailed in the next section.
 
 # Licence Agreement
 Seanox Software Solutions is an open-source project, hereinafter referred to as

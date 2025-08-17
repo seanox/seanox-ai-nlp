@@ -24,16 +24,16 @@ across multiple abstraction levels to support interpretable and reproducible
 retrieval workflows.
 
 The system integrates lightweight components into existing NLP pipelines. These
-components operate without dependence on non-transparent large language models
-(LLMs) and are designed to structure semantically relevant data based on
-deterministic and auditable mechanisms.
+components operate independently of large language models (LLMs) and are
+designed to structure relevant data using deterministic and auditable
+mechanisms.
 
 __Additional modules are planned to support structured query generation,
 including:__
 
 - __Logic Query Composer__: Parses natural-language input and produces a logical
- structure enriched with extracted entities, which can serve as a basis for
- formats like SQL, JSON or YAML.
+  structure enriched with extracted entities. This structure can be used as a
+  basis for formats such as SQL, JSON or YAML.
 
 __Example Pipeline: Structured NLP Workflow__
 
@@ -43,26 +43,46 @@ config:
   theme: neutral
 ---
 flowchart TD
-    subgraph Feedback Loop 
-        L[New Data + Natural-language Query] --> M[Synthetics Updates]
-        M --> M1[synthetics + units]
-        M1 --> N[NLP Component Update]
+    subgraph subGraph3["Feedback Loop (optional)"]
+        L["New Data + Natural-language Query"]
+        subgraph subGraph3-1["synthetics + units"]
+            M["Synthetics Updates"]
+        end
+        N["NLP Component Update"]
     end
-    subgraph Retrieval Process
-        D[Natural-language Query] --> E[Entity Extraction]
-        E --> F[Semantic and Logical Analysis]
-        F --> F1[logic query composer]
-        F1 --> G[Logical Structure]
-        G --> H[Manual SQL Composition]
-        H --> I[SQL]
-        I --> J[Database Execution]
-        J --> K[Retrieval]
+    subgraph subGraph2["Retrieval Process"]
+        D["Natural-language Query"]
+        E["Entity Extraction"]
+        subgraph subGraph2-1["logic query composer"]
+            F["Semantic and Logical Analysis"]
+        end
+        G["Logical Structure"]
+        H["Manual SQL Composition"]
+        I["SQL"]
+        J["Database Execution"]
+        K["Retrieval"]
     end
-    subgraph Training Pipeline
-        A[Structured Data] --> B[Synthetic Annotated Sentences]
-        B --> B1[synthetics + units]
-        B1 --> C[NLP Component Update]
+    subgraph subGraph1["Training Pipeline"]
+        A["Structured Data"]
+        subgraph subGraph1-1["synthetics + units"]
+            B["Synthetic Annotated Sentences"]
+        end
+        C["NLP Component Update"]
     end
+    A --> B
+    B --> C
+    D --> E
+    E --> F
+    F --> G
+    G --> H
+    H --> I
+    I --> J
+    J --> K
+    L --> M
+    M --> N
+    style subGraph1-1 fill:#BBDEFB
+    style subGraph2-1 fill:#BBDEFB
+    style subGraph3-1 fill:#BBDEFB
 ```
 
 > [!NOTE] 
@@ -101,32 +121,30 @@ pip install seanox-ai-nlp
 # Packages & Modules
 
 ## [units](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/units/README.md)
-The `units` module applies rule-based, deterministic pattern recognition to
+The __units__ module applies rule-based, deterministic pattern recognition to
 identify numerical expressions and measurement units in text. It is designed for
 integration into lightweight NLP pipelines and does not rely on large language
 models (LLMs). Its language-agnostic architecture and flexible formatting
-support a broad range of use cases, including general, semi-technical, and
+support a broad range of use cases, including general, semi-technical and
 semi-academic content.
 
 The module can be integrated with tools such as spaCy’s `EntityRuler`, enabling
 annotation, filtering, and token alignment workflows. It produces structured
-output suitable for downstream semantic analysis, without performing semantic
-interpretation itself.
+output suitable for downstream analysis, without performing semantic
+interpretation.
 
 ### Features
 - __Pattern-based extraction__  
   Identifies constructs like _5 km_, _-20 &ordm;C_, or _1000 hPa_ using regular
   expressions and token patterns -- no training required.
 - __Language-independent architecture__  
-  Operates at token and character level, making it effective across multilingual
-  content.
+  Operates at token and character level; applicable across multilingual content.
 - __Support for compound expressions__  
   Recognizes unit combinations (_km/h, kWh/m&sup2;, g/cm&sup3;_) and numerical
-  constructs nvolving signs and operators: _&plusmn;, &times;, &middot;,
+  constructs involving signs and operators: _&plusmn;, &times;, &middot;,
   :, /, ^, –_ and more.
 - __Integration-ready output__  
-  Returns structured entities compatible with tools like spaCy’s EntityRuler for
-  use in rule-based NLP pipelines.
+  Returns structured entities compatible with tools like spaCy’s EntityRuler.
 
 ### Quickstart
 ```python
@@ -141,37 +159,31 @@ for entity in units(text):
 - [Downstream Processing with pandas](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/units/README.md#downstream-processing-with-pandas)
 
 ## [synthetics](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md)
-The __synthetics__ module generates annotated natural language from
-domain-specific, structured input data -- such as records from databases or
-knowledge graphs. It uses template-based, rule-driven methods to produce
-linguistically rich and semantically annotated sentences. Designed for
-controlled NLP pipelines, it avoids large language models (LLMs) and instead
-supports deterministic, auditable generation. Through stochastic variation and
-semantic recombination, it enables fine-tuning, evaluation, and data
-augmentation -- without performing semantic interpretation.
+The __synthetics__ module generates annotated natural language from structured
+input data -- such as records from databases or knowledge graphs. It uses
+template-based, rule-driven methods to produce controlled and annotated
+sentences. Designed for deterministic NLP pipelines, it avoids large language
+models (LLMs) and supports reproducible generation.
 
 ### Features
 - __Template-Based Text Generation__  
-  Generates controlled content in natural language from structured input using
-  YAML-defined Jinja2 templates. Template selection is context-sensitive based
-  on input attributes.
+  Produces natural-language output from structured input using YAML-defined
+  Jinja2 templates. Template selection is context-sensitive.
 - __Stochastic Variation__  
-  Built-in filters like __random_set__, __random_range__, __random_range_join__
-  and __random_range_join_phrase__ introduce lexical and syntactic diversity
-  from identical data structures.
+  Filters such as __random_set__, __random_range__, and
+- __random_range_join_phrase__ introduce lexical and syntactic diversity from
+  identical data structures.
 - __Domain-Specific Annotation__  
-  Annotates entities with structured markers for precise extraction and
-  fine-grained control over type and placement.
+  Annotates entities with structured markers for precise extraction and control.
 - __Rule-Based Span Detection__  
   Identifies semantic spans using regular expressions, independent of
-  tokenization or linguistic parsing.
+  tokenization or parsing.
 - __Interpretation-Free Generation__  
-  Deterministic output without semantic analysis; compatible with reproducible
-  and auditable workflows.
-- __NLP Pipeline Compatibility__  
-  The `Synthetic` object includes raw text, annotated text, entity spans with
-  labels and positions, and regex-based semantic spans. Compatible with
-  spaCy-style frameworks for fine-tuning, evaluation, and augmentation.
+  Output is deterministic and reproducible; no semantic analysis is performed.
+- __NLP Pipeline compatibility__  
+  The __Synthetic__ object includes raw and annotated text, entity spans and
+  regex-based semantic spans. Compatible with spaCy-style frameworks for
+  fine-tuning, evaluation, and augmentation.
 
 ### Quickstart
 TODO:

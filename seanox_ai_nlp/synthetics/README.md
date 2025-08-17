@@ -64,6 +64,8 @@ TODO Where to put the template documentation (structure, syntax, functions)?
 
 # System Design
 
+TODO Optimize / Clean up / Minimize
+
 The __synthetics__ module is built around a template-driven generation engine
 using __Jinja2__. Templates are defined in YAML files and selected based on
 input conditions.

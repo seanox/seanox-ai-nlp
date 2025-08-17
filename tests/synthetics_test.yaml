@@ -1,0 +1,52 @@
+templates:
+
+- name: Template Functions
+  condition: case == "Template Functions - random_range"
+  template: |
+    {{ ["a", "b", "c", "d"] | random_range() }}
+    {{ ["a", "b", "c", "d"] | random_range(-1) }}
+    {{ ["a", "b", "c", "d"] | random_range(0) }}
+    {{ ["a", "b", "c", "d"] | random_range(1) }}
+    {{ ["a", "b", "c", "d"] | random_range(2) }}
+    {{ ["a", "b", "c", "d"] | random_range(20) }}
+
+- name: Template Functions
+  condition: case == "Template Functions - random_range_join"
+  template: |
+    {{ ["a", "b", "c", "d"] | random_range_join("_") }}
+    {{ ["a", "b", "c", "d"] | random_range_join("_", 1) }}
+    {{ ["a", "b", "c", "d"] | random_range_join("_", 2) }}
+    {{ ["a", "b", "c", "d"] | random_range_join("_", 20) }}
+
+- name: Template Functions
+  condition: case == "Template Functions - random_range_join_phrase"
+  template: |
+    {{ ["a", "b", "c", "d"] | random_range_join_phrase("_", "and") }}
+    {{ ["a", "b", "c", "d"] | random_range_join_phrase("_", "and", 1) }}
+    {{ ["a", "b", "c", "d"] | random_range_join_phrase("_", "and", 2) }}
+    {{ ["a", "b", "c", "d"] | random_range_join_phrase("_", "and", 20) }}
+
+- name: Template Functions
+  condition: case == "Template Functions - random_set"
+  template: |
+    {{ ["a", "b", "c", "d"] | random_set() }}
+    {{ ["a", "b", "c", "d"] | random_set(-1) }}
+    {{ ["a", "b", "c", "d"] | random_set(0) }}
+    {{ ["a", "b", "c", "d"] | random_set(1) }}
+    {{ ["a", "b", "c", "d"] | random_set(2) }}
+    {{ ["a", "b", "c", "d"] | random_set(20) }}
+
+- name: Condition Test
+  condition: case == "Condition Test"
+  template: |
+    TODO
+
+- name: spans Test
+  condition: case == "ents Test"
+  template: |
+    TODO
+
+- name: spans Test
+  condition: case == "spans Test"
+  template: |
+    TODO

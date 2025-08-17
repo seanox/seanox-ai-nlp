@@ -51,11 +51,11 @@ flowchart TD
     B --> C[NLP Model Training]
 
     D[Natural-language Query] --> E[Entity Extraction]
-    E --> F[Logic Query<br/>(logic query composer)]
+    E --> F[Logic Query\n(logic query composer)]
     F --> G[SQL]
     G --> H[Retrieval]
 
-    I[New Data + User Queries] --> J[Synthetic Updates<br/>(synthetics + units)]
+    I[New Data + User Queries] --> J[Synthetic Updates\n(synthetics + units)]
     J --> K[Model Retraining]
 ```
 

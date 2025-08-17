@@ -89,7 +89,39 @@ def _annotate(value: Any, label: str = "") -> str:
     )
 
 
-def _random_range_join(items: list[str], separator: str, limit: int = -1) -> str:
+def _random_range(items: list[Any], limit: int = -1) -> list[Any]:
+    """
+    Randomly selects and shuffles a subset of items from the provided list.
+
+    Designed for use as a Jinja2 filter. This utility function picks a random
+    number of elements (between 1 and `limit` or the length of `items`) from the
+    input list, shuffles them, and returns the result. If the list is empty, an
+    empty list is returned. If `limit` is negative, all items are considered.
+
+    Example:
+        {{ _random_range(["apple", "banana", "cherry"], 2) }}
+        might return: ["banana", "apple"]
+
+    Args:
+        items (list[Any]): The list of items to choose from.
+        limit (int, optional): Maximum number of items to include. If negative,
+            no limit is applied.
+
+    Returns:
+        list[Any]: A randomly selected and shuffled subset of the input list.
+    """
+    if not items:
+        return []
+    max_items = len(items)
+    if limit >= 0:
+        max_items = min(limit, len(items))
+    count = random.randint(1, max_items)
+    selection = random.sample(items, count)
+    random.shuffle(selection)
+    return selection
+
+
+def _random_range_join(items: list[Any], separator: str, limit: int = -1) -> str:
     """
     The method is intended as a function in the template. It randomly selects
     and joins a subset of strings from the provided list using the given
@@ -117,18 +149,11 @@ def _random_range_join(items: list[str], separator: str, limit: int = -1) -> str
         str: A string of randomly selected and joined items, or an empty string
             if `items` is empty.
     """
-    if not items:
-        return ""
-    max_items = len(items)
-    if limit >= 0:
-        max_items = min(limit, len(items))
-    count = random.randint(1, max_items)
-    selection = random.sample(items, count)
-    random.shuffle(selection)
+    selection = [str(item) for item in _random_range(items, limit)]
     return separator.join(selection)
 
 
-def _random_range_join_phrase(items: list[str], separator: str, word: str, limit: int = -1) -> str:
+def _random_range_join_phrase(items: list[Any], separator: str, word: str, limit: int = -1) -> str:
     """
     The method is intended as a function in the template. It randomly selects
     and joins a subset of strings from the provided list into a natural-language
@@ -162,19 +187,10 @@ def _random_range_join_phrase(items: list[str], separator: str, word: str, limit
     Returns:
         str: A natural-language phrase of randomly selected items, or an empty string if `items` is empty.
     """
-
-    if not items:
+    selection = [str(item) for item in _random_range(items, limit)]
+    if len(selection) <= 0:
         return ""
-
-    max_items = len(items)
-    if limit >= 0:
-        max_items = min(limit, len(items))
-
-    count = random.randint(1, max_items)
-    selection = random.sample(items, count)
-    random.shuffle(selection)
-
-    if len(selection) == 1:
+    elif len(selection) == 1:
         return selection[0]
     elif len(selection) == 2:
         return f"{selection[0]} {word} {selection[1]}"
@@ -182,7 +198,7 @@ def _random_range_join_phrase(items: list[str], separator: str, word: str, limit
         return f"{separator.join(selection[:-1])} {word} {selection[-1]}"
 
 
-def _random_set(items: list[str], count: int = 0) -> list[str]:
+def _random_set(items: list[Any], count: int = 0) -> list[Any]:
     """
     The method is intended as a function in the template. It randomly selects a
     subset of items from the provided list.
@@ -234,6 +250,7 @@ class _Template:
         self.environment = Environment(loader=BaseLoader(), trim_blocks=False, lstrip_blocks=False)
         self.environment.filters["annotate"] = _annotate
         self.environment.filters["random_set"] = _random_set
+        self.environment.filters["random_range"] = _random_range
         self.environment.filters["random_range_join"] = _random_range_join
         self.environment.filters["random_range_join_phrase"] = _random_range_join_phrase
 
@@ -416,6 +433,13 @@ def synthetics(datasource: str, language: str, data: dict[str, Any]) -> Syntheti
                 entities=[(4, 9, "PLANET"), (15, 21, "TERM")],
                 spans = [(4, 9, "PAIR"), (15, 21, "PAIR")]
             )
+
+    Raises:
+        FileNotFoundError: If the YAML template file for the given language
+            cannot be found at the specified path.
+        TemplateException: If the template file cannot be loaded or parsed.
+        TemplateConditionException: If a condition expression in the template
+            is invalid or unsafe to evaluate.
     """
     if not language or not language.strip():
         return Synthetic("", "", [], [])

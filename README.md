@@ -44,19 +44,19 @@ config:
 ---
 flowchart TD
     subgraph Feedback Loop 
-        K[New Data + Natural-language Query] --> L[Synthetics Updates]
-        L --> L1[synthetics + units]
-        L1 --> M[NLP Component Update]
+        L[New Data + Natural-language Query] --> M[Synthetics Updates]
+        M --> M1[synthetics + units]
+        M1 --> N[NLP Component Update]
     end
     subgraph Retrieval Process
         D[Natural-language Query] --> E[Entity Extraction]
-        E --> [Semantic and Logical Analysis]
-        E --> E1[logic query composer]
-        E1 --> F[Logical Structure]
-        F --> G[Manual SQL Composition]
-        G --> H[SQL]
-        H --> I[Database Execution]
-        I --> J[Retrieval]
+        E --> F[Semantic and Logical Analysis]
+        F --> F1[logic query composer]
+        F1 --> G[Logical Structure]
+        G --> H[Manual SQL Composition]
+        H --> I[SQL]
+        I --> J[Database Execution]
+        J --> K[Retrieval]
     end
     subgraph Training Pipeline
         A[Structured Data] --> B[Synthetic Annotated Sentences]
@@ -117,16 +117,13 @@ interpretation itself.
 - __Pattern-based extraction__  
   Identifies constructs like _5 km_, _-20 &ordm;C_, or _1000 hPa_ using regular
   expressions and token patterns -- no training required.
-
 - __Language-independent architecture__  
   Operates at token and character level, making it effective across multilingual
   content.
-
 - __Support for compound expressions__  
   Recognizes unit combinations (_km/h, kWh/m&sup2;, g/cm&sup3;_) and numerical
   constructs nvolving signs and operators: _&plusmn;, &times;, &middot;,
   :, /, ^, –_ and more.
-
 - __Integration-ready output__  
   Returns structured entities compatible with tools like spaCy’s EntityRuler for
   use in rule-based NLP pipelines.
@@ -158,24 +155,19 @@ augmentation -- without performing semantic interpretation.
   Generates controlled content in natural language from structured input using
   YAML-defined Jinja2 templates. Template selection is context-sensitive based
   on input attributes.
-- 
 - __Stochastic Variation__  
   Built-in filters like __random_set__, __random_range__, __random_range_join__
   and __random_range_join_phrase__ introduce lexical and syntactic diversity
   from identical data structures.
-
 - __Domain-Specific Annotation__  
   Annotates entities with structured markers for precise extraction and
   fine-grained control over type and placement.
-
 - __Rule-Based Span Detection__  
   Identifies semantic spans using regular expressions, independent of
   tokenization or linguistic parsing.
-
 - __Interpretation-Free Generation__  
   Deterministic output without semantic analysis; compatible with reproducible
   and auditable workflows.
-
 - __NLP Pipeline Compatibility__  
   The `Synthetic` object includes raw text, annotated text, entity spans with
   labels and positions, and regex-based semantic spans. Compatible with

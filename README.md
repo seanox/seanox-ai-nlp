@@ -47,15 +47,15 @@ __Example Pipeline: Structured NLP Workflow__
 
 ```mermaid
 flowchart TD
-    A[Structured Data] --> B[Synthetic Annotated Sentences\n(synthetics + units)]
+    A[Structured Data] --> B[Synthetic Annotated Sentences (synthetics + units)]
     B --> C[NLP Model Training]
 
     D[Natural-language Query] --> E[Entity Extraction]
-    E --> F[Logic Query\n(logic query composer)]
+    E --> F[Logic Query (logic query composer)]
     F --> G[SQL]
     G --> H[Retrieval]
 
-    I[New Data + User Queries] --> J[Synthetic Updates\n(synthetics + units)]
+    I[New Data + User Queries] --> J[Synthetic Updates (synthetics + units)]
     J --> K[Model Retraining]
 ```
 

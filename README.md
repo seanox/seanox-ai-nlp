@@ -50,7 +50,7 @@ flowchart TD
     subgraph subGraph3["Feedback Loop (optional)"]
         L["New Data + Natural-language Query"]
         subgraph subGraph3-1["synthetics + units"]
-            M["Synthetic Annotated Training Sentences - Update"]
+            M["Synthetic Annotated Training Sentences Update"]
         end
         N["NLP Component Update"]
     end

@@ -424,7 +424,8 @@ def synthetics(datasource: str, language: str, data: dict[str, Any]) -> Syntheti
             template.
 
     Returns:
-        Synthetic: A dataclass containing the generated synthetic text, itsannotated version, and metadata about entities and spans.
+        Synthetic: A dataclass containing the generated synthetic text, its
+            annotated version, and metadata about entities and spans.
 
         Example:
             Synthetic(

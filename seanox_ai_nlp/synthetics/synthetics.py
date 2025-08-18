@@ -63,7 +63,7 @@ def _annotate(value: Any, label: str = "") -> str:
 
     Example:
         {{ value | annotate("VALUE") }}
-        produce: [[[VALUE]]]value[[[-]]]
+        produce: [[[LABEL]]]value[[[-]]]
 
     Args:
         value (Any): The value to annotate. Will be converted to a string.
@@ -99,7 +99,7 @@ def _random_range(items: list[Any], limit: int = -1) -> list[Any]:
     empty list is returned. If `limit` is negative, all items are considered.
 
     Example:
-        {{ _random_range(["apple", "banana", "cherry"], 2) }}
+        {{ random_range(["apple", "banana", "cherry"], 2) }}
         might return: ["banana", "apple"]
 
     Args:
@@ -112,16 +112,17 @@ def _random_range(items: list[Any], limit: int = -1) -> list[Any]:
     """
     if not items:
         return []
-    max_items = len(items)
-    if limit >= 0:
-        max_items = min(limit, len(items))
-    count = random.randint(1, max_items)
+    if limit < 0:
+        limit = len(items)
+    elif limit <= 0:
+        return []
+    count = random.randint(1, min(limit, len(items)))
     selection = random.sample(items, count)
     random.shuffle(selection)
     return selection
 
 
-def _random_range_join(items: list[Any], separator: str, limit: int = -1) -> str:
+def _random_range_join(items: list[Any], separator: str = ", ", limit: int = -1) -> str:
     """
     The method is intended as a function in the template. It randomly selects
     and joins a subset of strings from the provided list using the given
@@ -140,7 +141,7 @@ def _random_range_join(items: list[Any], separator: str, limit: int = -1) -> str
         might produce: "cherry, apple"
 
     Args:
-        items (list[str]): The list of strings to choose from.
+        items (list[Any]): The list of strings to choose from.
         separator (str): The string used to separate the selected items.
         limit (int, optional): Maximum number of items to include. If negative,
             no limit is applied.
@@ -153,7 +154,7 @@ def _random_range_join(items: list[Any], separator: str, limit: int = -1) -> str
     return separator.join(selection)
 
 
-def _random_range_join_phrase(items: list[Any], separator: str, word: str, limit: int = -1) -> str:
+def _random_range_join_phrase(items: list[Any], separator: str = ", ", word: str = ", ", limit: int = -1) -> str:
     """
     The method is intended as a function in the template. It randomly selects
     and joins a subset of strings from the provided list into a natural-language
@@ -173,11 +174,11 @@ def _random_range_join_phrase(items: list[Any], separator: str, word: str, limit
     all items are considered.
 
     Example:
-        {{ items | random_range_join_phrase(", ", "and", 3) }}
+        {{ items | random_range_join_phrase(", ", " and ", 3) }}
         might produce: "banana, cherry and apple"
 
     Args:
-        items (list[str]): The list of strings to choose from.
+        items (list[Any]): The list of strings to choose from.
         separator (str): The string used to separate items before the final one.
         word (str): The conjunction word used before the last item (e.g., "and",
             "or").
@@ -193,41 +194,43 @@ def _random_range_join_phrase(items: list[Any], separator: str, word: str, limit
     elif len(selection) == 1:
         return selection[0]
     elif len(selection) == 2:
-        return f"{selection[0]} {word} {selection[1]}"
+        return f"{selection[0]}{word}{selection[1]}"
     else:
-        return f"{separator.join(selection[:-1])} {word} {selection[-1]}"
+        return f"{separator.join(selection[:-1])}{word}{selection[-1]}"
 
 
-def _random_set(items: list[Any], count: int = 0) -> list[Any]:
+def _random_set(items: list[Any], count: int = -1) -> list[Any]:
     """
     The method is intended as a function in the template. It randomly selects a
     subset of items from the provided list.
 
     Designed for use as a Jinja2 filter. This function returns a list containing
-    up to `count` randomly selected items from `items`. If `count` exceeds the
-    number of available items, all items are returned in random order. If the
-    input list is empty, an empty list is returned.
+    up to `count` randomly selected items from `items`. If `count` is negative
+    or exceeds the number of available items, all items are returned in random
+    order. If the input list is empty, an empty list is returned.
 
-    Unlike `_random_range_join` or `_random_range_join_phrase`, this function returns the
-    raw list of selected items for further processing or formatting.
+    Unlike `_random_range_join` or `_random_range_join_phrase`, this function
+    returns the raw list of selected items for further processing or formatting.
 
     Example:
         {{ ["apple", "banana", "cherry"] | random_set(2) }}
-        generat
         might return: ["banana", "apple"]
 
     Args:
-        items (list[str]): The list of strings to choose from.
+        items (list[Any]): The list of strings to choose from.
         count (int): The number of items to select.
 
     Returns:
-        list[str]: A randomly selected subset of items, or an empty list if `items` is empty.
+        list[str]: A randomly selected subset of items, or an empty list if
+        `items` is empty.
     """
-    if not items or count <= 0:
+    if not items:
         return []
-    max_items = len(items)
-    actual_count = min(count, max_items)
-    return random.sample(items, actual_count)
+    if count < 0:
+        count = len(items)
+    elif count <= 0:
+        return []
+    return random.sample(items, min(count, len(items)))
 
 
 class TemplateException(Exception):
@@ -236,6 +239,11 @@ class TemplateException(Exception):
 
 
 class TemplateConditionException(TemplateException):
+    def __init__(self, message):
+        super().__init__(message)
+
+
+class TemplateSyntaxException(TemplateException):
     def __init__(self, message):
         super().__init__(message)
 
@@ -299,7 +307,7 @@ class _Template:
                 template.render({})
                 self.variants.append((template, condition, spans))
             except Exception as exception:
-                raise SyntaxError(f"Template {name} {type(exception).__name__} occurred: {exception}")
+                raise TemplateSyntaxException(f"[{name}] Template syntax error ({type(exception).__name__}): {str(exception)}")
 
     def generate(self, data: dict[str, Any]) -> tuple[Any, str, dict[str, Any], str]:
 

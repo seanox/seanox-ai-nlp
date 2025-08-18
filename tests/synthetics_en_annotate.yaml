@@ -22,9 +22,9 @@ templates:
     {{ characteristic | annotate("characteristics") }} is a feature of{{ [" the planet", ""] | random }} {{ planet | annotate("planet") }}.
     {{ ["It is a", "This means the planet belongs to the group of"] | random }} {{ type | annotate("type") }}.
     {% set facts = [
-        "has a diameter of " ~ (diameter | annotate("diameter")) ~ " km",
-        moons == 0 and "does not have any moons" or "has " ~ (moons | annotate("moons")) ~ " moons",
-        "has an orbital period of " ~ (turnover | annotate("turnover")) ~ " days"
+        "has a diameter of " ~ ((diameter ~ " km") | annotate("diameter")),
+        moons == 0 and "does not have any moons" or "has " ~ ((moons ~ " moons") | annotate("moons")),
+        "has an orbital period of " ~ ((turnover ~ " days") | annotate("turnover"))
     ] %}\
     {% set facts = facts | random_set(2) %}\
     {{ ["It", "The planet"] | random }} {{ facts[0] }} and {{ facts[1] }}.
@@ -51,13 +51,13 @@ templates:
   template: |
     {{ ["The planet ", ""] | random }}{{ planet | annotate("planet") }} is a {{ type | annotate("type") }} \
     {% set facts = [
-        "with a diameter of " ~ (diameter | annotate("diameter")) ~ " km",
-        moons == 0 and "does not have any moons" or "has " ~ (moons | annotate("moons")) ~ " moons",
-        "with an orbital period of " ~ (turnover | annotate("turnover")) ~ " days"
+        "with a diameter of " ~ ((diameter ~ " km") | annotate("diameter")),
+        moons == 0 and "does not have any moons" or "has " ~ ((moons ~ " moons") | annotate("moons")),
+        "with an orbital period of " ~ ((turnover ~ " days") | annotate("turnover"))
     ] %}\
     {{ facts[0] }} and {{ facts[1] }}.
     {% set atmosphere = atmosphere | default([]) | map('annotate', 'atmosphere') | list %}
-    The atmosphere {{ ["consists of", "is composed of"] | random }} {{ atmosphere | random_range_join_phrase(", ", " and ") }}.
+    The {{ "atmosphere" | annotate("term") }} {{ ["consists of", "is composed of"] | random }} {{ atmosphere | random_range_join_phrase(", ", " and ") }}.
     {{ ["Typical", "Characteristic", "Striking"] | random }} features of {{ planet | annotate("planet") }} include:
     {% for item in characteristics %}\
     - {{ item | annotate("characteristics") }}
@@ -68,7 +68,7 @@ templates:
   template: |
     Are there any suggestions for optimizing management processes?
     Yes -- we are planning to relocate the meeting rooms to {{ planet | annotate("planet") }}.
-    A year there lasts {{ turnover | annotate("turnover") }} days, which helps compensate for longer meetings.
+    A year there lasts {{ (turnover ~ " days") | annotate("turnover") }}, which helps compensate for longer meetings.
 
 - name: Example 05
   condition: moons > 2
@@ -97,7 +97,7 @@ templates:
     {% set turnover_diff = (turnover | default(0, true) | int) - 365 %}
     Compared to {{ "Earth" | annotate("term") }}, \
     {{ planet | annotate("planet") }} takes \
-    {{ turnover_diff | annotate("turnover") }} more days \
+    {{ (turnover_diff ~ " more days") | annotate("turnover") }} \
     to complete its {{ "orbit" | annotate("term") }}.
 
 # In addition to named entities, custom spans can be defined between entities
@@ -111,14 +111,14 @@ templates:
   - label: "PAIR"
     pattern: (?<=[\"\'])\w+:\s.*?(?=[\"\'])
   template: |
-    '{{ "planet" | annotate("terms") }}: {{ planet | annotate("planet") }}', \
-    '{{ "type" | annotate("terms") }}: {{ type | annotate("type") }}', \
-    '{{ "diameter" | annotate("terms") }}: {{ diameter | annotate("diameter") }}', \
-    '{{ "turnover" | annotate("terms") }}: {{ turnover | annotate("turnover") }}', \
-    '{{ "moons" | annotate("terms") }}: {{ moons | annotate("moons") }}'\
+    '{{ "planet" | annotate("term") }}: {{ planet | annotate("planet") }}', \
+    '{{ "type" | annotate("term") }}: {{ type | annotate("type") }}', \
+    '{{ "diameter" | annotate("term") }}: {{ diameter | annotate("diameter") }}', \
+    '{{ "turnover" | annotate("term") }}: {{ turnover | annotate("turnover") }}', \
+    '{{ "moons" | annotate("term") }}: {{ moons | annotate("moons") }}'\
     {% for item in atmosphere %}\
-    , '{{ "atmosphere" | annotate("terms") }}: {{ item | annotate("atmosphere") }}'\
+    , '{{ "atmosphere" | annotate("term") }}: {{ item | annotate("atmosphere") }}'\
     {% endfor %}\
     {% for item in characteristics %}\
-    , '{{ "characteristics" | annotate("terms") }}: {{ item | annotate("characteristics") }}'\
+    , '{{ "characteristics" | annotate("term") }}: {{ item | annotate("characteristics") }}'\
     {% endfor %}

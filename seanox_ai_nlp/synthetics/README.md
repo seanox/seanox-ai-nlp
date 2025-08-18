@@ -62,43 +62,195 @@ or augmentation in domain-specific NLP workflows.
 TODO
 TODO Where to put the template documentation (structure, syntax, functions)?
 
+# Template
+
+## Schema
+
+```Yaml
+templates:
+  - name: <string>             # Unique identifier for the template
+    condition: <expression>    # Optional condition to activate the template
+    template: <string>         # Sentence with annotated placeholders
+    spans:                     # Optional: custom span definitions
+      - label: <string>        # Name of the span (e.g. "planet", "moon")
+        regex: <string>        # Regex pattern to extract the span
+```
+
+## Field Details
+- __name__: A unique identifier for the template, used for referencing and
+  debugging.
+- __condition__: A string representing a logical expression. It must evaluate to
+  `True` for the template to be used. Example: `planet != "Earth"`.
+- __template__: A sentence string containing placeholders, expressions,
+  functions, and optional annotations via (`annotate`).
+- __spans__:
+  - Each span defines a __label__ and a __regex__ pattern.
+  - The span's position is determined by the full match of the regular
+    expression -- from the start to the end of the match.
+  - Useful for extracting relationships or nested entities not covered by inline
+    annotations (`annotate`).
+
+## Additional Jinja2 filters
+
+### `annotate(value: Any, label: str = "") -> str`
+
+<details>
+  <summary>
+Marks a value with a structured entity label for downstream processing (e.g.
+entity extraction).
+  </summary>
+
+```
+{{ value | annotate("LABEL") }}
+produce: [[[LABEL]]]value[[[-]]]
+```
+
+__Parmeters__:
+- `value (Any)`: The value to annotate. Will be converted to a string.
+- `label (str)`: The entity label to apply. The same conventions apply as for
+   variable names. In addition, the minus sign is permitted between word
+   characters.
+
+__Returns__:
+- `str`: The annotated string if the label is valid, otherwise the original
+  value.
+
+__Behavior__
+- Wraps the string representation of `value` with custom entity markers.
+- Returns the original value if the label is invalid or empty.
+
+__Purpose__
+Enables inline annotation of entities in generated text.
+</details>
+
+### `random_range(items: list[Any], limit: int = -1) -> list[Any]`
+
+<details>
+  <summary>
+Randomly selects and shuffles a subset of items from the provided list.
+  </summary>
+
+```
+{{ random_range(["apple", "banana", "cherry"], 2) }}
+might return: ["banana", "apple"]
+```
+
+__Parameters__:
+- `items (list[Any])`: The list of items to choose from.
+- `limit (int)`: Maximum number of items to include. If negative, all items are
+  considered.
+
+__Returns__:
+- `list[Any]`: A randomly selected and shuffled subset of the input list.
+
+__Behavior__:
+- Picks between 1 and `limit` items from the list.
+- Shuffles the result before returning.
+- Returns an empty list if input is empty or limit is zero.
+
+__Purpose__:
+Provides controlled variation in template-generated content.
+</details>
+
+### `random_range_join(items: list[Any], separator: str = ", ", limit: int = -1) -> str`
+
+<details>
+  <summary>
+Randomly selects and joins a subset of items into a single string.
+  </summary>
+
+```
+{{ ["apple", "banana", "cherry"] | random_range_join(",", 2) }}
+might produce: "cherry, apple"
+```
+
+__Parameters__:
+- `items (list[Any])`: List of strings to choose from.
+- `separator (str)`: Separator used between selected items.
+- `limit (int)`: Maximum number of items to include. If negative, all items are
+  considered.
+
+__Returns__:
+- `str`: Joined string of randomly selected items, or an empty string if input
+  is empty.
+
+__Behavior__:
+- Selects between 1 and `limit` items from the list.
+- Shuffles the selection and joins it using the specified separator.
+- Returns an empty string if the input list is empty.
+
+__Purpose__:
+Generates dynamic, varied list expressions for use in template-generated text.
+</details>
+
+### `random_range_join_phrase(items: list[Any], separator: str = ", ", word: str = ", ", limit: int = -1) -> str`
+
+<details>
+  <summary>
+Randomly selects and joins items into a natural-language phrase.
+  </summary>
+
+```
+{{ items | random_range_join_phrase(", ", " and ", 3) }}
+might produce: "banana, cherry and apple"
+```
+
+__Parameters__:
+- `items (list[Any])`: List of strings to choose from.
+- `separator (str)`: Separator used between items before the final one.
+- `word (str)`: Conjunction word before the last item (e.g., `"and"`, `"or"`).
+- `limit (int)`: Maximum number of items to include. If negative, all items are
+  considered.
+
+__Returns__:
+- `str`: Natural-language phrase of randomly selected items, or an empty string if input is empty.
+
+__Behavior__:
+- Selects between 1 and `limit` items from the list.
+- Shuffles the selection and formats it as:
+  - One item → returned as-is.
+  - Two items → joined with the conjunction word.
+  - Three or more → joined with separator, and the last item prefixed by the conjunction word.
+
+__Purpose__:
+Creates human-friendly phrases for use in template-generated text, ideal for lists in natural language.
+</details>
+
+### `random_set(items: list[Any], count: int = -1) -> list[Any]`
+
+<details>
+  <summary>
+Randomly selects a subset of items from a list.
+  </summary>
+
+```
+{{ ["apple", "banana", "cherry"] | random_set(2) }}
+might return: ["banana", "apple"]
+```
+
+__Parameters__:
+- `items (list[Any])`: List of items to choose from.
+- `count (int)`: Number of items to select. If negative or exceeds list length,
+  all items are returned in random order.
+
+__Returns__:
+- `list[Any]`: A randomly selected subset of items, or an empty list if input is
+  empty.
+
+__Behavior__:
+- Returns up to `count` randomly selected items.
+- If `count` is negative → returns all items in random order.
+- If `count` is zero or list is empty → returns an empty list.
+
+__Purpose__:
+Provides raw access to a randomized subset of items for further use in templates or logic.
+</details>
+
+## Example Template File
+See a working example in [synthetics_en_annotate.yaml](
+    ../../tests/synthetics_en_annotate.yaml)
+
 # System Design
-
-TODO Optimize / Clean up / Minimize
-
-The __synthetics__ module is built around a template-driven generation engine
-using __Jinja2__. Templates are defined in YAML files and selected based on
-input conditions.
-
-The system architecture includes:
-
-- __Template Loader__
-  Loads language-specific YAML files and compiles templates with conditions.
-
-- __Filter Registration__  
-  Custom Jinja2 filters (__annotate__, __random_range__, __random_set__ etc.)
-  enable stochastic variation and entity tagging.
-
-- __Syntax & Condition Validation__  
-  Before any template is used, both its syntax and condition logic are
-  validated:
-  - Templates are compiled using Jinja2 to ensure renderability.
-  - Conditions are checked for unsafe tokens and tested for syntactic correctness.
-  - Invalid or unrenderable templates are excluded during initialization.
-
-- __Caching Layer__  
-  Templates are cached in-memory to optimize repeated generation calls.
-
-- __Entity Extraction__  
-  Annotated output is parsed using regex to extract entity spans and semantic
-  patterns.
-
-- __Output Structure__
-  The result is encapsulated in a __Synthetic__ object, containing raw text,
-  annotated text, entity metadata, and span matches.
-
-This design ensures deterministic, interpretable, and domain-adaptable synthetic
-text generation for NLP workflows.
 
 TODO
 
@@ -110,17 +262,52 @@ TODO
 
 TODO
 
-## Data Management
-
-TODO
-
 # Known Limitations
 
-TODO
+None are known at this time.
 
 # Usage
 
-TODO
+```python
+from seanox_ai_nlp.synthetics import synthetics
+import json
+
+with open("synthetics-planets_en.json", encoding="utf-8") as file:
+  datas = json.load(file)
+
+for data in datas:
+  synthetic = synthetics(".", "en_annotate", data)
+  print(synthetic)
+```
+
+Example Output:
+```
+Synthetic(
+    text='Closest planet to the Sun as well as Many impact craters are characteristic of Mercury.',
+    annotation='[[[characteristics]]]Closest planet to the Sun[[[-]]] as well as [[[characteristics]]]Many impact craters[[[-]]] are characteristic of [[[planet]]]Mercury[[[-]]].',
+    entities=[
+        (0, 25, 'characteristics'),
+        (37, 56, 'characteristics'),
+        (79, 86, 'planet')
+    ],
+    spans=[]
+),
+Synthetic(
+    text="'planet: Earth', 'type: terrestrial planet', 'diameter: 12742', ...",
+    annotation="'[[[terms]]]planet[[[-]]]: [[[planet]]]Earth[[[-]]]', ...",
+    entities=[
+        (1, 7, 'terms'),
+        (9, 14, 'planet'),
+        ...
+    ],
+    spans=[
+        (1, 14, 'PAIR'),
+        (18, 42, 'PAIR'),
+        ...
+    ]
+),
+...
+```
 
 ## Integration in NLP-Workflows
 
@@ -128,19 +315,78 @@ TODO
 
 ## Downstream Processing with pandas
 
-TODO
+```
+from seanox_ai_nlp.synthetics import synthetics
+import json
+import pandas
+
+LABEL_COLORS = {
+    "planet": ("\033[38;5;0m", "\033[48;5;117m"),   # white on blue
+    "term":   ("\033[38;5;0m", "\033[48;5;250m")    # black on light gray
+}
+
+def highlight_entities(text, entities):
+    reset = '\033[0m'
+    for start, end, label in sorted(entities, key=lambda x: -x[0]):
+        if label not in LABEL_COLORS:
+            label = "term"
+        fg, bg = LABEL_COLORS[label]
+        colored = f"{fg}{bg}{text[start:end]}{reset}"
+        text = text[:start] + colored + text[end:]
+    return text
+
+# Load synthetic input data
+with open("synthetics-planets_en.json", encoding="utf-8") as file:
+    datas = json.load(file)
+
+# Generate color-coded output for terms and planets
+for data in datas:
+    synthetic = synthetics(".", "en_annotate", data)
+    print(highlight_entities(synthetic.text, synthetic.entities))
+    
+    dataframe = pandas.DataFrame(synthetic.entities, columns=["start", "end", "label"])
+    dataframe["text"] = dataframe.apply(lambda row: synthetic.text[row["start"]:row["end"]], axis=1)
+    dataframe = dataframe[["start", "end", "label", "text"]]
+    print(dataframe.to_string(index=False))    
+```
+
+Example Output:
+```
+Compared to Earth, Mars takes 322 more days to complete its orbit.
+ start  end    label          text
+    12   17     term         Earth
+    19   23   planet          Mars
+    30   43 turnover 322 more days
+    60   65     term         orbit
+```
 
 # Benchmark
 
-TODO
+The module was tested on an Intel Core i5-12400 with 16 GB RAM running Windows 11.
 
 ## Single-Pass Evaluation
 
-TODO
+[test_synthetics_benchmark_01](../../tests/test_synthetics_synthetics.py)
 
-## Scaled Evaluation (&times;10)
+| Metric                         | Value              |
+|--------------------------------|--------------------|
+| Varied text without repetition | 1,813 characters   |
+| Iterations                     | 8 x                |
+| Processing time                | 0.94 ms            |
+| Avg. time per iteration        | ~0.1175 ms         |
+| Theoretical throughput         | ~1,928,723 chars/s |
 
-TODO
+## Scaled Evaluation (&times;500)
+
+[test_synthetics_benchmark_02](../../tests/test_synthetics_synthetics.py)
+
+| Metric                               | Value              |
+|--------------------------------------|--------------------|
+| Scaled Data (500&times; single test) | 848,888 characters |
+| Iterations                           | 4000 x             |
+| Processing time                      | 346.10 ms          |
+| Avg. time per iteration              | ~0.0865 ms         |
+| Theoretical throughput               | ~2,452,724 chars/s |
 
 # API Reference
 
@@ -192,6 +438,10 @@ in the YAML.
 Raised when a condition expression in the template is invalid or unsafe to
 evaluate.
 
+## `TemplateSyntxException`
+
+Raised when a syntax error occurs in the jinja2 template.
+
 # Sources & References
 
-TODO
+- https://jinja.palletsprojects.com/en/stable/

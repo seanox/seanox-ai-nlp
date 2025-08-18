@@ -19,7 +19,8 @@ from .synthetics import (
     synthetics,
     Synthetic,
     TemplateException,
-    TemplateConditionException
+    TemplateConditionException,
+    TemplateSyntaxException
 )
 
 __all__ = [
@@ -41,5 +42,6 @@ __all__ = [
     "synthetics",
     "Synthetic",
     "TemplateException",
-    "TemplateConditionException"
+    "TemplateConditionException",
+    "TemplateSyntaxException"
 ]

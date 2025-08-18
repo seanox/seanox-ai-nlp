@@ -247,6 +247,7 @@ class TemplateSyntaxException(TemplateException):
     def __init__(self, message):
         super().__init__(message)
 
+
 _SAFE_BUILTINS = {
     "len": len,
     "min": min,
@@ -266,6 +267,7 @@ _SAFE_BUILTINS = {
     "list": list,
     "isinstance": isinstance,
 }
+
 
 class _Template:
 

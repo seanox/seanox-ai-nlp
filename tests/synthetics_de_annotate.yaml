@@ -111,14 +111,14 @@ templates:
   - label: "PAIR"
     pattern: (?<=[\"\'])\w+:\s.*?(?=[\"\'])
   template: |
-    '{{ "planet" | annotate("terms") }}: {{ planet | annotate("planet") }}', \
-    '{{ "type" | annotate("terms") }}: {{ type | annotate("type") }}', \
-    '{{ "diameter" | annotate("terms") }}: {{ diameter | annotate("diameter") }}', \
-    '{{ "turnover" | annotate("terms") }}: {{ turnover | annotate("turnover") }}', \
-    '{{ "moons" | annotate("terms") }}: {{ moons | annotate("moons") }}'\
+    '{{ "planet" | annotate("term") }}: {{ planet | annotate("planet") }}', \
+    '{{ "type" | annotate("term") }}: {{ type | annotate("type") }}', \
+    '{{ "diameter" | annotate("term") }}: {{ diameter | annotate("diameter") }}', \
+    '{{ "turnover" | annotate("term") }}: {{ turnover | annotate("turnover") }}', \
+    '{{ "moons" | annotate("term") }}: {{ moons | annotate("moons") }}'\
     {% for item in atmosphere %}\
-    , '{{ "atmosphere" | annotate("terms") }}: {{ item | annotate("atmosphere") }}'\
+    , '{{ "atmosphere" | annotate("term") }}: {{ item | annotate("atmosphere") }}'\
     {% endfor %}\
     {% for item in characteristics %}\
-    , '{{ "characteristics" | annotate("terms") }}: {{ item | annotate("characteristics") }}'\
+    , '{{ "characteristics" | annotate("term") }}: {{ item | annotate("characteristics") }}'\
     {% endfor %}

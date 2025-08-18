@@ -22,9 +22,9 @@ templates:
     {{ characteristic | annotate("characteristics") }} trifft auf{{ [" den Planeten", ""] | random }} {{ planet | annotate("planet") }} zu.
     {{ ["Das ist ein", "Damit gehört der Planet zur Gruppe"] | random }} {{ type | annotate("type") }}.
     {% set facts = [
-        "hat einen Durchmesser von " ~ (diameter | annotate("diameter")) ~ " km",
-        "besitzt " ~ ((moons == 0 and "keine" or moons | annotate("moons")) ~ " Monde"),
-        "hat eine Umlaufzeit von " ~ (turnover | annotate("turnover")) ~ " Tagen"
+        "hat einen " ~ ("Durchmesser" | annotate("term")) ~ " von " ~ ((diameter ~ " km") | annotate("diameter")),
+        "besitzt " ~ (((moons == 0 and "keine" or moons ~ " Monde") | annotate("moons"))),
+        "hat eine " ~ ("Umlaufzeit" | annotate("term")) ~ " von " ~ ((turnover ~ " Tagen") | annotate("turnover"))
     ] %}\
     {% set facts = facts | random_set(2) %}\
     {{ ["Er", "Der Planet"] | random }} {{ facts[0] }} und {{ facts[1] }}.
@@ -51,13 +51,13 @@ templates:
   template: |
     {{ ["Der Planet ", ""] | random }}{{ planet | annotate("planet") }} ist ein {{ type | annotate("type") }} \
     {% set facts = [
-        "mit einem Durchmesser von " ~ (diameter | annotate("diameter")) ~ " km",
-        "besitzt " ~ ((moons == 0 and "keine" or moons | annotate("moons")) ~ " Monde"),
-        "mit einer Umlaufzeit von " ~ (turnover | annotate("turnover")) ~ " Tagen"
+        "mit einem " ~ ("Durchmesser" | annotate("term")) ~ " von " ~ ((diameter ~ " km") | annotate("diameter")),
+        "besitzt " ~ (((moons == 0 and "keine" or moons ~ " Monde") | annotate("moons"))),
+        "mit einer " ~ ("Umlaufzeit" | annotate("term")) ~ " von " ~ ((turnover ~ " Tagen") | annotate("turnover"))
     ] %}\
     {{ facts[0] }} und {{ facts[1] }}.
     {% set atmosphere = atmosphere | default([]) | map('annotate', 'atmosphere') | list %}
-    Die Atmosphäre {{ ["besteht", "setzt sich zusammen"] | random }} aus {{ atmosphere | random_range_join_phrase(", ", " und ") }}.
+    Die {{ "Atmosphäre" | annotate("term") }} {{ ["besteht", "setzt sich zusammen"] | random }} aus {{ atmosphere | random_range_join_phrase(", ", " und ") }}.
     {{ ["Typisch", "Charakteristisch", "Markant"] | random }} für {{ planet | annotate("planet") }} sind Merkmale wie:
     {% for item in characteristics %}\
     - {{ item | annotate("characteristics") }}
@@ -68,7 +68,7 @@ templates:
   template: |
     Gibt es Vorschläge zur Optimierung der Prozesse beim Management?
     Ja -- Wir planen die Verlagerung der Besprechungsräume auf den {{ planet | annotate("planet") }}.
-    Dort hat das Jahr {{ turnover | annotate("turnover") }} Tage, was die längeren Besprechungen kompensieren.
+    Dort hat das Jahr {{ (turnover ~ "Tage") | annotate("turnover") }}, was die längeren Besprechungen kompensieren.
 
 - name: Beispiel 05
   condition: moons > 2
@@ -97,7 +97,7 @@ templates:
     {% set turnover_diff = (turnover | default(0, true) | int) - 365 %}
     Im Vergleich zur {{ "Erde" | annotate("term") }} \
     benötigt {{ planet | annotate("planet") }} \
-    {{ turnover_diff | annotate("turnover") }} Tage \
+    {{ (turnover_diff ~ " Tage") | annotate("turnover") }} \
     länger für seine {{ "Umlaufbahn" | annotate("term") }}.
 
 # In addition to named entities, custom spans can be defined between entities

@@ -22,9 +22,9 @@ templates:
     {{ characteristic | annotate("characteristics") }} is a feature of{{ [" the planet", ""] | random }} {{ planet | annotate("planet") }}.
     {{ ["It is a", "This means the planet belongs to the group of"] | random }} {{ type | annotate("type") }}.
     {% set facts = [
-        "has a diameter of " ~ ((diameter ~ " km") | annotate("diameter")),
+        "has a " ~ ("diameter" | annotate("term")) ~ " of " ~ ((diameter ~ " km") | annotate("diameter")),
         moons == 0 and "does not have any moons" or "has " ~ ((moons ~ " moons") | annotate("moons")),
-        "has an orbital period of " ~ ((turnover ~ " days") | annotate("turnover"))
+        "has an " ~ ("orbital period" | annotate("term")) ~ " of " ~ ((turnover ~ " days") | annotate("turnover"))
     ] %}\
     {% set facts = facts | random_set(2) %}\
     {{ ["It", "The planet"] | random }} {{ facts[0] }} and {{ facts[1] }}.
@@ -51,9 +51,9 @@ templates:
   template: |
     {{ ["The planet ", ""] | random }}{{ planet | annotate("planet") }} is a {{ type | annotate("type") }} \
     {% set facts = [
-        "with a diameter of " ~ ((diameter ~ " km") | annotate("diameter")),
+        "with a " ~ ("diameter" | annotate("term")) ~ " of " ~ ((diameter ~ " km") | annotate("diameter")),
         moons == 0 and "does not have any moons" or "has " ~ ((moons ~ " moons") | annotate("moons")),
-        "with an orbital period of " ~ ((turnover ~ " days") | annotate("turnover"))
+        "with an " ~ ("orbital period" | annotate("term")) ~ " of " ~ ((turnover ~ " days") | annotate("turnover"))
     ] %}\
     {{ facts[0] }} and {{ facts[1] }}.
     {% set atmosphere = atmosphere | default([]) | map('annotate', 'atmosphere') | list %}

@@ -1,40 +1,129 @@
 # tests/test_synthetics_synthetics.py
 
 from seanox_ai_nlp.synthetics import synthetics
+from time import perf_counter
 
-import itertools
-import re
+import pandas
+import random
+import copy
+import json
 
-PATTERN_SYMBOLS = ['a', 'b', 'c', 'd']
-PATTERN_COMBINATIONS = []
-for index in range(1, len(PATTERN_SYMBOLS) + 1):
-    perms = itertools.permutations(PATTERN_SYMBOLS, index)
-    PATTERN_COMBINATIONS.extend(perms)
+def test_synthetics_benchmark_00():
+    synthetics(
+        ".",
+        "de_annotate",
+        {
+            "planet": "",
+            "type": "",
+            "diameter": 0,
+            "turnover": 0,
+            "moons": 0,
+            "atmosphere": [],
+            "characteristics": []
+        }
+    )
 
-PATTERN_COMBINATIONS_2 = list(itertools.permutations(PATTERN_SYMBOLS, 2))
-PATTERN_COMBINATIONS_2_STRINGS = [str(list(comb)) for comb in PATTERN_COMBINATIONS_2]
 
-PATTERN_COMBINATIONS_4 = list(itertools.permutations(PATTERN_SYMBOLS, 4))
-PATTERN_COMBINATIONS_4_STRINGS = [str(list(comb)) for comb in PATTERN_COMBINATIONS_4]
+def test_synthetics_benchmark_01():
 
-def test_synthetics_01():
-    synthetic = synthetics(".", "test", {"case": "Template Functions"})
-    lines = synthetic.text.splitlines()
+    with open("synthetics-planets_de.json", encoding="utf-8") as file:
+        datas = json.load(file)
 
-    assert len(lines) == 14, f"Expected: 14 lines, found: {len(lines)}"
+    count_text = 0
+    start = perf_counter()
+    for data in datas:
+        result = synthetics(".", "de_annotate", data)
+        count_text += len(result.text)
+    end = perf_counter()
 
     print()
-    print(lines[0])
-    assert re.match(r"^[abcd]$", lines[1]), f"Expected: a|b|c|d, found: {lines[1]}"
-    print(lines[2])
-    print(lines[3])
-    print(lines[4])
-    assert re.match(r"^[abcd]$", lines[5]), f"Expected: a|b|c|d, found: {lines[5]}"
-    print(lines[6])
-    print(lines[7])
-    assert lines[8] == "[]", f"Expected: [], found: {lines[8]}"
-    assert lines[9] == "[]", f"Expected: [], found: {lines[9]}"
-    assert lines[10] == "[]", f"Expected: [], found: {lines[10]}"
-    assert re.match(r"^\['[abcd]'\]$", lines[11]), f"Expected: ['a|b|c|d'], found: {lines[11]}"
-    assert lines[12] in PATTERN_COMBINATIONS_2_STRINGS, f"{lines[12]} not included in PATTERN_COMBINATIONS_2_STRINGS"
-    assert lines[13] in PATTERN_COMBINATIONS_4_STRINGS, f"{lines[13]} not included in PATTERN_COMBINATIONS_4_STRINGS"
+    print(f"Benchmark text: {count_text} characters")
+    print(f"Benchmark iterations: {len(datas)} x")
+    print(f"Benchmark duration: {(end - start) * 1000:.2f} ms")
+
+
+def test_synthetics_benchmark_02():
+
+    with open("synthetics-planets_de.json", encoding="utf-8") as file:
+        datas = json.load(file)
+
+    count_text = 0
+    scaled_datas = []
+    for data in datas:
+        for _ in range(500):
+            scaled_datas.append(copy.deepcopy(data))
+    random.shuffle(scaled_datas)
+
+    print(len(scaled_datas))
+    start = perf_counter()
+    for data in scaled_datas:
+        result = synthetics(".", "de_annotate", data)
+        count_text += len(result.text)
+    end = perf_counter()
+
+    print()
+    print(f"Benchmark text: {count_text} characters")
+    print(f"Benchmark iterations: {len(scaled_datas)} x")
+    print(f"Benchmark duration: {(end - start) * 1000:.2f} ms")
+
+
+def test_synthetics_usage_01():
+    with open("synthetics-planets_en.json", encoding="utf-8") as file:
+        datas = json.load(file)
+    for data in datas:
+        synthetic = synthetics(".", "en_annotate", data)
+        print(synthetic)
+
+
+def test_synthetics_usage_02():
+    with open("synthetics-planets_en.json", encoding="utf-8") as file:
+        datas = json.load(file)
+    for data in datas:
+        synthetic = synthetics(".", "en", data)
+        print(synthetic)
+
+
+def test_synthetics_usage_03():
+    with open("synthetics-planets_de.json", encoding="utf-8") as file:
+        datas = json.load(file)
+    for data in datas:
+        synthetic = synthetics(".", "de_annotate", data)
+        print(synthetic)
+
+
+def test_synthetics_usage_04():
+    with open("synthetics-planets_de.json", encoding="utf-8") as file:
+        datas = json.load(file)
+    for data in datas:
+        synthetic = synthetics(".", "de", data)
+        print(synthetic)
+
+
+LABEL_COLORS = {
+    "planet": ("\033[38;5;0m", "\033[48;5;117m"),   # white on blue
+    "term":   ("\033[38;5;0m", "\033[48;5;250m")    # black on light gray
+}
+
+
+def highlight_entities(text, entities):
+    reset = '\033[0m'
+    for start, end, label in sorted(entities, key=lambda x: -x[0]):
+        if label not in LABEL_COLORS:
+            label = "term"
+        fg, bg = LABEL_COLORS[label]
+        colored = f"{fg}{bg}{text[start:end]}{reset}"
+        text = text[:start] + colored + text[end:]
+    return text
+
+
+def test_synthetics_usage_x02():
+    with open("synthetics-planets_en.json", encoding="utf-8") as file:
+        datas = json.load(file)
+    for data in datas:
+        synthetic = synthetics(".", "en_annotate", data)
+        print(highlight_entities(synthetic.text, synthetic.entities))
+
+        dataframe = pandas.DataFrame(synthetic.entities, columns=["start", "end", "label"])
+        dataframe["text"] = dataframe.apply(lambda row: synthetic.text[row["start"]:row["end"]], axis=1)
+        dataframe = dataframe[["start", "end", "label", "text"]]
+        print(dataframe.to_string(index=False))

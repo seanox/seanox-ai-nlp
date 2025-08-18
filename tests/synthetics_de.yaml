@@ -30,7 +30,7 @@ templates:
     {{ ["Er", "Der Planet"] | random }} {{ facts[0] }} und {{ facts[1] }}.
 
 - name: Beispiel 03
-  condition: moons != 1
+  condition: moons != 1 and len(atmosphere) > 2
   template: |
     {{ ["Der Planet ", ""] | random }}{{ planet }} ist ein {{ type }} \
     {% set facts = [
@@ -97,10 +97,10 @@ templates:
     'type: {{ type }}', \
     'diameter: {{ diameter }}', \
     'turnover: {{ turnover }}', \
-    'moons: {{ moons }}'\
-    {% for item in atmosphere %}\
-    , 'atmosphere: {{ item }}'\
-    {% endfor %}\
-    {% for item in characteristics %}\
-    , 'characteristics: {{ item }}'\
+    'moons: {{ moons }}' \
+    {% for item in atmosphere %} \
+    , 'atmosphere: {{ item }}' \
+    {% endfor %} \
+    {% for item in characteristics %} \
+    , 'characteristics: {{ item }}' \
     {% endfor %}

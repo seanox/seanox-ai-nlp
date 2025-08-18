@@ -47,7 +47,7 @@ templates:
 # a generator will result in errors. Therefore, generator values must be
 # explicitly converted into lists using list() before further processing.
 - name: Beispiel 03
-  condition: moons != 1
+  condition: moons != 1 and len(atmosphere) > 2
   template: |
     {{ ["Der Planet ", ""] | random }}{{ planet | annotate("planet") }} ist ein {{ type | annotate("type") }} \
     {% set facts = [
@@ -116,9 +116,9 @@ templates:
     '{{ "diameter" | annotate("term") }}: {{ diameter | annotate("diameter") }}', \
     '{{ "turnover" | annotate("term") }}: {{ turnover | annotate("turnover") }}', \
     '{{ "moons" | annotate("term") }}: {{ moons | annotate("moons") }}'\
-    {% for item in atmosphere %}\
-    , '{{ "atmosphere" | annotate("term") }}: {{ item | annotate("atmosphere") }}'\
-    {% endfor %}\
-    {% for item in characteristics %}\
-    , '{{ "characteristics" | annotate("term") }}: {{ item | annotate("characteristics") }}'\
+    {% for item in atmosphere %} \
+    , '{{ "atmosphere" | annotate("term") }}: {{ item | annotate("atmosphere") }}' \
+    {% endfor %} \
+    {% for item in characteristics %} \
+    , '{{ "characteristics" | annotate("term") }}: {{ item | annotate("characteristics") }}' \
     {% endfor %}

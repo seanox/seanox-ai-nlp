@@ -196,7 +196,21 @@ models (LLMs) and supports reproducible generation.
   fine-tuning, evaluation, and augmentation.
 
 ### Quickstart
-TODO:
+```python
+from seanox_ai_nlp.synthetics import synthetics
+import json
+
+with open("synthetics-planets_en.json", encoding="utf-8") as file:
+    datas = json.load(file)
+    
+for data in datas:
+    synthetic = synthetics(".", "en_annotate", data)
+    print(synthetic)
+```
+
+- [Usage](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#usage)
+- [Integration in NLP Workflows](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#integration-in-nlp-workflows)
+- [Downstream Processing with pandas](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#downstream-processing-with-pandas)
 
 # Changes
 ## 1.0.0 20250808

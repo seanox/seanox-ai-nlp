@@ -60,15 +60,12 @@ def test_synthetics_random_range_03():
 
 def test_synthetics_random_range_04():
     results = [_random_range(PATTERN_SYMBOLS, 0) for _ in range(5)]
-    print(results)
     # Each entry must be empty lists
     assert all(len(result) == 0 for result in results)
 
 
 def test_synthetics_random_range_05():
     results = [_random_range(PATTERN_SYMBOLS, 1) for _ in range(5)]
-    print()
-    print(results)
     # Each entry must be 1 long
     assert all(len(result) == 1 for result in results)
     # Each entry must appear in PATTERN_COMBINATIONS
@@ -80,8 +77,6 @@ def test_synthetics_random_range_05():
 
 def test_synthetics_random_range_06():
     results = [_random_range(PATTERN_SYMBOLS, 2) for _ in range(5)]
-    print()
-    print(results)
     # Each entry must be 1 or 2 long
     assert all(len(result) in [1, 2] for result in results)
     # Each entry must appear in PATTERN_COMBINATIONS

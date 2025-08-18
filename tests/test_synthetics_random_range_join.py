@@ -17,9 +17,7 @@ for index in range(1, len(PATTERN_SYMBOLS) + 1):
 
 
 def test_synthetics_random_range_join_01():
-    results = [_random_range_join(PATTERN_SYMBOLS) for _ in range(5)]
-    print()
-    print(results)
+    results = [_random_range_join(PATTERN_SYMBOLS) for _ in range(15)]
     # Each entry is at most as long as PATTERN_SYMBOLS
     assert all(len(result) <= len(PATTERN_SYMBOLS_DEFAULT) for result in results)
     # At least one entry is shorter than PATTERN_SYMBOLS
@@ -33,7 +31,7 @@ def test_synthetics_random_range_join_01():
 
 
 def test_synthetics_random_range_join_02():
-    results = [_random_range_join(PATTERN_SYMBOLS, "_", -1) for _ in range(5)]
+    results = [_random_range_join(PATTERN_SYMBOLS, "_", -1) for _ in range(15)]
     # Each entry is at most as long as PATTERN_SYMBOLS
     assert all(len(result) <= len(PATTERN_SYMBOLS_CUSTOM) for result in results)
     # At least one entry is shorter than PATTERN_SYMBOLS
@@ -47,7 +45,7 @@ def test_synthetics_random_range_join_02():
 
 
 def test_synthetics_random_range_join_03():
-    results = [_random_range_join(PATTERN_SYMBOLS, "_", -2) for _ in range(5)]
+    results = [_random_range_join(PATTERN_SYMBOLS, "_", -2) for _ in range(15)]
     # Each entry is at most as long as PATTERN_SYMBOLS
     assert all(len(result) <= len(PATTERN_SYMBOLS_CUSTOM) for result in results)
     # At least one entry is shorter than PATTERN_SYMBOLS
@@ -61,13 +59,13 @@ def test_synthetics_random_range_join_03():
 
 
 def test_synthetics_random_range_join_04():
-    results = [_random_range_join(PATTERN_SYMBOLS, "_", 0) for _ in range(5)]
+    results = [_random_range_join(PATTERN_SYMBOLS, "_", 0) for _ in range(15)]
     # Each entry must be empty lists
     assert all(len(result) == 0 for result in results)
 
 
 def test_synthetics_random_range_join_05():
-    results = [_random_range_join(PATTERN_SYMBOLS, "_", 1) for _ in range(5)]
+    results = [_random_range_join(PATTERN_SYMBOLS, "_", 1) for _ in range(15)]
     # Each entry must be 1 long
     assert all(len(result) == 1 for result in results)
     # Each entry must appear in PATTERN_COMBINATIONS
@@ -77,9 +75,11 @@ def test_synthetics_random_range_join_05():
 
 
 def test_synthetics_random_range_join_06():
-    results = [_random_range_join(PATTERN_SYMBOLS, "_", 2) for _ in range(5)]
+    results = [_random_range_join(PATTERN_SYMBOLS, "_", 2) for _ in range(15)]
     # Each entry must be 1 (a) or 3 (a_b) long
     assert all(len(result) in [1, 3] for result in results)
+    assert any(len(item) == 1 for item in results)
+    assert any(len(item) == 3 for item in results)
     # Each entry must appear in PATTERN_COMBINATIONS
     assert all(item in PATTERN_COMBINATIONS_CUSTOM for item in results)
     # At least one entry differs from another
@@ -87,7 +87,7 @@ def test_synthetics_random_range_join_06():
 
 
 def test_synthetics_random_range_join_07():
-    results = [_random_range_join(PATTERN_SYMBOLS, "_", 20) for _ in range(5)]
+    results = [_random_range_join(PATTERN_SYMBOLS, "_", 20) for _ in range(15)]
     # Each entry is at most as long as PATTERN_SYMBOLS
     assert all(len(result) <= len(PATTERN_SYMBOLS_CUSTOM) for result in results)
     # At least one entry is shorter than PATTERN_SYMBOLS

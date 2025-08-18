@@ -1,4 +1,4 @@
-# tests/test_synthetics_filters.py
+# tests/test_synthetics_random_range.py
 
 from seanox_ai_nlp.synthetics.synthetics import _random_range
 from seanox_ai_nlp.synthetics.synthetics import _random_set

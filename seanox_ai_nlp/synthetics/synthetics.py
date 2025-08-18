@@ -247,13 +247,32 @@ class TemplateSyntaxException(TemplateException):
     def __init__(self, message):
         super().__init__(message)
 
+_SAFE_BUILTINS = {
+    "len": len,
+    "min": min,
+    "max": max,
+    "sum": sum,
+    "any": any,
+    "all": all,
+    "abs": abs,
+    "round": round,
+    "sorted": sorted,
+    "str": str,
+    "int": int,
+    "float": float,
+    "bool": bool,
+    "range": range,
+    "type": type,
+    "list": list,
+    "isinstance": isinstance,
+}
 
 class _Template:
 
     def __init__(self, datasource: str, language: str):
 
         self.language = language
-        self.variants = []
+        self.variants = {}
         self.filter = []
         self.environment = Environment(loader=BaseLoader(), trim_blocks=False, lstrip_blocks=False)
         self.environment.filters["annotate"] = _annotate
@@ -280,7 +299,10 @@ class _Template:
             condition = str(part["condition"]) or "True"
 
             try:
-                template = self.environment.from_string(part["template"].strip())
+                content = part["template"] + os.linesep
+                content = re.sub(r'(\r\n)|(\n\r)|(\r)', '\n', content)
+                content = re.sub(r'\\\n', '', content)
+                template = self.environment.from_string(content.strip())
             except Exception as exception:
                 raise TemplateException(f"[{name}] Template error ({type(exception).__name__}): {str(exception)}")
 
@@ -305,7 +327,7 @@ class _Template:
 
             try:
                 template.render({})
-                self.variants.append((template, condition, spans))
+                self.variants[index] = (template, condition, spans)
             except Exception as exception:
                 raise TemplateSyntaxException(f"[{name}] Template syntax error ({type(exception).__name__}): {str(exception)}")
 
@@ -316,23 +338,27 @@ class _Template:
         context["re"] = re
 
         templates = []
-        for template, condition, spans in self.variants:
-            if condition is None or eval(condition, {"__builtins__": {}}, context):
-                templates.append((template, condition, spans))
+        for index, (template, condition, spans) in self.variants.items():
+            if condition is None or eval(condition, {"__builtins__": _SAFE_BUILTINS}, context):
+                templates.append(index)
+
         if not templates:
             return None, "", {}, ""
-        selection = [template for template in templates if template not in self.filter]
+
+        selection = []
+        for index in templates:
+            if index not in self.filter:
+                selection.append(index)
         if selection:
-            template, condition, spans = random.choice(selection)
-            self.filter.append((template, condition, spans))
+            template_id = random.choice(selection)
+            self.filter.append(template_id)
         else:
-            template, condition, spans = random.choice(templates)
-        if len(self.filter) >= len(self.variants):
+            template_id = random.choice(templates)
+        if set(self.filter) >= set(templates):
             self.filter.clear()
 
-        content = (template.render(**context)).strip()
-        content = re.sub(r'(\r\n)|(\n\r)|(\r)', '\n', content)
-        content = re.sub(r'\\\n', '', content)
+        template, condition, spans = self.variants[template_id]
+        content = template.render(**context).strip()
 
         return template, condition, spans, content
 

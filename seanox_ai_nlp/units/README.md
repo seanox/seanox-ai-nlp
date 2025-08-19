@@ -707,19 +707,25 @@ dependencies -- ensuring transparency and reproducibility.
 config:
   theme: neutral
 ---
-flowchart LR
-    R["12345678901234567890123456789012345678901234567890"]
-    subgraph subGraphWorkflow["Processing Workflow"]
-        A["Text Input"]
-        B["Normalization<br/>spacing correction"]
-        subgraph subGraphRegExEngine["RegEx Engine"]
-            C["Pattern Matching<br/>quick rough pattern search"]
-            D["Validation<br/>slower detailed pattern search"]
+flowchart TD
+    subgraph subGraphFrame[" &nbsp; "]
+        F1[" &nbsp; "]
+        F2[" &nbsp; "]
+        F3[" &nbsp; "]
+        subgraph subGraphWorkflow["Processing Workflow"]
+            A["Text Input"]
+            B["Normalization<br/>spacing correction"]
+            subgraph subGraphRegExEngine["RegEx Engine"]
+                C["Pattern Matching<br/>quick rough pattern search"]
+                D["Validation<br/>slower detailed pattern search"]
+            end
+            E["Unit Categorization<br/>tagging"]
+            F["Structured Output<br>Unit entries"]
         end
-        E["Unit Categorization<br/>tagging"]
-        F["Structured Output<br>Unit entries"]
     end
-    L["12345678901234567890123456789012345678901234567890"]
+    F1 ~~~ F2
+    F2 ~~~ F3
+    F3 ~~~ A
     A --> B
     B --> C
     C --> D
@@ -730,8 +736,10 @@ flowchart LR
     style C fill:#FFFFFF
     style D fill:#FFFFFF
     style E fill:#FFFFFF
-    style L fill:#FFFFFF,stroke:#FFFFFF,stroke-width:0px,color:#FFFF00
-    style R fill:#FFFFFF,stroke:#FFFFFF,stroke-width:0px,color:#FFFF00
+    style subGraphFrame fill:FFFFFF,stroke:#FFFFFF,stroke-width:0px,color:#FF0000
+    style F1 fill:FFFFFF,stroke-width:1px,stroke-dasharray: 0,stroke:none
+    style F2 fill:FFFFFF,stroke-width:1px,stroke-dasharray: 0,stroke:none
+    style F3 fill:FFFFFF,stroke-width:1px,stroke-dasharray: 0,stroke:none
 ```
 
 # Maintenance & Extensibility

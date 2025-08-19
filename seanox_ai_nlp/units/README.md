@@ -708,9 +708,7 @@ config:
   theme: neutral
 ---
 flowchart TD
-    subgraph subGraphRight[" "]
-        R["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-    end
+    R["12345678901234567890123456789012345678901234567890"]
     subgraph subGraphWorkflow["Processing Workflow"]
         A["Text Input"]
         B["Normalization<br/>spacing correction"]
@@ -721,6 +719,7 @@ flowchart TD
         E["Unit Categorization<br/>tagging"]
         F["Structured Output<br>Unit entries"]
     end
+    L["12345678901234567890123456789012345678901234567890"]
     subgraph subGraphLeft[" "]
         L["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
@@ -734,10 +733,8 @@ flowchart TD
     style C fill:#FFFFFF
     style D fill:#FFFFFF
     style E fill:#FFFFFF
-    style subGraphLeft fill:#FFFFFF,stroke:#FFFFFF,stroke-width:0px
-    style L fill:#FFFFFF,stroke:#FFFFFF,stroke-width:0px
-    style subGraphRight fill:#FFFFFF,stroke:#FFFFFF,stroke-width:0px
-    style R fill:#FFFFFF,stroke:#FFFFFF,stroke-width:0px
+    style L fill:#FFFFFF,stroke:#FFFFFF,stroke-width:0px,color:#FFFFFF
+    style R fill:#FFFFFF,stroke:#FFFFFF,stroke-width:0px,color:#FFFFFF
 ```
 
 # Maintenance & Extensibility

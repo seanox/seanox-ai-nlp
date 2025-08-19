@@ -90,51 +90,6 @@ expressions from natural language.
 - [Maintenance & Extensibility](#maintenance--extensibility)
 - [Sources & References](#sources--references)
 
-# System Design
-
-The module adopts a minimalist, rule-based design focused on regular expressions
-to identify and classify measurement units in unstructured text. Its behavior is
-__deterministic__, __language-independent__, and free from machine learning
-dependencies -- ensuring transparency and reproducibility.
-
-## Components Overview
-
-| Component                     | Description                                                                                                                                |
-|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| __Token Normalization__       | Detects and corrects typographic inconsistencies -- such as missing spaces between numbers and units -- to improve recognition robustness. |
-| __Unit Extraction__           | Applies structured regular expressions to detect SI, informal, and compound unit formats in natural language.                              |
-| __Semantic Categorization__   | Assigns domain-specific categories (e.g., *mass*, *energy*, *length*) to recognized units via a static lookup table.                       |
-| __Structured Representation__ | Creates structured entities from matched expressions -- designed for downstream processing in NLP pipelines or annotation tools.           |
-
-## Processing Workflow
-
-```text
-Text Input
-    |
-Normalization (Spacing Correction)
-    |
-Pattern Matching (RegEx Engine)
-    +- quick rough pattern search
-    |
-Validation
-    +- slower detailed pattern search
-    |
-Unit Categorization (Tagging)
-    |
-Structured Output: Unit entries
-```
-
-## Data Management
-
-The module uses a structured Excel file __units.xlsx__ as the central source for
-all unit definitions, prefixes, spellings, and classifications. This file
-enables clean separation between data and logic: RegEx patterns for unit
-recognition are generated directly within the Excel file using embedded
-functions, then manually transferred into __units.py__, replacing existing
-constants. No changes to the module logic are needed. All updates and extensions
-are made exclusively in __units.xlsx__, allowing collaborative maintenance and
-controlled integration.
-
 # Supported formats and units
 
 ## Numeric Values
@@ -620,7 +575,7 @@ The module was tested on an Intel Core i5-12400 with Windows 11 and 16 GB RAM.
 
 # API Reference
 
-The __units__ module provides a compact API for extracting unit expressions from
+The __units__ module offers a compact API for extracting unit expressions from
 natural language. It is suitable for NLP pipelines, preprocessing workflows, and
 annotation tools.
 
@@ -728,6 +683,53 @@ into semantic categories (e.g. `mass`, `length`, `energy`).
 
 Precompiled regular expressions, matches operators used in compound units (e.g.
 `/`, `&middot;`, `x`).
+
+# System Design
+
+The module adopts a minimalist, rule-based design focused on regular expressions
+to identify and classify measurement units in unstructured text. Its behavior is
+__deterministic__, __language-independent__, and free from machine learning
+dependencies -- ensuring transparency and reproducibility.
+
+## Components Overview
+
+| Component                     | Description                                                                                                                                |
+|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| __Token Normalization__       | Detects and corrects typographic inconsistencies -- such as missing spaces between numbers and units -- to improve recognition robustness. |
+| __Unit Extraction__           | Applies structured regular expressions to detect SI, informal, and compound unit formats in natural language.                              |
+| __Semantic Categorization__   | Assigns domain-specific categories (e.g., *mass*, *energy*, *length*) to recognized units via a static lookup table.                       |
+| __Structured Representation__ | Creates structured entities from matched expressions -- designed for downstream processing in NLP pipelines or annotation tools.           |
+
+## Processing Workflow
+
+```mermaid
+---
+config:
+  theme: neutral
+---
+flowchart TD
+    subgraph subGraph2["Retrieval Process"]
+        A["Text Input"]
+        B["Normalization<br/>spacing correction"]
+        subgraph subGraph["RegEx Engine"]
+            C["Pattern Matching<br/>quick rough pattern search"]
+            D["Validation<br/>slower detailed pattern search"]
+        end
+
+        E["Unit Categorization<br/>tagging"]
+        F["Structured Output<br>Unit entries"]
+    end
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    style subGraph fill:#BBDEFB  
+    style B fill:#FFFFFF
+    style C fill:#FFFFFF
+    style D fill:#FFFFFF
+    style E fill:#FFFFFF
+```
 
 # Maintenance & Extensibility
 

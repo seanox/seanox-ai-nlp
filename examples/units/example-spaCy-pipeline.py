@@ -8,9 +8,9 @@ from spacy.util import filter_spans
 from spacy.lang.en.stop_words import STOP_WORDS
 from seanox_ai_nlp.units import units
 
-Span.set_extension("value", default=None)
-Span.set_extension("unit", default=None)
-Span.set_extension("categories", default=None)
+Span.set_extension("value", default=None, force=True)
+Span.set_extension("unit", default=None, force=True)
+Span.set_extension("categories", default=None, force=True)
 
 # Loading model and text
 nlp = spacy.load("en_core_web_md")

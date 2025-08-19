@@ -62,11 +62,11 @@ or augmentation in domain-specific NLP workflows.
   - [Schema](#schema)
   - [Field Details](#field-details)
   - [Additional Jinja2 filters](#additional-jinja2-filters)
-    - [`annotate`](#annotatevalue-any-label-str---str)
-    - [`random_range`](#random_rangeitems-listany-limit-int--1---listany)
-    - [`random_range_join`](#random_range_joinitems-listany-separator-str--limit-int--1---str)
-    - [`random_range_join_phrase`](#random_range_join_phraseitems-listany-separator-str--word-str--limit-int--1---str)
-    - [`random_set`](#random_setitems-listany-count-int--1---listany)
+    - [`annotate`](#annotatevalue-any-label-str-----str)
+    - [`random_range`](#random_rangeitems-listany-limit-int---1---listany)
+    - [`random_range_join`](#random_range_joinitems-listany-separator-str----limit-int---1---str)
+    - [`random_range_join_phrase`](#random_range_join_phraseitems-listany-separator-str----word-str----limit-int---1---str)
+    - [`random_set`](#random_setitems-listany-count-int---1---listany)
   - [Example Template File](#example-template-file)
 - [Known Limitations](#known-limitations)
 - [Usage](#usage)
@@ -331,9 +331,18 @@ Synthetic(
 
 ## Integration in NLP-Workflows
 
+Example for a spaCy pipeline.  
+see also:
+- [example-spaCy-pipeline.py](
+  ../../examples/synthetics/example-spaCy-pipeline.py) with comments
+
 TODO
 
 ## Downstream Processing with pandas
+
+Example for downstream processing with pandas.  
+see also [example-pandas.py](
+    ../../examples/synthetics/example-pandas.py) with comments.
 
 ```python
 from seanox_ai_nlp.synthetics import synthetics

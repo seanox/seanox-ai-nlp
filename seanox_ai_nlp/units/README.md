@@ -708,7 +708,7 @@ config:
   theme: neutral
 ---
 flowchart TD
-    R["12345678901234567890123456789012345678901234567890"]
+    R["1234567890123456789012345678901234567890"]
     subgraph subGraphWorkflow["Processing Workflow"]
         A["Text Input"]
         B["Normalization<br/>spacing correction"]
@@ -719,7 +719,7 @@ flowchart TD
         E["Unit Categorization<br/>tagging"]
         F["Structured Output<br>Unit entries"]
     end
-    L["12345678901234567890123456789012345678901234567890"]
+    L["1234567890123456789012345678901234567890"]
     A --> B
     B --> C
     C --> D

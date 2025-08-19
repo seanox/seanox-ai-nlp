@@ -174,7 +174,7 @@ def _random_range_join_phrase(items: list[Any], separator: str = ", ", word: str
     all items are considered.
 
     Example:
-        {{ items | random_range_join_phrase(", ", " and ", 3) }}
+        {{ ["apple", "banana", "cherry"] | random_range_join_phrase(", ", " and ", 3) }}
         might produce: "banana, cherry and apple"
 
     Args:

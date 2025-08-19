@@ -191,7 +191,7 @@ Randomly selects and joins items into a natural-language phrase.
   </summary>
 
 ```
-{{ items | random_range_join_phrase(", ", " and ", 3) }}
+{{ ["apple", "banana", "cherry"] | random_range_join_phrase(", ", " and ", 3) }}
 might produce: "banana, cherry and apple"
 ```
 
@@ -281,7 +281,7 @@ for data in datas:
 ```
 
 Example Output:
-```
+```python
 Synthetic(
     text='Closest planet to the Sun as well as Many impact craters are characteristic of Mercury.',
     annotation='[[[characteristics]]]Closest planet to the Sun[[[-]]] as well as [[[characteristics]]]Many impact craters[[[-]]] are characteristic of [[[planet]]]Mercury[[[-]]].',
@@ -315,7 +315,7 @@ TODO
 
 ## Downstream Processing with pandas
 
-```
+```python
 from seanox_ai_nlp.synthetics import synthetics
 import json
 import pandas
@@ -351,7 +351,7 @@ for data in datas:
 ```
 
 Example Output:
-```
+```text
 Compared to Earth, Mars takes 322 more days to complete its orbit.
  start  end    label          text
     12   17     term         Earth
@@ -362,7 +362,12 @@ Compared to Earth, Mars takes 322 more days to complete its orbit.
 
 # Benchmark
 
-The module was tested on an Intel Core i5-12400 with 16 GB RAM running Windows 11.
+The benchmark tests were conducted on a system running Windows 11 with an Intel
+Core i5-12400 and 16 GB of RAM. The templates used for evaluation included
+conditional logic, loops, randomization, and annotated entities, representing a
+moderately complex structure typical for synthetic text generation. The focus
+was on measuring text throughput during large-scale data generation, excluding
+I/O and external dependencies.
 
 ## Single-Pass Evaluation
 

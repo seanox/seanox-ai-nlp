@@ -4,10 +4,9 @@ Measurement expressions appear across domains like weather, medicine,
 e-commerce, and social media. Their formats are often inconsistent and informal,
 which complicates automated extraction.
 
-The __units__ module provides a __rule-based__, __transparent__ approach to
-identifying such expressions -- without relying on large language models (LLMs).
-It uses deterministic pattern recognition to support __lightweight__ NLP
-workflows.
+The __units__ module provides a __rule-based__ approach to identifying such
+expressions. It uses deterministic pattern recognition and does not depend on
+large language models (LLMs), supporting __lightweight__ NLP workflows.
 
 Developed for practitioners and developers, the module extracts constructs like
 `1000 hPa`, `-20 &ordm;C`, or `km/h`, and also handles standalone units (`in`,
@@ -15,11 +14,10 @@ Developed for practitioners and developers, the module extracts constructs like
 wide range of applications, including general, semi-technical, and semi-academic
 content.
 
-The module integrates smoothly with tools like spaCy's __EntityRuler__, and fits
-into workflows involving __annotation__, __filtering__, or __token alignment__
--- where clarity and control are key. It does not perform semantic analysis
-itself, but provides clean, structured output to support downstream semantic
-processing.
+The module integrates with tools such as spaCy's __EntityRuler__ and supports
+workflows involving __annotation__, __filtering__, or __token alignment__, where
+clarity and control are essential. It does not perform semantic analysis itself,
+but produces structured output suitable for downstream semantic processing.
 
 # Features
 
@@ -71,9 +69,9 @@ expressions from natural language.
   - [Unit Recognition Without Semantic Context](#unit-recognition-without-semantic-context)
   - [Ambiguous Unit Symbols](#ambiguous-unit-symbols)
 - [API Reference](#api-reference)
-  - [`units(text: str) -> list[Unit]`](#unitstext-str---listunit)
-  - [`spacing(text: str, mode: SpacingMode = SpacingMode.NUMERIC) -> str`](#spacingtext-str-mode-spacingmode--spacingmodenumeric---str)
-  - [`Unit` (NamedTuple)](#unit-namedtuple)
+  - [`units`](#unitstext-str---listunit)
+  - [`spacing`](#spacingtext-str-mode-spacingmode--spacingmodenumeric---str)
+  - [`Unit`](#unit-namedtuple)
   - [`NUMERIC_PATTERN`](#numeric_pattern)
   - [`NUMERIC_VALIDATION_PATTERN`](#numeric_validation_pattern)
   - [`NUMERIC_EXPRESSION_VALIDATION_PATTERN`](#numeric_expression_validation_pattern)
@@ -701,33 +699,14 @@ dependencies -- ensuring transparency and reproducibility.
 
 ## Processing Workflow
 
-```mermaid
----
-config:
-  theme: neutral
----
-flowchart TD
-    subgraph subGraphWorkflow["Processing Workflow"]
-        A["Text Input"]
-        B["Normalization<br/>spacing correction"]
-        subgraph subGraphRegExEngine["RegEx Engine"]
-            C["Pattern Matching<br/>quick rough pattern search"]
-            D["Validation<br/>slower detailed pattern search"]
-        end
-        E["Unit Categorization<br/>tagging"]
-        F["Structured Output<br>Unit entries"]
-    end
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    style subGraphRegExEngine fill:#BBDEFB  
-    style B fill:#FFFFFF
-    style C fill:#FFFFFF
-    style D fill:#FFFFFF
-    style E fill:#FFFFFF
-```
+1. __Input__: Raw text string containing potential measurement expressions
+2. __Normalization__: Spacing corrections applied to improve pattern matching
+3. __Pattern Matching__: Fast regex-based detection of candidate expressions
+4. __Validation__: Slower detailed validation of numeric formats and unit
+   formats using regular expressions
+5. __Unit Categorization__: Semantic tags assigned based on unit classification
+6. __Structured Output__: Matched expressions are converted into a list of Unit
+  objects, each containing structured metadata for downstream use
 
 # Maintenance & Extensibility
 
@@ -741,7 +720,7 @@ Regular expressions for unit recognition are generated directly within
 __units.xlsx__ using embedded formulas. These expressions are manually
 transferred into the Python module __units.py__ as constants, without requiring
 any changes to the core logic. This procedure enables updates and extensions to
-carried out securely and efficiently.
+be carried out securely and efficiently.
 
 Adding new units to existing categories requires only an update to the Excel
 file. For broader extensions -- such as introducing new semantic domains (e.g.

@@ -10,8 +10,8 @@ usefulness for tasks like natural language generation and semantic retrieval.
 Synthetic sentences with annotated domain-specific content offer a way to make
 structured input linguistically more accessible. By recombining lexical,
 syntactic, and semantic elements in a controlled manner, these sentences
-introduce systematic variation. This can help to broaden semantic coverage and
-supports the adaptation of models to specific domains.
+introduce systematic variation. Introduces broader semantic coverage and
+supports model adaptation to specific domains.
 
 The __synthetics__ module provides a generator based on templates and
 transformation rules. It introduces variation through stochastic selection and
@@ -44,9 +44,9 @@ or augmentation in domain-specific NLP workflows.
   tokenization or linguistic parsing.
 
 - __Interpretation-Free Generation__  
-  No semantic interpretation or analysis is performed during generation,
-  ensuring that the output remains deterministic, transparent, and suitable for
-  controlled NLP workflows.
+  No semantic interpretation or analysis is performed during generation, which
+  results in output that is deterministic and transparent, and suitable for use
+  in controlled NLP workflows.
 
 - __Compatibility with NLP Workflows__  
   The output object __Synthetic__ includes raw text, annotated text, entity
@@ -58,11 +58,42 @@ or augmentation in domain-specific NLP workflows.
 
 - [Introduction](#introduction)
 - [Features](#features)
-
-TODO
-TODO Where to put the template documentation (structure, syntax, functions)?
+- [Template](#template)
+  - [Schema](#schema)
+  - [Field Details](#field-details)
+  - [Additional Jinja2 filters](#additional-jinja2-filters)
+    - [`annotate`](#annotatevalue-any-label-str---str)
+    - [`random_range`](#random_rangeitems-listany-limit-int--1---listany)
+    - [`random_range_join`](#random_range_joinitems-listany-separator-str--limit-int--1---str)
+    - [`random_range_join_phrase`](#random_range_join_phraseitems-listany-separator-str--word-str--limit-int--1---str)
+    - [`random_set`](#random_setitems-listany-count-int--1---listany)
+  - [Example Template File](#example-template-file)
+- [Known Limitations](#known-limitations)
+- [Usage](#usage)
+- [Integration in NLP-Workflows](#integration-in-nlp-workflows)
+- [Downstream Processing with pandas](#downstream-processing-with-pandas)
+- [Benchmark](#benchmark)
+  - [Single-Pass Evaluation](#single-pass-evaluation)
+  - [Scaled Evaluation (×500)](#scaled-evaluation-×500)
+- [API Reference](#api-reference)
+  - [`synthetics`](#syntheticsdatasource-str-language-str-data-dictstr-any---synthetic)
+  - [`Synthetic`](#synthetic)
+  - [`TemplateException`](#templateexception)
+  - [`TemplateConditionException`](#templateconditionexception)
+  - [`TemplateSyntxException`](#templatesyntxexception)
+- [System Design](#system-design)
+  - [Components Overview](#components-overview)
+  - [Processing Workflow](#processing-workflow)
+- [Sources & References](#sources--references)
 
 # Template
+
+Templates composed of recombinable sentence fragments transform structured input
+data into annotated natural language. This modular design enables variation,
+reuse, and adaptability across different contexts. Each template includes
+rendering logic, inline annotation markers, and optional conditions that guide
+selection. Based on these conditions, templates are chosen dynamically and
+contextually -- which makes the output both relevant and varied.
 
 ## Schema
 
@@ -187,7 +218,7 @@ Generates dynamic, varied list expressions for use in template-generated text.
 
 <details>
   <summary>
-Randomly selects and joins items into a natural-language phrase.
+Randomly selects and joins items into a natural-language-like phrase.
   </summary>
 
 ```
@@ -203,7 +234,8 @@ __Parameters__:
   considered.
 
 __Returns__:
-- `str`: Natural-language phrase of randomly selected items, or an empty string if input is empty.
+- `str`: Natural-language-like phrase of randomly selected items, or an empty string
+  if input is empty.
 
 __Behavior__:
 - Selects between 1 and `limit` items from the list.
@@ -213,7 +245,7 @@ __Behavior__:
   - Three or more → joined with separator, and the last item prefixed by the conjunction word.
 
 __Purpose__:
-Creates human-friendly phrases for use in template-generated text, ideal for lists in natural language.
+Creates a natural-language-like phrase for use in template-generated text
 </details>
 
 ### `random_set(items: list[Any], count: int = -1) -> list[Any]`
@@ -250,21 +282,9 @@ Provides raw access to a randomized subset of items for further use in templates
 See a working example in [synthetics_en_annotate.yaml](
     ../../tests/synthetics_en_annotate.yaml)
 
-# System Design
-
-TODO
-
-## Components Overview
-
-TODO
-
-## Processing Workflow
-
-TODO
-
 # Known Limitations
 
-None are known at this time.
+No limitations have been documented in current usage scenarios.
 
 # Usage
 
@@ -318,7 +338,7 @@ TODO
 ```python
 from seanox_ai_nlp.synthetics import synthetics
 import json
-import pandas
+import pandas as pd
 
 LABEL_COLORS = {
     "planet": ("\033[38;5;0m", "\033[48;5;117m"),   # white on blue
@@ -343,11 +363,11 @@ with open("synthetics-planets_en.json", encoding="utf-8") as file:
 for data in datas:
     synthetic = synthetics(".", "en_annotate", data)
     print(highlight_entities(synthetic.text, synthetic.entities))
-    
-    dataframe = pandas.DataFrame(synthetic.entities, columns=["start", "end", "label"])
-    dataframe["text"] = dataframe.apply(lambda row: synthetic.text[row["start"]:row["end"]], axis=1)
-    dataframe = dataframe[["start", "end", "label", "text"]]
-    print(dataframe.to_string(index=False))    
+
+    df = pd.DataFrame(synthetic.entities, columns=["start", "end", "label"])
+    df["text"] = df.apply(lambda row: synthetic.text[row["start"]:row["end"]], axis=1)
+    df = df[["start", "end", "label", "text"]]
+    print(df.to_string(index=False))    
 ```
 
 Example Output:
@@ -462,6 +482,42 @@ evaluate.
 ## `TemplateSyntxException`
 
 Raised when a syntax error occurs in the jinja2 template.
+
+# System Design
+
+The __synthetics__ module generates annotated natural language from structured
+input using predefined templates composed of recombinable sentence fragments. It
+does not perform semantic interpretation. The module operates deterministically
+and follows a rule-based approach.
+
+Design characteristics:
+
+- Templates are written in YAML and rendered using Jinja2.
+- Conditional logic enables dynamic and context-sensitive template selection.
+- Inline entity annotation is supported via custom markers.
+- Regex-based span extraction allows postprocessing of semantic patterns.
+- Execution is limited to safe built-in functions.
+
+## Components Overview
+
+| Component         | Description                                                                             |
+|-------------------|-----------------------------------------------------------------------------------------|
+| Template          | Defines recombinable sentence fragments, rendering logic, and selection conditions      |
+| Jinja2 Filter     | Additional rendering helpers for annotation and controlled variation                    |
+| Jinja2 Renderer   | Renders annotated text from structured input using selected templates                   |
+| Entity Extraction | Extracts and annotates entities inline based on input structure                         |
+| Span Extraction   | Detects semantic spans in the generated text using regular expressions                  |
+| Synthetic         | Structured data object containing the generated text, annotations, entities, and spans. |
+
+## Processing Workflow
+
+1. __Input__: Structured data as a dictionary
+2. __Template Filtering__: Templates are selected based on conditions
+3. __Template Selection__: One template is chosen randomly from the filtered set
+4. __Rendering__: Jinja2 renders the template with inline annotations
+5. __Entity Extraction__: Markers are parsed and converted to entity spans
+6. __Span Detection__: Regex patterns are applied to extract additional spans
+7. __Output__: A `Synthetic` object is returned with all relevant metadata
 
 # Sources & References
 

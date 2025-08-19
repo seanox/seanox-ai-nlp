@@ -6,6 +6,7 @@ from time import perf_counter
 
 import pytest
 import os
+import pathlib
 
 
 class Unit(NamedTuple):
@@ -179,3 +180,30 @@ def test_units_benchmark_02():
     print(f"Benchmark text: {len(text)} characters")
     print(f"Benchmark detections: {len(entities)} units + measures")
     print(f"Benchmark duration: {(end - start) * 1000:.2f} ms")
+
+
+def test_synthetics_usage_01(monkeypatch):
+    monkeypatch.chdir("../examples/units")
+    script_path = pathlib.Path("example-pandas.py")
+    try:
+        exec(script_path.read_text(), {})
+    except Exception as exception:
+        pytest.fail(f"{script_path.name} failed with error: {exception}")
+
+
+def test_synthetics_usage_02(monkeypatch):
+    monkeypatch.chdir("../examples/units")
+    script_path = pathlib.Path("example-spaCy-component.py")
+    try:
+        exec(script_path.read_text(), {})
+    except Exception as exception:
+        pytest.fail(f"{script_path.name} failed with error: {exception}")
+
+
+def test_synthetics_usage_03(monkeypatch):
+    monkeypatch.chdir("../examples/units")
+    script_path = pathlib.Path("example-spaCy-pipeline.py")
+    try:
+        exec(script_path.read_text(), {})
+    except Exception as exception:
+        pytest.fail(f"{script_path.name} failed with error: {exception}")

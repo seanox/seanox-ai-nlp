@@ -707,7 +707,7 @@ dependencies -- ensuring transparency and reproducibility.
 config:
   theme: neutral
 ---
-flowchart TD
+flowchart LR
     R["12345678901234567890123456789012345678901234567890"]
     subgraph subGraphWorkflow["Processing Workflow"]
         A["Text Input"]

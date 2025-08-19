@@ -380,6 +380,12 @@ Compared to Earth, Mars takes 322 more days to complete its orbit.
     60   65     term         orbit
 ```
 
+> [!NOTE]
+> The entity highlighting in this script uses ANSI escape codes to render
+> colored text in the terminal. While this works well on most Unix-based systems
+> (e.g. macOS, Linux) and modern terminal emulators, it may not display
+> correctly on all platforms. 
+
 # Benchmark
 
 The benchmark tests were conducted on a system running Windows 11 with an Intel

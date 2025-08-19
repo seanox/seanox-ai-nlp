@@ -222,7 +222,7 @@ def _random_set(items: list[Any], count: int = -1) -> list[Any]:
 
     Returns:
         list[str]: A randomly selected subset of items, or an empty list if
-        `items` is empty.
+            `items` is empty.
     """
     if not items:
         return []

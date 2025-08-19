@@ -74,7 +74,7 @@ or augmentation in domain-specific NLP workflows.
 - [Downstream Processing with pandas](#downstream-processing-with-pandas)
 - [Benchmark](#benchmark)
   - [Single-Pass Evaluation](#single-pass-evaluation)
-  - [Scaled Evaluation (×500)](#scaled-evaluation-×500)
+  - [Scaled Evaluation (×500)](#scaled-evaluation-500)
 - [API Reference](#api-reference)
   - [`synthetics`](#syntheticsdatasource-str-language-str-data-dictstr-any---synthetic)
   - [`Synthetic`](#synthetic)
@@ -136,7 +136,7 @@ entity extraction).
 produce: [[[LABEL]]]value[[[-]]]
 ```
 
-__Parmeters__:
+__Parameters__:
 - `value (Any)`: The value to annotate. Will be converted to a string.
 - `label (str)`: The entity label to apply. The same conventions apply as for
    variable names. In addition, the minus sign is permitted between word
@@ -336,7 +336,64 @@ see also:
 - [example-spaCy-pipeline.py](
   ../../examples/synthetics/example-spaCy-pipeline.py) with comments
 
-TODO
+```python
+from spacy.tokens import DocBin
+from seanox_ai_nlp.synthetics import synthetics
+
+import spacy
+import json
+
+with open("synthetics-planets_en.json", encoding="utf-8") as file:
+    datas = json.load(file)
+
+nlp = spacy.load("en_core_web_md")
+doc_bin = DocBin()
+
+for data in datas:
+    synthetic = synthetics(".", "en_annotate", data)
+    doc = nlp.make_doc(synthetic.text)
+    ents = []
+    for start, end, label in synthetic.entities:
+        span = doc.char_span(start, end, label=label)
+        if span:
+            ents.append(span)
+        else:
+            print(f"Invalid entity: ({start}, {end}, {label}) in text: {synthetic.text}")
+    doc.ents = ents
+    doc_bin.add(doc)
+
+doc_bin.to_disk("synthetic_training.spacy")
+
+docs = list(doc_bin.get_docs(nlp.vocab))
+for index, doc in enumerate(docs):
+    if index > 0:
+        print()
+    print(f"Doc {index + 1}:")
+    print(f"{doc.text}")
+    for ent in doc.ents:
+        print(
+            f"Label: {ent.label_:<18}"
+            f"Start: {ent.start_char:<6}"
+            f"End: {ent.end_char:<6}"
+            f"{ent.text}"
+        )
+```
+
+Example Output:
+```text
+Doc 1:
+What can you tell me about "Volcanically active" in our solar system?
+Volcanically active is a feature of Venus.
+It is a terrestrial planet.
+The planet does not have any moons and has a diameter of 12104 km.
+Label: characteristics   Start: 28    End: 47    Volcanically active
+Label: term              Start: 56    End: 68    solar system
+Label: characteristics   Start: 70    End: 89    Volcanically active
+Label: planet            Start: 106   End: 111   Venus
+Label: type              Start: 121   End: 139   terrestrial planet
+Label: term              Start: 186   End: 194   diameter
+Label: diameter          Start: 198   End: 206   12104 km
+```
 
 ## Downstream Processing with pandas
 
@@ -364,11 +421,9 @@ def highlight_entities(text, entities):
         text = text[:start] + colored + text[end:]
     return text
 
-# Load synthetic input data
 with open("synthetics-planets_en.json", encoding="utf-8") as file:
     datas = json.load(file)
 
-# Generate color-coded output for terms and planets
 for data in datas:
     synthetic = synthetics(".", "en_annotate", data)
     print(highlight_entities(synthetic.text, synthetic.entities))

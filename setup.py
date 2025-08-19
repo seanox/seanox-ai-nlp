@@ -14,7 +14,8 @@ setup(
     license="Apache-2.0",
     python_requires=">=3.9",
     install_requires=[
-        "pyyaml>=6.0"
+        "pyyaml>=6.0",
+        "jinja2>=3.0.0"
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",

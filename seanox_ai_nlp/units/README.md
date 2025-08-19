@@ -51,10 +51,6 @@ expressions from natural language.
 
 - [Introduction](#introduction)
 - [Features](#features)
-- [System Design](#system-design)
-  - [Components Overview](#components-overview)
-  - [Processing Workflow](#processing-workflow)
-  - [Data Management](#data-management)
 - [Supported formats and units](#supported-formats-and-units)
   - [Numeric Values](#numeric-values)
   - [Dimensional Separators](#dimensional-separators)
@@ -87,6 +83,9 @@ expressions from natural language.
   - [`UNIT_EXPRESSION_VALIDATION_PATTERN`](#unit_expression_validation_pattern)
   - [`UNIT_CLASSIFICATION_PATTERN`](#unit_classification_pattern)
   - [`UNIT_OPERATORS_PATTERN`](#unit_operators_pattern)
+- [System Design](#system-design)
+  - [Components Overview](#components-overview)
+  - [Processing Workflow](#processing-workflow)
 - [Maintenance & Extensibility](#maintenance--extensibility)
 - [Sources & References](#sources--references)
 

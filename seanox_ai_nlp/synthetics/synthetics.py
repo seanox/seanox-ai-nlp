@@ -3,6 +3,7 @@
 from jinja2 import Environment, BaseLoader
 from typing import Any
 from dataclasses import dataclass
+from collections import deque
 
 import os
 import random
@@ -275,7 +276,6 @@ class _Template:
 
         self.language = language
         self.variants = {}
-        self.filter = []
         self.environment = Environment(loader=BaseLoader(), trim_blocks=False, lstrip_blocks=False)
         self.environment.filters["annotate"] = _annotate
         self.environment.filters["random_set"] = _random_set
@@ -333,6 +333,8 @@ class _Template:
             except Exception as exception:
                 raise TemplateSyntaxException(f"[{name}] Template syntax error ({type(exception).__name__}): {str(exception)}")
 
+            self.filter = deque(maxlen=len(self.variants))
+
     def generate(self, data: dict[str, Any]) -> tuple[Any, str, dict[str, Any], str]:
 
         context = dict(data or {})
@@ -353,11 +355,9 @@ class _Template:
                 selection.append(index)
         if selection:
             template_id = random.choice(selection)
-            self.filter.append(template_id)
         else:
             template_id = random.choice(templates)
-        if set(self.filter) >= set(templates):
-            self.filter.clear()
+        self.filter.append(template_id)
 
         template, condition, spans = self.variants[template_id]
         content = template.render(**context).strip()

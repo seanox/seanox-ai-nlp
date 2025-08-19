@@ -3,10 +3,12 @@
 from seanox_ai_nlp.synthetics import synthetics
 from time import perf_counter
 
-import pandas
+import pathlib
 import random
 import copy
 import json
+import pytest
+
 
 def test_synthetics_benchmark_00():
     synthetics(
@@ -99,31 +101,19 @@ def test_synthetics_usage_04():
         print(synthetic)
 
 
-LABEL_COLORS = {
-    "planet": ("\033[38;5;0m", "\033[48;5;117m"),   # white on blue
-    "term":   ("\033[38;5;0m", "\033[48;5;250m")    # black on light gray
-}
+def test_synthetics_usage_05(monkeypatch):
+    monkeypatch.chdir("../examples/synthetics")
+    script_path = pathlib.Path("example-pandas.py")
+    try:
+        exec(script_path.read_text(), {})
+    except Exception as exception:
+        pytest.fail(f"{script_path.name} failed with error: {exception}")
 
 
-def highlight_entities(text, entities):
-    reset = '\033[0m'
-    for start, end, label in sorted(entities, key=lambda x: -x[0]):
-        if label not in LABEL_COLORS:
-            label = "term"
-        fg, bg = LABEL_COLORS[label]
-        colored = f"{fg}{bg}{text[start:end]}{reset}"
-        text = text[:start] + colored + text[end:]
-    return text
-
-
-def test_synthetics_usage_x02():
-    with open("synthetics-planets_en.json", encoding="utf-8") as file:
-        datas = json.load(file)
-    for data in datas:
-        synthetic = synthetics(".", "en_annotate", data)
-        print(highlight_entities(synthetic.text, synthetic.entities))
-
-        dataframe = pandas.DataFrame(synthetic.entities, columns=["start", "end", "label"])
-        dataframe["text"] = dataframe.apply(lambda row: synthetic.text[row["start"]:row["end"]], axis=1)
-        dataframe = dataframe[["start", "end", "label", "text"]]
-        print(dataframe.to_string(index=False))
+def test_synthetics_usage_05(monkeypatch):
+    monkeypatch.chdir("../examples/synthetics")
+    script_path = pathlib.Path("example-spaCy-pipeline.py")
+    try:
+        exec(script_path.read_text(), {})
+    except Exception as exception:
+        pytest.fail(f"{script_path.name} failed with error: {exception}")

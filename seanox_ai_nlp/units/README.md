@@ -709,7 +709,7 @@ config:
 ---
 flowchart TD
     subgraph subGraphRight[" "]
-        R["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        R["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
     subgraph subGraphWorkflow["Processing Workflow"]
         A["Text Input"]
@@ -722,14 +722,14 @@ flowchart TD
         F["Structured Output<br>Unit entries"]
     end
     subgraph subGraphLeft[" "]
-        L["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        L["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
     A --> B
     B --> C
     C --> D
     D --> E
     E --> F
-    style subGraph fill:#BBDEFB  
+    style subGraphRegExEngine fill:#BBDEFB  
     style B fill:#FFFFFF
     style C fill:#FFFFFF
     style D fill:#FFFFFF

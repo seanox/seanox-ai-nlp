@@ -395,7 +395,9 @@ I/O and external dependencies.
 
 # API Reference
 
-TODO
+The __synthetic__ module offers a compact API for synthetic text generation. It
+is suitable for NLP pipelines, annotation workflows, or automated content
+generation tools. 
 
 ## `synthetics(datasource: str, language: str, data: dict[str, Any]) -> Synthetic`
 
@@ -431,7 +433,21 @@ __Raises:__
 
 ## `Synthetic`
 
-TODO
+<details>
+  <summary>
+Represents the result of a synthetic text generation process including both raw
+and annotated text, as well as entity and span metadata.
+  </summary>
+
+__Attributes__:
+- `text (str)`: The raw generated text without annotations.
+- `annotation (str)`: The annotated version of the text, including entity
+  markers.
+- `entities (list[tuple[int, int, str]])`: A list of entities found in the text.
+  Each entity is represented as a tuple (`start_index, end_index, label`).
+- `spans (list[tuple[int, int, str]])`: A list of pattern-based spans in the
+  text. Each span is represented as a tuple (`start_index, end_index, label`).
+</details>
 
 ## `TemplateException`
 

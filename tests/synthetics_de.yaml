@@ -48,9 +48,10 @@ templates:
 - name: Beispiel 04
   condition: turnover > 365
   template: |
-    Gibt es Vorschläge zur Optimierung der Prozesse beim Management?
-    Ja -- Wir planen die Verlagerung der Besprechungsräume auf den {{ planet }}.
-    Dort hat das Jahr {{ turnover }} Tage, was die längeren Besprechungen kompensieren.
+    {% set turnover_diff = (turnover | default(0, true) | int) - 365 %}
+    Vorschläge zur Verbesserung der Meetings?
+    Ja -- Die Verlagerung auf den {{ planet }}.
+    Das Jahr hat {{ (turnover_diff ~ " Tage") }} mehr und wir Zeit für die Arbeit.
 
 - name: Beispiel 05
   condition: moons > 2

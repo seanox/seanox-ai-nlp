@@ -204,7 +204,7 @@ with open("synthetics-planets_en.json", encoding="utf-8") as file:
     datas = json.load(file)
     
 for data in datas:
-    synthetic = synthetics(".", "en_annotate", data)
+    synthetic = synthetics(".", "synthetics_en_annotate.yaml", data)
     print(synthetic)
 ```
 

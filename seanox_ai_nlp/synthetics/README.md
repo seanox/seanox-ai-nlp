@@ -296,7 +296,7 @@ with open("synthetics-planets_en.json", encoding="utf-8") as file:
   datas = json.load(file)
 
 for data in datas:
-  synthetic = synthetics(".", "en_annotate", data)
+  synthetic = synthetics(".", "synthetics_en_annotate.yaml", data)
   print(synthetic)
 ```
 
@@ -350,7 +350,7 @@ nlp = spacy.load("en_core_web_md")
 doc_bin = DocBin()
 
 for data in datas:
-    synthetic = synthetics(".", "en_annotate", data)
+    synthetic = synthetics(".", "synthetics_en_annotate.yaml", data)
     doc = nlp.make_doc(synthetic.text)
     ents = []
     for start, end, label in synthetic.entities:
@@ -362,7 +362,7 @@ for data in datas:
     doc.ents = ents
     doc_bin.add(doc)
 
-doc_bin.to_disk("synthetic_training.spacy")
+doc_bin.to_disk("synthetics_training.spacy")
 
 docs = list(doc_bin.get_docs(nlp.vocab))
 for index, doc in enumerate(docs):
@@ -425,7 +425,7 @@ with open("synthetics-planets_en.json", encoding="utf-8") as file:
     datas = json.load(file)
 
 for data in datas:
-    synthetic = synthetics(".", "en_annotate", data)
+    synthetic = synthetics(".", "synthetics_en_annotate.yaml", data)
     print(highlight_entities(synthetic.text, synthetic.entities))
 
     df = pd.DataFrame(synthetic.entities, columns=["start", "end", "label"])
@@ -489,23 +489,23 @@ The __synthetic__ module offers a compact API for synthetic text generation. It
 is suitable for NLP pipelines, annotation workflows, or automated content
 generation tools. 
 
-## `synthetics(datasource: str, language: str, data: dict[str, Any]) -> Synthetic`
+## `synthetics(datasource: str, template: str, data: dict[str, Any]) -> Synthetic`
 
 <details>
   <summary>
 Generates synthetic text using predefined YAML templates.
 
-The function loads templates from a language-specific YAML file (e.g.
-'synthetics_en.yaml'), evaluates conditions associated with each template,
-randomly selects one of the matching entries, and renders it using Jinja2.
+The function loads template definitions from a YAML file located in the
+datasource directory (e.g. synthetics_en.yaml). It evaluates the conditions
+specified for each template, filters the matching entries, randomly selects one
+of them, and renders the final output using the Jinja2 templating engine.
   </summary>
 
 Templates are cached internally to improve performance on repeated invocations.
 
 __Parameters:__
-- `datasource (str)`: Path to the directory containing the YAML template files.
-- `language (str or Enum)`: Language identifier used to select the correct
-  template file.
+- `datasource (str)`: Path to the directory containing template files.
+- `template (str)`: Name of the template file.
 - `data (dict)`: Contextual data used to evaluate conditions and render the
   template.
 

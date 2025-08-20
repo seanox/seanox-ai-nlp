@@ -17,7 +17,7 @@ nlp = spacy.load("en_core_web_md")
 doc_bin = DocBin()
 
 for data in datas:
-    synthetic = synthetics(".", "en_annotate", data)
+    synthetic = synthetics(".", "synthetics_en_annotate.yaml", data)
     doc = nlp.make_doc(synthetic.text)
     ents = []
     for start, end, label in synthetic.entities:
@@ -30,7 +30,7 @@ for data in datas:
     doc_bin.add(doc)
 
 # Save for spaCy training
-doc_bin.to_disk("synthetic_training.spacy")
+doc_bin.to_disk("synthetics_training.spacy")
 
 docs = list(doc_bin.get_docs(nlp.vocab))
 for index, doc in enumerate(docs):

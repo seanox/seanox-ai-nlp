@@ -28,7 +28,7 @@ with open("synthetics-planets_en.json", encoding="utf-8") as file:
 
 # Generate color-coded output for terms and planets
 for data in datas:
-    synthetic = synthetics(".", "en_annotate", data)
+    synthetic = synthetics(".", "synthetics_en_annotate.yaml", data)
     print(highlight_entities(synthetic.text, synthetic.entities))
 
     df = pd.DataFrame(synthetic.entities, columns=["start", "end", "label"])

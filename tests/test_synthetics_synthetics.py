@@ -13,7 +13,7 @@ import pytest
 def test_synthetics_benchmark_00():
     synthetics(
         ".",
-        "de_annotate",
+        "synthetics_de_annotate.yaml",
         {
             "planet": "",
             "type": "",
@@ -34,7 +34,7 @@ def test_synthetics_benchmark_01():
     count_text = 0
     start = perf_counter()
     for data in datas:
-        result = synthetics(".", "de_annotate", data)
+        result = synthetics(".", "synthetics_de_annotate.yaml", data)
         count_text += len(result.text)
     end = perf_counter()
 
@@ -59,7 +59,7 @@ def test_synthetics_benchmark_02():
     print(len(scaled_datas))
     start = perf_counter()
     for data in scaled_datas:
-        result = synthetics(".", "de_annotate", data)
+        result = synthetics(".", "synthetics_de_annotate.yaml", data)
         count_text += len(result.text)
     end = perf_counter()
 
@@ -73,7 +73,7 @@ def test_synthetics_usage_01():
     with open("synthetics-planets_en.json", encoding="utf-8") as file:
         datas = json.load(file)
     for data in datas:
-        synthetic = synthetics(".", "en_annotate", data)
+        synthetic = synthetics(".", "synthetics_en_annotate.yaml", data)
         print(synthetic)
 
 
@@ -81,7 +81,7 @@ def test_synthetics_usage_02():
     with open("synthetics-planets_en.json", encoding="utf-8") as file:
         datas = json.load(file)
     for data in datas:
-        synthetic = synthetics(".", "en", data)
+        synthetic = synthetics(".", "synthetics_en.yaml", data)
         print(synthetic)
 
 
@@ -89,7 +89,7 @@ def test_synthetics_usage_03():
     with open("synthetics-planets_de.json", encoding="utf-8") as file:
         datas = json.load(file)
     for data in datas:
-        synthetic = synthetics(".", "de_annotate", data)
+        synthetic = synthetics(".", "synthetics_de_annotate.yaml", data)
         print(synthetic)
 
 
@@ -97,7 +97,7 @@ def test_synthetics_usage_04():
     with open("synthetics-planets_de.json", encoding="utf-8") as file:
         datas = json.load(file)
     for data in datas:
-        synthetic = synthetics(".", "de", data)
+        synthetic = synthetics(".", "synthetics_de.yaml", data)
         print(synthetic)
 
 

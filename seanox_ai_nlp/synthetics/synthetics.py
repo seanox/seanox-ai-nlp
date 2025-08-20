@@ -49,6 +49,9 @@ _ENTITY_MARKER_RAW_PATTERN = rf"""
 _ENTITY_MARKER_NAME_PATTERN = re.compile(rf"^{_ENTITY_MARKER_NAME_RAW_PATTERN}$")
 _ENTITY_MARKER_PATTERN = _re_compile(_ENTITY_MARKER_RAW_PATTERN)
 
+_SEGEMENT_PLACEHOLDER_NAME = r"(?:\w(?:[\w\-\:]*\w)?)"
+_SEGEMENT_PLACEHOLDER_INLINE_PATTERN = _re_compile(rf"@({_SEGEMENT_PLACEHOLDER_NAME})")
+_SEGEMENT_PLACEHOLDER_BRACED_PATTERN = _re_compile(rf"{{@({_SEGEMENT_PLACEHOLDER_NAME})}}")
 
 def _annotate(value: Any, label: str = "") -> str:
     """
@@ -270,11 +273,23 @@ _SAFE_BUILTINS = {
 }
 
 
+def _flat_dict(tree: dict[str, Any], parent: str = "") -> dict[str, str]:
+    if not tree:
+        return {}
+    items = {}
+    for key, value in tree.items():
+        new_key = f"{parent}{":"}{key}" if parent else key
+        if isinstance(value, dict):
+            items.update(_flat_dict(value, new_key))
+        else:
+            items[new_key] = value
+    return items
+
+
 class _Template:
 
-    def __init__(self, datasource: str, language: str):
+    def __init__(self, directory: str, filename: str):
 
-        self.language = language
         self.variants = {}
         self.environment = Environment(loader=BaseLoader(), trim_blocks=False, lstrip_blocks=False)
         self.environment.filters["annotate"] = _annotate
@@ -283,8 +298,9 @@ class _Template:
         self.environment.filters["random_range_join"] = _random_range_join
         self.environment.filters["random_range_join_phrase"] = _random_range_join_phrase
 
-        filename = f"synthetics_{language.lower()}.yaml"
-        path = os.path.join(datasource, filename)
+        if not filename or not filename.strip():
+            raise ValueError("filename is required")
+        path = os.path.join(directory, filename)
         if not os.path.isfile(path):
             raise FileNotFoundError(f"File not found: {path}")
 
@@ -294,16 +310,25 @@ class _Template:
         if not isinstance(parts, list):
             return
 
+        segments = data.get("segments")
+        if segments:
+            segments = _flat_dict(segments)
+
+        def _replace_segments_placeholder(match):
+            return segments.get(match.group(1), match.group(0))
+
         for index, part in enumerate(parts):
-            if not part["template"]:
+            if not part.get("template"):
                 continue
-            name = part["name"] or f"#{str(index)}"
-            condition = str(part["condition"]) or "True"
+            name = part.get("name") or f"#{str(index + 1)}"
+            condition = str(part.get("condition")) or "True"
 
             try:
                 content = part["template"] + os.linesep
                 content = re.sub(r'(\r\n)|(\n\r)|(\r)', '\n', content)
-                content = re.sub(r'\\\n', '', content)
+                content = re.sub(r'\\\n\s*', '', content)
+                content = _SEGEMENT_PLACEHOLDER_BRACED_PATTERN.sub(_replace_segments_placeholder, content)
+                content = _SEGEMENT_PLACEHOLDER_INLINE_PATTERN.sub(_replace_segments_placeholder, content)
                 template = self.environment.from_string(content.strip())
             except Exception as exception:
                 raise TemplateException(f"[{name}] Template error ({type(exception).__name__}): {str(exception)}")
@@ -440,22 +465,22 @@ def _extract_entities(text: str, patterns: dict[str, Any] = None) -> Synthetic:
     return Synthetic(plaintext, text, entities, spans)
 
 
-def synthetics(datasource: str, language: str, data: dict[str, Any]) -> Synthetic:
+def synthetics(datasource: str, template: str, data: dict[str, Any]) -> Synthetic:
     """
     Generates synthetic text using predefined YAML templates.
 
-    The function loads templates from a language-specific YAML file (e.g.
-    'synthetics_en.yaml'), evaluates conditions associated with each template,
-    randomly selects one of the matching entries, and renders it using Jinja2.
+    The function loads template definitions from a YAML file located in the
+    datasource directory (e.g. synthetics_en.yaml). It evaluates the conditions
+    specified for each template, filters the matching entries, randomly selects
+    one of them, and renders the final output using the Jinja2 templating
+    engine.
 
     Templates are cached internally to improve performance on repeated
     invocations.
 
     Parameters:
-        datasource (str): Path to the directory containing the YAML template
-            files.
-        language (str or Enum): Language identifier used to select the correct
-            template file.
+        datasource (str): Path to the directory containing template files.
+        template (str): Name of the template file.
         data (dict): Contextual data used to evaluate conditions and render the
             template.
 
@@ -478,11 +503,11 @@ def synthetics(datasource: str, language: str, data: dict[str, Any]) -> Syntheti
         TemplateConditionException: If a condition expression in the template
             is invalid or unsafe to evaluate.
     """
-    if not language or not language.strip():
+    if not template or not template.strip():
         return Synthetic("", "", [], [])
-    signature = (datasource or "", language)
+    signature = (datasource or "", template)
     if signature not in _TEMPLATES:
-        _TEMPLATES[signature] = _Template(datasource=datasource, language=language)
+        _TEMPLATES[signature] = _Template(datasource, template)
     template = _TEMPLATES[signature]
     template, condition, spans, content = template.generate(data)
     if not template:

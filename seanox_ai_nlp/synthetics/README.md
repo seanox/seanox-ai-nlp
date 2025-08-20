@@ -61,6 +61,7 @@ or augmentation in domain-specific NLP workflows.
 - [Template](#template)
   - [Schema](#schema)
   - [Field Details](#field-details)
+  - [Segments](#segments)
   - [Additional Jinja2 filters](#additional-jinja2-filters)
     - [`annotate`](#annotatevalue-any-label-str-----str)
     - [`random_range`](#random_rangeitems-listany-limit-int---1---listany)
@@ -98,8 +99,11 @@ contextually -- which makes the output both relevant and varied.
 ## Schema
 
 ```Yaml
+segments:                      # Optional reusable segments
+  ...                          # The sub-structure can be defined individually.
+
 templates:
-  - name: <string>             # Unique identifier for the template
+  - name: <string>             # Optional Unique identifier for the template
     condition: <expression>    # Optional condition to activate the template
     template: <string>         # Sentence with annotated placeholders
     spans:                     # Optional: custom span definitions
@@ -120,6 +124,37 @@ templates:
     expression -- from the start to the end of the match.
   - Useful for extracting relationships or nested entities not covered by inline
     annotations (`annotate`).
+
+## Segments
+
+The __segments__ section defines reusable, semantically annotated text fragments
+that can be referenced within templates. These segments act as modular building
+blocks for dynamic content generation, optimizing consistency, maintainability,
+and flexibility.
+
+There are two supported syntaxes for referencing segments in templates:
+
+- `@data:planet` Inline syntax for simple, direct references
+- `{@data:planet}` Bracketed syntax for clearer embedding in complex or nested
+  contexts
+
+Both syntaxes resolve to the same segment definition and can be used
+interchangeably depending on the formatting needs.
+
+```Yaml
+segments:
+  term:
+    planet: '{{ planet | annotate("term") }}'
+    diameter: '{{ diameter | annotate("term") }}'
+  data:
+    planet: '{{ planet | annotate("planet") }}'
+    diameter: '((diameter ~ " km") | annotate("diameter"))'
+
+templates:
+  - name: Example
+    condition: True
+    template: The @term:planet @data:planet has a {@term:diameter} of {@data:diameter}.
+```
 
 ## Additional Jinja2 filters
 

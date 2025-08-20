@@ -148,7 +148,7 @@ segments:
     diameter: '{{ diameter | annotate("term") }}'
   data:
     planet: '{{ planet | annotate("planet") }}'
-    diameter: '((diameter ~ " km") | annotate("diameter"))'
+    diameter: '{{ (diameter ~ " km") | annotate("diameter") }}'
 
 templates:
   - name: Example

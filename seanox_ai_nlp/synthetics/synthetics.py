@@ -237,6 +237,32 @@ def _random_set(items: list[Any], count: int = -1) -> list[Any]:
     return random.sample(items, min(count, len(items)))
 
 
+def _normalize(text: str = "") -> str:
+    """
+    Normalize whitespace in a string.
+
+    Designed for use as a Jinja2 filter. This function removes leading and
+    trailing whitespace characters, and replaces any sequence of one or more
+    whitespace characters (spaces, tabs, newlines) within the string with a
+    single space.
+
+    Args:
+        text (str): The input string to be cleaned.
+
+    Returns:
+        str: A string with normalized whitespace.
+
+    Example:
+        {{ " apple    banana    cherry " | normalize }}
+        might return: "apple banana cherry"
+    """
+    if text is None:
+        return ""
+    text = text.strip()
+    text = re.sub(r'\s+', ' ', text)
+    return text
+
+
 class TemplateException(Exception):
     def __init__(self, message):
         super().__init__(message)
@@ -297,6 +323,7 @@ class _Template:
         self.environment.filters["random_range"] = _random_range
         self.environment.filters["random_range_join"] = _random_range_join
         self.environment.filters["random_range_join_phrase"] = _random_range_join_phrase
+        self.environment.filters["normalize"] = _normalize
 
         if not filename or not filename.strip():
             raise ValueError("filename is required")

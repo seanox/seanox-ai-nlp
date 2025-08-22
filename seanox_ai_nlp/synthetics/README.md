@@ -68,6 +68,7 @@ or augmentation in domain-specific NLP workflows.
     - [`random_range_join`](#random_range_joinitems-listany-separator-str----limit-int---1---str)
     - [`random_range_join_phrase`](#random_range_join_phraseitems-listany-separator-str----word-str----limit-int---1---str)
     - [`random_set`](#random_setitems-listany-count-int---1---listany)
+    - [`normalize`](#normalizetext-str---str)
   - [Example Template File](#example-template-file)
 - [Known Limitations](#known-limitations)
 - [Usage](#usage)
@@ -129,13 +130,12 @@ templates:
 
 The __segments__ section defines reusable, semantically annotated text fragments
 that can be referenced within templates. These segments act as modular building
-blocks for dynamic content generation, optimizing consistency, maintainability,
-and flexibility.
+blocks for dynamic content generation.
 
 There are two supported syntaxes for referencing segments in templates:
 
-- `@data:planet` Inline syntax for simple, direct references
-- `{@data:planet}` Bracketed syntax for clearer embedding in complex or nested
+- `@data:planet` Inline syntax for direct references
+- `{@data:planet}` Bracketed syntax for embedding in complex or nested
   contexts
 
 Both syntaxes resolve to the same segment definition and can be used
@@ -310,7 +310,37 @@ __Behavior__:
 - If `count` is zero or list is empty → returns an empty list.
 
 __Purpose__:
-Provides raw access to a randomized subset of items for further use in templates or logic.
+Provides raw access to a randomized subset of items for further use in templates
+or logic.
+</details>
+
+### `normalize(text: str) -> str`
+
+<details>
+  <summary>
+Normalizes whitespace in a string.
+  </summary>
+
+```
+{{ " apple    banana    cherry "] | normalize }}
+might return: "apple banana cherry"
+```
+
+__Parameters__:
+- `text (str)`: The input string to be cleaned.
+
+__Returns__:
+- `str`: A string with normalized whitespace.
+
+__Behavior__:
+- Removes leading and trailing whitespace.
+- Replaces any sequence of one or more whitespace characters (spaces, tabs,
+  newlines) with a single space.
+- Preserves the original word order and content.
+
+__Purpose__:
+Provides a clean and consistent string format for use in templates, especially
+when dealing with user input or dynamically generated content.
 </details>
 
 ## Example Template File
@@ -367,9 +397,8 @@ Synthetic(
 ## Integration in NLP-Workflows
 
 Example for a spaCy pipeline.  
-see also:
-- [example-spaCy-pipeline.py](
-  ../../examples/synthetics/example-spaCy-pipeline.py) with comments
+see also [example-spaCy-pipeline.py](
+    ../../examples/synthetics/example-spaCy-pipeline.py) with comments
 
 ```python
 from spacy.tokens import DocBin
@@ -442,8 +471,8 @@ import json
 import pandas as pd
 
 LABEL_COLORS = {
-    "planet": ("\033[38;5;0m", "\033[48;5;117m"),   # white on blue
-    "term":   ("\033[38;5;0m", "\033[48;5;250m")    # black on light gray
+    "planet": ("\033[38;5;0m", "\033[48;5;117m"),
+    "term":   ("\033[38;5;0m", "\033[48;5;250m")
 }
 
 def highlight_entities(text, entities):
@@ -617,12 +646,13 @@ Design characteristics:
 ## Processing Workflow
 
 1. __Input__: Structured data as a dictionary
-2. __Template Filtering__: Templates are selected based on conditions
-3. __Template Selection__: One template is chosen randomly from the filtered set
-4. __Rendering__: Jinja2 renders the template with inline annotations
-5. __Entity Extraction__: Markers are parsed and converted to entity spans
-6. __Span Detection__: Regex patterns are applied to extract additional spans
-7. __Output__: A `Synthetic` object is returned with all relevant metadata
+2. __Template Preprocessing__: Segments are resolved in the template logic
+3. __Template Filtering__: Templates are selected based on conditions
+4. __Template Selection__: One template is chosen randomly from the filtered set
+5. __Rendering__: Jinja2 renders the template with inline annotations
+6. __Entity Extraction__: Markers are parsed and converted to entity spans
+7. __Span Detection__: Regex patterns are applied to extract additional spans
+8. __Output__: A `Synthetic` object is returned with all relevant metadata
 
 # Sources & References
 

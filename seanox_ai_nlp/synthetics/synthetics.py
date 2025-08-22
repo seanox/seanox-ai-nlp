@@ -350,23 +350,33 @@ class _Template:
             name = part.get("name") or f"#{str(index + 1)}"
             condition = str(part.get("condition")) or "True"
 
+            content = part["template"] + os.linesep
+            content = re.sub(r'(\r\n)|(\n\r)|(\r)', '\n', content)
+            content = re.sub(r'\\\n\s*', '', content)
+            content = _SEGEMENT_PLACEHOLDER_BRACED_PATTERN.sub(_replace_segments_placeholder, content)
+            content = _SEGEMENT_PLACEHOLDER_INLINE_PATTERN.sub(_replace_segments_placeholder, content)
+
             try:
-                content = part["template"] + os.linesep
-                content = re.sub(r'(\r\n)|(\n\r)|(\r)', '\n', content)
-                content = re.sub(r'\\\n\s*', '', content)
-                content = _SEGEMENT_PLACEHOLDER_BRACED_PATTERN.sub(_replace_segments_placeholder, content)
-                content = _SEGEMENT_PLACEHOLDER_INLINE_PATTERN.sub(_replace_segments_placeholder, content)
                 template = self.environment.from_string(content.strip())
             except Exception as exception:
-                raise TemplateException(f"[{name}] Template error ({type(exception).__name__}): {str(exception)}")
+                raise TemplateException(
+                    f"[{name}] Template error ({type(exception).__name__}): {str(exception)}"
+                    f"{os.linesep}{content}"
+                )
 
             if re.search(r"\b(__|import|exec|open|os|sys)\b", condition):
-                raise TemplateConditionException(f"[{name}] Condition token error: {str(condition)}")
+                raise TemplateConditionException(
+                    f"[{name}] Condition token error"
+                    f"{os.linesep}{str(condition)}"
+                )
 
             try:
                 compile(condition, "<condition>", "eval")
             except Exception as exception:
-                raise TemplateConditionException(f"[{name}] Condition error ({type(exception).__name__}): {str(exception)}")
+                raise TemplateConditionException(
+                    f"[{name}] Condition error ({type(exception).__name__}): {str(exception)}"
+                    f"{os.linesep}{str(condition)}"
+                )
 
             patterns = {}
             labels = []
@@ -381,9 +391,12 @@ class _Template:
 
             try:
                 template.render({})
-                self.variants[index] = (template, condition, spans)
+                self.variants[index] = (name, template, condition, spans)
             except Exception as exception:
-                raise TemplateSyntaxException(f"[{name}] Template syntax error ({type(exception).__name__}): {str(exception)}")
+                raise TemplateSyntaxException(
+                    f"[{name}] Template syntax error ({type(exception).__name__}): {str(exception)}"
+                    f"{os.linesep}{content}"
+                )
 
             self.filter = deque(maxlen=len(self.variants))
 
@@ -394,9 +407,15 @@ class _Template:
         context["re"] = re
 
         templates = []
-        for index, (template, condition, spans) in self.variants.items():
-            if condition is None or eval(condition, {"__builtins__": _SAFE_BUILTINS}, context):
-                templates.append(index)
+        for index, (name, template, condition, spans) in self.variants.items():
+            try:
+                if condition is None or eval(condition, {"__builtins__": _SAFE_BUILTINS}, context):
+                    templates.append(index)
+            except Exception as exception:
+                raise TemplateConditionException(
+                    f"[{name}] Condition error ({type(exception).__name__}): {str(exception)}"
+                    f"{os.linesep}{str(condition)}"
+                )
 
         if not templates:
             return None, "", {}, ""
@@ -411,7 +430,7 @@ class _Template:
             template_id = random.choice(templates)
         self.filter.append(template_id)
 
-        template, condition, spans = self.variants[template_id]
+        name, template, condition, spans = self.variants[template_id]
         content = template.render(**context).strip()
 
         return template, condition, spans, content

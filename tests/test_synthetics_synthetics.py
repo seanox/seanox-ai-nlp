@@ -75,6 +75,7 @@ def test_synthetics_usage_01():
     for data in datas:
         synthetic = synthetics(".", "synthetics_en_annotate.yaml", data)
         print(synthetic)
+        assert "@" not in synthetic.text
 
 
 def test_synthetics_usage_02():
@@ -83,6 +84,7 @@ def test_synthetics_usage_02():
     for data in datas:
         synthetic = synthetics(".", "synthetics_en.yaml", data)
         print(synthetic)
+        assert "@" not in synthetic.text
 
 
 def test_synthetics_usage_03():
@@ -91,6 +93,7 @@ def test_synthetics_usage_03():
     for data in datas:
         synthetic = synthetics(".", "synthetics_de_annotate.yaml", data)
         print(synthetic)
+        assert "@" not in synthetic.text
 
 
 def test_synthetics_usage_04():
@@ -99,6 +102,7 @@ def test_synthetics_usage_04():
     for data in datas:
         synthetic = synthetics(".", "synthetics_de.yaml", data)
         print(synthetic)
+        assert "@" not in synthetic.text
 
 
 def test_synthetics_usage_05(monkeypatch):

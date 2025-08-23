@@ -5,13 +5,13 @@ templates:
     Ist {{ planet }} ein Gesteinsplanet?
     Nein, {{ planet }} {{ ["ist ein", "gehört zur Gruppe"] | random }} {{ type }}.
     {{ [
-        "Wusstest Du schon Folgendes dazu:",
-        "Er hat zudem interessante Merkmale:",
-        "Interessant dazu ist auch:",
-        "Dazu habe ich noch Folgendes gefunden:"
-      ] | random }}
+      "Wusstest Du schon Folgendes dazu:",
+      "Er hat zudem interessante Merkmale:",
+      "Interessant dazu ist auch:",
+      "Dazu habe ich noch Folgendes gefunden:"
+    ] | random }}
     {% for item in characteristics %}\
-    - {{ item }}
+      - {{ item }}
     {% endfor %}
 
 - name: Beispiel 02
@@ -22,9 +22,9 @@ templates:
     {{ characteristic }} trifft auf{{ [" den Planeten", ""] | random }} {{ planet }} zu.
     {{ ["Das ist ein", "Damit gehört der Planet zur Gruppe" ] | random }} {{ type }}.
     {% set facts = [
-        "hat einen Durchmesser von " ~ diameter ~ " km",
-        "besitzt " ~ (moons == 0 and "keine" or moons) ~ " Monde",
-        "hat eine Umlaufzeit von " ~ turnover ~ " Tagen"
+      "hat einen Durchmesser von " ~ diameter ~ " km",
+      "besitzt " ~ (moons == 0 and "keine" or moons) ~ " Monde",
+      "hat eine Umlaufzeit von " ~ turnover ~ " Tagen"
     ] %}\
     {% set facts = facts | random_set(2) %}\
     {{ ["Er", "Der Planet"] | random }} {{ facts[0] }} und {{ facts[1] }}.
@@ -32,17 +32,17 @@ templates:
 - name: Beispiel 03
   condition: moons != 1 and len(atmosphere) > 2
   template: |
-    {{ ["Der Planet ", ""] | random }}{{ planet }} ist ein {{ type }} \
+    {{ ["Der Planet", ""] | random }} {{ planet }} ist ein {{ type }} \
     {% set facts = [
-        "mit einem Durchmesser von " ~ diameter ~ " km",
-        "besitzt " ~ (moons == 0 and "keine" or moons) ~ " Monde",
-        "mit einer Umlaufzeit von " ~ turnover ~ " Tagen"
+      "mit einem Durchmesser von " ~ diameter ~ " km",
+      "besitzt " ~ (moons == 0 and "keine" or moons) ~ " Monde",
+      "mit einer Umlaufzeit von " ~ turnover ~ " Tagen"
     ] %}\
     {{ facts[0] }} und {{ facts[1] }}.
     Die Atmosphäre {{ ["besteht", "setzt sich zusammen"] | random }} aus {{ atmosphere | random_range_join_phrase(", ", " und ") }}.
     {{ ["Typisch", "Charakteristisch", "Markant"] | random}} für {{ planet }} sind Merkmale wie:
     {% for item in characteristics %}\
-    - {{ item }}
+      - {{ item }}
     {% endfor %}
 
 - name: Beispiel 04
@@ -96,12 +96,12 @@ templates:
   template: |
     'planet: {{ planet }}', \
     'type: {{ type }}', \
-    'diameter: {{ diameter }}', \
-    'turnover: {{ turnover }}', \
-    'moons: {{ moons }}' \
-    {% for item in atmosphere %} \
-    , 'atmosphere: {{ item }}' \
-    {% endfor %} \
-    {% for item in characteristics %} \
-    , 'characteristics: {{ item }}' \
+    'diameter: {{ diameter }} km', \
+    'turnover: {{ turnover }} Tage', \
+    'moons: {{ moons }}'\
+    {% for item in atmosphere %}\
+      , 'atmosphere: {{ item }}'\
+    {% endfor %}\
+    {% for item in characteristics %}\
+      , 'characteristics: {{ item }}'\
     {% endfor %}

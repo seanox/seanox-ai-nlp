@@ -156,6 +156,8 @@ templates:
     template: The @term:planet @data:planet has a {@term:diameter} of {@data:diameter}.
 ```
 
+The structure and depth below the section __segment__ is individual.
+
 ## Additional Jinja2 filters
 
 ### `annotate(value: Any, label: str = "") -> str`

@@ -5,13 +5,13 @@ templates:
     Is {{ planet }} a terrestrial planet?
     No, {{ planet }} {{ ["is a", "belongs to the group of"] | random }} {{ type }}.
     {{ [
-        "Did you know this about it?",
-        "It also has some interesting features:",
-        "Here's something else that's fascinating:",
-        "I found the following details as well:"
-      ] | random }}
+      "Did you know this about it?",
+      "It also has some interesting features:",
+      "Here's something else that's fascinating:",
+      "I found the following details as well:"
+    ] | random }}
     {% for item in characteristics %}\
-    - {{ item }}
+      - {{ item }}
     {% endfor %}
 
 - name: Example 02
@@ -22,9 +22,9 @@ templates:
     "{{ characteristic }}" is a feature of{{ [" the planet", ""] | random }} {{ planet }}.
     {{ ["It is a", "This means the planet belongs to the group of"] | random }} {{ type }}.
     {% set facts = [
-        "has a diameter of " ~ diameter ~ " km",
-        moons == 0 and "does not have any moons" or "has " ~ moons ~ " moons",
-        "has an orbital period of " ~ turnover ~ " days"
+      "has a diameter of " ~ diameter ~ " km",
+      moons == 0 and "does not have any moons" or "has " ~ moons ~ " moons",
+      "has an orbital period of " ~ turnover ~ " days"
     ] %}\
     {% set facts = facts | random_set(2) %}\
     {{ ["It", "The planet"] | random }} {{ facts[0] }} and {{ facts[1] }}.
@@ -34,15 +34,15 @@ templates:
   template: |
     {{ ["The planet ", ""] | random }}{{ planet }} is a {{ type }} \
     {% set facts = [
-        "with a diameter of " ~ diameter ~ " km",
-        moons == 0 and "does not have any moons" or "has " ~ moons ~ " moons",
-        "with an orbital period of " ~ turnover ~ " days"
+      "with a diameter of " ~ diameter ~ " km",
+      moons == 0 and "does not have any moons" or "has " ~ moons ~ " moons",
+      "with an orbital period of " ~ turnover ~ " days"
     ] %}\
     {{ facts[0] }} and {{ facts[1] }}.
     The atmosphere {{ ["consists of", "is composed of"] | random }} {{ atmosphere | random_range_join_phrase(", ", " and ") }}.
     {{ ["Typical", "Characteristic", "Striking"] | random }} features of {{ planet }} include:
     {% for item in characteristics %}\
-    - {{ item }}
+      - {{ item }}
     {% endfor %}
 
 - name: Example 04
@@ -96,12 +96,12 @@ templates:
   template: |
     'planet: {{ planet }}', \
     'type: {{ type }}', \
-    'diameter: {{ diameter }}', \
-    'turnover: {{ turnover }}', \
-    'moons: {{ moons }}' \
-    {% for item in atmosphere %} \
-    , 'atmosphere: {{ item }}' \
-    {% endfor %} \
-    {% for item in characteristics %} \
-    , 'characteristics: {{ item }}' \
+    'diameter: {{ diameter }} km', \
+    'turnover: {{ turnover }} days', \
+    'moons: {{ moons }}'\
+    {% for item in atmosphere %}\
+      , 'atmosphere: {{ item }}'\
+    {% endfor %}\
+    {% for item in characteristics %}\
+      , 'characteristics: {{ item }}'\
     {% endfor %}

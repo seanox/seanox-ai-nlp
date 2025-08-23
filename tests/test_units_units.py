@@ -3,10 +3,14 @@
 from seanox_ai_nlp.units import units
 from typing import Optional, NamedTuple
 from time import perf_counter
+from pathlib import Path
 
 import pytest
 import os
 import pathlib
+
+TESTS_PATH = Path("./tests") if Path("./tests").is_dir() else Path(".")
+EXAMPLES_PATH = Path("./examples") if Path("./examples").is_dir() else Path("../examples")
 
 
 class Unit(NamedTuple):
@@ -182,8 +186,8 @@ def test_units_benchmark_02():
     print(f"Benchmark duration: {(end - start) * 1000:.2f} ms")
 
 
-def test_synthetics_usage_01(monkeypatch):
-    monkeypatch.chdir("../examples/units")
+def test_units_usage_01(monkeypatch):
+    monkeypatch.chdir(EXAMPLES_PATH / "units")
     script_path = pathlib.Path("example-pandas.py")
     try:
         exec(script_path.read_text(), {})
@@ -191,8 +195,8 @@ def test_synthetics_usage_01(monkeypatch):
         pytest.fail(f"{script_path.name} failed with error: {exception}")
 
 
-def test_synthetics_usage_02(monkeypatch):
-    monkeypatch.chdir("../examples/units")
+def test_units_usage_02(monkeypatch):
+    monkeypatch.chdir(EXAMPLES_PATH / "units")
     script_path = pathlib.Path("example-spaCy-component.py")
     try:
         exec(script_path.read_text(), {})
@@ -200,8 +204,8 @@ def test_synthetics_usage_02(monkeypatch):
         pytest.fail(f"{script_path.name} failed with error: {exception}")
 
 
-def test_synthetics_usage_03(monkeypatch):
-    monkeypatch.chdir("../examples/units")
+def test_units_usage_03(monkeypatch):
+    monkeypatch.chdir(EXAMPLES_PATH / "units")
     script_path = pathlib.Path("example-spaCy-pipeline.py")
     try:
         exec(script_path.read_text(), {})

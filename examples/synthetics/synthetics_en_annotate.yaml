@@ -66,9 +66,10 @@ templates:
 - name: Example 04
   condition: turnover > 365
   template: |
-    Are there any suggestions for optimizing management processes?
-    Yes -- we are planning to relocate the meeting rooms to {{ planet | annotate("planet") }}.
-    A year there lasts {{ (turnover ~ " days") | annotate("turnover") }}, which helps compensate for longer meetings.
+    {% set turnover_diff = (turnover | default(0, true) | int) - 365 %}
+    Suggestions for improving meetings?
+    Yes -- Relocating them to {{ planet | annotate("planet") }}.
+    The year has {{ (turnover_diff ~ " days") | annotate("turnover") }} more, giving us time to work.
 
 - name: Example 05
   condition: moons > 2

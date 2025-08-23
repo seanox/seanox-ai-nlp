@@ -41,7 +41,7 @@ The illustration below presents the core motivation and design focus of this
 package. It outlines the typical stages of a structured NLP pipeline and
 highlights the specific components where this package provides support.
 
-__Training Pipeline__
+## Training Pipeline
 
 ```mermaid
 ---
@@ -63,7 +63,7 @@ flowchart TD
     style B fill:#FFFFFF
 ```
 
-__Retrieval Process__
+## Retrieval Process
 
 ```mermaid
 ---
@@ -98,7 +98,7 @@ flowchart TD
     style K fill:#FFFFFF
 ```
 
-__Feedback Loop (optional)__
+## Feedback Loop (optional)
 
 ```mermaid
 ---

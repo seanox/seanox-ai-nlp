@@ -54,6 +54,7 @@ flowchart TD
         end
         N["NLP Component Update"]
     end
+    
     subgraph subGraph2["Retrieval Process"]
         D["Natural-language Query"]
         E["Entity Extraction"]
@@ -66,6 +67,7 @@ flowchart TD
         J["Database Execution"]
         K["Retrieval"]
     end
+    
     subgraph subGraph1["Training Pipeline"]
         A["Structured Data"]
         subgraph subGraph1-1["synthetics + units"]

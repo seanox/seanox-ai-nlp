@@ -203,7 +203,7 @@ models (LLMs) and supports reproducible generation.
   Jinja2 templates. Template selection is context-sensitive.
 - __Stochastic Variation__  
   Filters such as __random_set__, __random_range__, and
-- __random_range_join_phrase__ introduce lexical and syntactic diversity from
+  __random_range_join_phrase__ introduce lexical and syntactic diversity from
   identical data structures.
 - __Domain-Specific Annotation__  
   Annotates entities with structured markers for precise extraction and control.

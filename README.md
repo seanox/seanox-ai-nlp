@@ -37,8 +37,8 @@ including:__
 
 ## Structured NLP Workflow
 
-The illustration below presents the core motivation and design focus of this
-package. It outlines the typical stages of a structured NLP pipeline and
+The following figures illustrate the core motivation and design focus of this
+package design. They outline the typical stages of a structured NLP pipeline and
 highlights the specific components where this package provides support.
 
 ## Training Pipeline

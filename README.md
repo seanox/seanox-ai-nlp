@@ -46,7 +46,7 @@ highlights the specific components where this package provides support.
 config:
   theme: neutral
 ---
-flowchart TD
+flowchart LR
     subgraph subGraph3["Feedback Loop (optional)"]
         L["New Structured Data + Natural-language Query"]
         subgraph subGraph3-1["synthetics + units"]

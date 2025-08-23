@@ -236,12 +236,12 @@ for data in datas:
 
 # Changes
 ## 1.1.0 20250823
-BF: units Corrections/optimizations of categorization
-BF: Documentation: Corrections/optimizations
-BF: Build: Corrections/optimizations in pyproject.toml/setup.py
-CR: units Renaming of the UNIT-VALUE label to MEASURE
-CR: units Added unit hl / hL for Hectoliters
-CR: units Separation of SI prefixes: Multiples / Submultiples
+BF: units Corrections/optimizations of categorization  
+BF: Documentation: Corrections/optimizations  
+BF: Build: Corrections/optimizations in pyproject.toml/setup.py  
+CR: units Renaming of the UNIT-VALUE label to MEASURE  
+CR: units Added unit hl / hL for Hectoliters  
+CR: units Separation of SI prefixes: Multiples / Submultiples  
 CR: synthetics: Added to generate semantic sentences
 
 [Read more](https://raw.githubusercontent.com/seanox/seanox-ai-nlp/refs/heads/master/CHANGES)

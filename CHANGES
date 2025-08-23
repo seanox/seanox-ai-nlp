@@ -1,4 +1,4 @@
-1.1.0 202509xx
+1.1.0 20250823
 BF: units Corrections/optimizations of categorization
     The short RegEx was incorrectly prioritized instead of the qualified one.
     e.g. mph (as m), was not correctly determined as length + time

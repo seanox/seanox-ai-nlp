@@ -41,20 +41,36 @@ The illustration below presents the core motivation and design focus of this
 package. It outlines the typical stages of a structured NLP pipeline and
 highlights the specific components where this package provides support.
 
+__Training Pipeline__
+
 ```mermaid
 ---
 config:
   theme: neutral
 ---
 flowchart TD
-    subgraph subGraph3["Feedback Loop (optional)"]
-        L["New Structured Data + Natural-language Query"]
-        subgraph subGraph3-1["synthetics + units"]
-            M["Update of Synthetic Annotated Training Sentences"]
+    subgraph subGraph1[" "]
+        A["Structured Data"]
+        subgraph subGraph1-1["synthetics + units"]
+            B["Synthetic Annotated Training Sentences"]
         end
-        N["NLP Component Update"]
+        C["NLP Component Update"]
     end
-    
+    A --> B
+    B --> C
+    style subGraph1-1 fill:#BBDEFB    
+    style A fill:#FFFFFF
+    style B fill:#FFFFFF
+```
+
+__Retrieval Process__
+
+```mermaid
+---
+config:
+  theme: neutral
+---
+flowchart TD
     subgraph subGraph2["Retrieval Process"]
         D["Natural-language Query"]
         E["Entity Extraction"]
@@ -67,16 +83,6 @@ flowchart TD
         J["Database Execution"]
         K["Retrieval"]
     end
-    
-    subgraph subGraph1["Training Pipeline"]
-        A["Structured Data"]
-        subgraph subGraph1-1["synthetics + units"]
-            B["Synthetic Annotated Training Sentences"]
-        end
-        C["NLP Component Update"]
-    end
-    A --> B
-    B --> C
     D --> E
     E --> F
     F --> G
@@ -84,18 +90,32 @@ flowchart TD
     H --> I
     I --> J
     J --> K
-    L --> M
-    M --> N
-    style subGraph1-1 fill:#BBDEFB    
     style subGraph2-1 fill:#BBDEFB
-    style subGraph3-1 fill:#BBDEFB
-    style A fill:#FFFFFF
-    style B fill:#FFFFFF
     style D fill:#FFFFFF
     style F fill:#FFFFFF
     style G fill:#FFFFFF
     style I fill:#FFFFFF
     style K fill:#FFFFFF
+```
+
+__Feedback Loop (optional)__
+
+```mermaid
+---
+config:
+  theme: neutral
+---
+flowchart TD
+    subgraph subGraph3[" "]
+        L["New Structured Data + Natural-language Query"]
+        subgraph subGraph3-1["synthetics + units"]
+            M["Update of Synthetic Annotated Training Sentences"]
+        end
+        N["NLP Component Update"]
+    end
+    L --> M
+    M --> N
+    style subGraph3-1 fill:#BBDEFB
     style L fill:#FFFFFF
     style M fill:#FFFFFF
 ```

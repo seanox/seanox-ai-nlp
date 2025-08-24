@@ -15,7 +15,7 @@ segments:
     planet: '{{ "planet" | annotate("term") }}'
     umlaufbahn: '{{ "Umlaufbahn" | annotate("term") }}'
     erde: '{{ "Erde" | annotate("term") }}'
-  term-ex:
+  term-exp:
     durchmesser: '("Durchmesser" | annotate("term"))'
     umlaufzeit: '("Umlaufzeit" | annotate("term"))'
   data:
@@ -26,7 +26,7 @@ segments:
     diameter: '{{ diameter ~ " km" | annotate("diameter") }}'
     turnover: '{{ turnover ~ " Tage" | annotate("turnover") }}'
     atmosphere_random: '{{ atmosphere | random_range_join_phrase(", ", " und ") }}'
-  data-ex:
+  data-exp:
     diameter: '(diameter ~ " km" | annotate("diameter"))'
     turnover: '(turnover ~ " Tagen" | annotate("turnover"))'
 
@@ -54,9 +54,9 @@ templates:
     @data:characteristic trifft auf{{ [" den Planeten", ""] | random }} @data:planet zu.
     {{ ["Das ist ein", "Damit gehört der Planet zur Gruppe"] | random }} @data:type.
     {% set facts = [
-      "hat einen " ~ @term-ex:durchmesser ~ " von " ~ @data-ex:diameter,
+      "hat einen " ~ @term-exp:durchmesser ~ " von " ~ @data-exp:diameter,
       "besitzt " ~ ((moons == 0 and "keine" or moons) ~ " Monde" | annotate("moons")),
-      "hat eine " ~ @term-ex:umlaufzeit ~ " von " ~ @data-ex:turnover
+      "hat eine " ~ @term-exp:umlaufzeit ~ " von " ~ @data-exp:turnover
     ] %}\
     {% set facts = facts | random_set(2) %}\
     {{ ["Er", "Der Planet"] | random }} {{ facts[0] }} und {{ facts[1] }}.
@@ -83,9 +83,9 @@ templates:
   template: |
     {{ ["Der Planet", ""] | random }} @data:planet ist ein @data:type \
     {% set facts = [
-      "mit einem " ~ @term-ex:durchmesser ~ " von " ~ ((diameter ~ " km") | annotate("diameter")),
+      "mit einem " ~ @term-exp:durchmesser ~ " von " ~ ((diameter ~ " km") | annotate("diameter")),
       "besitzt " ~ ((moons == 0 and "keine" or moons) ~ " Monde" | annotate("moons")),
-      "mit einer " ~ @term-ex:umlaufzeit ~ " von " ~ @data-ex:turnover
+      "mit einer " ~ @term-exp:umlaufzeit ~ " von " ~ @data-exp:turnover
     ] %}\
     {{ facts[0] }} und {{ facts[1] }}.
     {% set atmosphere = atmosphere | default([]) | map('annotate', 'atmosphere') | list %}

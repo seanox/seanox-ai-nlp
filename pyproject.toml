@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "seanox-ai-nlp"
-version = "1.1.0"
+version = "1.1.1"
 description = "Lightweight NLP components for semantic processing of domain-specific content."
 readme = "README.md"
 license = {text = "Apache-2.0"}

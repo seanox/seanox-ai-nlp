@@ -53,7 +53,7 @@ _SEGEMENT_PLACEHOLDER_NAME = r"(?:\w(?:[\w\-\:]*\w)?)"
 _SEGEMENT_PLACEHOLDER_INLINE_PATTERN = _re_compile(rf"@({_SEGEMENT_PLACEHOLDER_NAME})")
 _SEGEMENT_PLACEHOLDER_BRACED_PATTERN = _re_compile(rf"{{@({_SEGEMENT_PLACEHOLDER_NAME})}}")
 
-def _annotate(value: Any, label: str = "") -> str:
+def _annotate(value: Any = "", label: str = "") -> str:
     """
     The method is intended as a function in the template and annotates a given
     value with a structured entity marker if a valid label is provided.
@@ -81,6 +81,8 @@ def _annotate(value: Any, label: str = "") -> str:
     """
     value = str(value)
     if not label or not _ENTITY_MARKER_NAME_PATTERN.match(label.strip()):
+        return value
+    if not value or not value.strip():
         return value
     return (
         f"{_ENTITY_MARKER_SIGNATURE_START}"

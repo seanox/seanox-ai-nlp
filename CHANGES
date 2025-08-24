@@ -1,3 +1,7 @@
+1.1.1 202509xx
+BF: synthetics: annotate, correction for empty values
+    No output of annotation for empty values, preventing empty entities.
+
 1.1.0 20250823
 BF: units Corrections/optimizations of categorization
     The short RegEx was incorrectly prioritized instead of the qualified one.

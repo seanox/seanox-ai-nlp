@@ -15,3 +15,8 @@ def test_synthetics_annotate_01():
     assert "[[[B]]] a[[[-]]]" == _annotate(" a", " B")
     assert "[[[B]]] a [[[-]]]" == _annotate(" a ", " B ")
     assert "[[[B]]]a [[[-]]]" == _annotate("a ", "B ")
+    assert " " == _annotate(" ", "b")
+    assert "  " == _annotate("  ", "b")
+    assert "\t" == _annotate("\t", "b")
+    assert "\r" == _annotate("\r", "b")
+    assert "\n" == _annotate("\n", "b")

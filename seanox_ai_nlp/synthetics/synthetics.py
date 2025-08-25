@@ -353,10 +353,9 @@ class _Template:
             condition = str(part.get("condition")) or "True"
 
             content = part["template"] + os.linesep
-            content = re.sub(r'(\r\n)|(\n\r)|(\r)', '\n', content)
-            content = re.sub(r'\\\n\s*', '', content)
             content = _SEGEMENT_PLACEHOLDER_BRACED_PATTERN.sub(_replace_segments_placeholder, content)
             content = _SEGEMENT_PLACEHOLDER_INLINE_PATTERN.sub(_replace_segments_placeholder, content)
+            content = re.sub(r"(\s*[\r\n]+\s*){1,}", " ", content)
 
             try:
                 template = self.environment.from_string(content.strip())

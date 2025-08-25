@@ -1,6 +1,11 @@
-1.1.1 202509xx
+1.2.0 202509xx
 BF: synthetics: annotate, correction for empty values
     No output of annotation for empty values, preventing empty entities.
+CR: synthetics: Omission of the backslash to control whitespaces
+    The backslash (\) at the end of a line to control whitespace has been
+    omitted. Line breaks and surrounding spaces are collapsed into a single
+    space. Then use the whitespace control syntax of Jinja: e.g. {%- ... -%}.
+    https://jinja.palletsprojects.com/en/stable/templates/#whitespace-control
 
 1.1.0 20250823
 BF: units Corrections/optimizations of categorization

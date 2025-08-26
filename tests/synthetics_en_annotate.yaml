@@ -159,9 +159,9 @@ templates:
     '@term:diameter: @data:diameter',
     '@term:turnover: @data:turnover',
     '@term:moons: @data:moons'
-    {% for item in atmosphere %}
+    {%- for item in atmosphere -%}
       , '@term:atmosphere: {{ item | annotate("atmosphere") }}'
-    {% endfor %}
-    {% for item in characteristics %}
+    {%- endfor %}
+    {%- for item in characteristics -%}
       , '@term:characteristics: {{ item | annotate("characteristics") }}'
-    {% endfor %}
+    {%- endfor -%}

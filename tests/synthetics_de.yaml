@@ -113,9 +113,9 @@ templates:
     'diameter: {{ diameter }} km',
     'turnover: {{ turnover }} Tage',
     'moons: {{ moons }}'
-    {% for item in atmosphere %}
+    {%- for item in atmosphere -%}
       , 'atmosphere: {{ item }}'
-    {% endfor %}
-    {% for item in characteristics %}
+    {%- endfor -%}
+    {%- for item in characteristics -%}
       , 'characteristics: {{ item }}'
-    {% endfor %}
+    {%- endfor -%}

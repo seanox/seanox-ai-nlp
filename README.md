@@ -71,7 +71,7 @@ config:
   theme: neutral
 ---
 flowchart TD
-    subgraph subGraph2["Retrieval Process"]
+    subgraph subGraph2[" "]
         D["Natural-language Query"]
         E["Entity Extraction"]
         subgraph subGraph2-1["logic query composer"]

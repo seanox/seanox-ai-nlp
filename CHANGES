@@ -1,6 +1,7 @@
 1.2.0 202509xx
 BF: synthetics: annotate, correction for empty values
     No output of annotation for empty values, preventing empty entities.
+BF: units: Optimization Backward compatibility Python < 3.13.x
 CR: synthetics: Omission of the backslash to control whitespaces
     The backslash (\) at the end of a line to control whitespace has been
     omitted. Line breaks and surrounding spaces are collapsed into a single

@@ -306,7 +306,7 @@ def _flat_dict(tree: dict[str, Any], parent: str = "") -> dict[str, str]:
         return {}
     items = {}
     for key, value in tree.items():
-        new_key = f"{parent}{":"}{key}" if parent else key
+        new_key = f"{parent}\":\"{key}" if parent else key
         if isinstance(value, dict):
             items.update(_flat_dict(value, new_key))
         else:

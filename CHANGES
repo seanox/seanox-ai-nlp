@@ -7,6 +7,8 @@ CR: synthetics: Omission of the backslash to control whitespaces
     omitted. Line breaks and surrounding spaces are collapsed into a single
     space. Then use the whitespace control syntax of Jinja: e.g. {%- ... -%}.
     https://jinja.palletsprojects.com/en/stable/templates/#whitespace-control
+CR: synthetics: Optimization of placeholder resolution
+    Improved recursive usage (placeholders use preceding placeholders)
 
 1.1.0 20250823
 BF: units Corrections/optimizations of categorization

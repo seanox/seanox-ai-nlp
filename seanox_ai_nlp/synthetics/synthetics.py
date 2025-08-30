@@ -50,8 +50,9 @@ _ENTITY_MARKER_NAME_PATTERN = re.compile(rf"^{_ENTITY_MARKER_NAME_RAW_PATTERN}$"
 _ENTITY_MARKER_PATTERN = _re_compile(_ENTITY_MARKER_RAW_PATTERN)
 
 _SEGEMENT_PLACEHOLDER_NAME = r"(?:\w(?:[\w\-\:]*\w)?)"
-_SEGEMENT_PLACEHOLDER_INLINE_PATTERN = _re_compile(rf"@({_SEGEMENT_PLACEHOLDER_NAME})")
-_SEGEMENT_PLACEHOLDER_BRACED_PATTERN = _re_compile(rf"{{@({_SEGEMENT_PLACEHOLDER_NAME})}}")
+_SEGEMENT_PLACEHOLDER_INLINE = rf"@({_SEGEMENT_PLACEHOLDER_NAME})"
+_SEGEMENT_PLACEHOLDER_BRACED = rf"{{@({_SEGEMENT_PLACEHOLDER_NAME})}}"
+_SEGEMENT_PLACEHOLDER_PATTERN = re.compile(rf"{_SEGEMENT_PLACEHOLDER_INLINE}|{_SEGEMENT_PLACEHOLDER_BRACED}")
 
 def _annotate(value: Any = "", label: str = "") -> str:
     """
@@ -306,7 +307,7 @@ def _flat_dict(tree: dict[str, Any], parent: str = "") -> dict[str, str]:
         return {}
     items = {}
     for key, value in tree.items():
-        new_key = f"{parent}\":\"{key}" if parent else key
+        new_key = f"{parent}:{key}" if parent else key
         if isinstance(value, dict):
             items.update(_flat_dict(value, new_key))
         else:
@@ -344,7 +345,7 @@ class _Template:
             segments = _flat_dict(segments)
 
         def _replace_segments_placeholder(match):
-            return segments.get(match.group(1), match.group(0))
+            return segments.get(match.group(1) or match.group(2), match.group(0))
 
         for index, part in enumerate(parts):
             if not part.get("template"):
@@ -353,12 +354,11 @@ class _Template:
             condition = str(part.get("condition")) or "True"
 
             content = part["template"] + os.linesep
-            content = _SEGEMENT_PLACEHOLDER_BRACED_PATTERN.sub(_replace_segments_placeholder, content)
-            content = _SEGEMENT_PLACEHOLDER_INLINE_PATTERN.sub(_replace_segments_placeholder, content)
-            content = re.sub(r"(\s*[\r\n]+\s*){1,}", " ", content)
+            content = _SEGEMENT_PLACEHOLDER_PATTERN.sub(_replace_segments_placeholder, content)
+            payload = re.sub(r"(\s*[\r\n]+\s*){1,}", " ", content).strip()
 
             try:
-                template = self.environment.from_string(content.strip())
+                template = self.environment.from_string(payload)
             except Exception as exception:
                 raise TemplateException(
                     f"[{name}] Template error ({type(exception).__name__}): {str(exception)}"

@@ -340,9 +340,27 @@ class _Template:
         if not isinstance(parts, list):
             return
 
+        def _resolve_segments_sequential(segments: dict):
+
+            keys = list(segments.keys())
+            resolved = {}
+
+            for index, key in enumerate(keys):
+                value = segments[key]
+                previous = {key: resolved[key] for key in keys[:index]}
+
+                def _replace(match):
+                    name = match.group(1) or match.group(2)
+                    return previous.get(name, match.group(0))
+
+                resolved[key] = _SEGEMENT_PLACEHOLDER_PATTERN.sub(_replace, value)
+
+            return resolved
+
         segments = data.get("segments")
         if segments:
             segments = _flat_dict(segments)
+        segments = _resolve_segments_sequential(segments)
 
         def _replace_segments_placeholder(match):
             return segments.get(match.group(1) or match.group(2), match.group(0))

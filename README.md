@@ -73,8 +73,10 @@ config:
 flowchart TD
     subgraph subGraph2[" "]
         D["Natural-language Query"]
-        E["Entity Extraction"]
-        subgraph subGraph2-1["logic query composer"]
+        subgraph subGraph2-1["units"]
+            E["Entity Extraction"]
+        end
+        subgraph subGraph2-2["logic query composer"]
             F["Semantic and Logical Analysis"]
         end
         G["Logical Structure"]
@@ -91,6 +93,7 @@ flowchart TD
     I --> J
     J --> K
     style subGraph2-1 fill:#BBDEFB
+    style subGraph2-2 fill:#BBDEFB
     style D fill:#FFFFFF
     style F fill:#FFFFFF
     style G fill:#FFFFFF

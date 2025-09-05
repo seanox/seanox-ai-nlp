@@ -41,7 +41,7 @@ The following figures illustrate the core motivation and design focus of this
 package design. They outline the typical stages of a structured NLP pipeline and
 highlights the specific components where this package provides support.
 
-![Retrieval Process](./assets/retrieval-process.svg)
+![Retrieval Process](https://raw.githubusercontent.com/seanox/seanox-ai-nlp/refs/heads/master/assets/retrieval-process.svg)
 
 This conceptual overview serves as a foundation for understanding the individual
 components, which are detailed in the next section.

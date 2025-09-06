@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36" version="28.2.0">
   <diagram name="Seite-1" id="W8E7Fu8FmdDjgyTMKueG">
-    <mxGraphModel dx="1422" dy="947" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="733" dy="492" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -61,10 +61,10 @@
         <mxCell id="DQWL6Y3L35b5UZnqnHU8-59" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;" parent="1" source="DQWL6Y3L35b5UZnqnHU8-35" target="DQWL6Y3L35b5UZnqnHU8-32" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="56x2TEef05zbnp8twlGz-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="DQWL6Y3L35b5UZnqnHU8-35" target="56x2TEef05zbnp8twlGz-2">
+        <mxCell id="56x2TEef05zbnp8twlGz-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="DQWL6Y3L35b5UZnqnHU8-35" target="56x2TEef05zbnp8twlGz-2" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="56x2TEef05zbnp8twlGz-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="DQWL6Y3L35b5UZnqnHU8-35" target="56x2TEef05zbnp8twlGz-1">
+        <mxCell id="56x2TEef05zbnp8twlGz-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="DQWL6Y3L35b5UZnqnHU8-35" target="56x2TEef05zbnp8twlGz-1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="DQWL6Y3L35b5UZnqnHU8-35" value="Entity Extraction" style="whiteSpace=wrap;strokeWidth=1;fillColor=#f5f5f5;gradientColor=#CCCCCC;strokeColor=#999999;gradientDirection=south;" parent="1" vertex="1">
@@ -101,7 +101,7 @@
         <mxCell id="DQWL6Y3L35b5UZnqnHU8-60" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;" parent="1" source="DQWL6Y3L35b5UZnqnHU8-32" target="DQWL6Y3L35b5UZnqnHU8-36" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="DQWL6Y3L35b5UZnqnHU8-32" value="Semantic and Logical Analysis" style="whiteSpace=wrap;strokeWidth=1;strokeColor=#999999;" parent="1" vertex="1">
+        <mxCell id="DQWL6Y3L35b5UZnqnHU8-32" value="Semantic and Logical Analysis" style="whiteSpace=wrap;strokeWidth=1;strokeColor=#999999;fillColor=#f5f5f5;gradientColor=#CCCCCC;" parent="1" vertex="1">
           <mxGeometry x="680" y="690" width="200" height="60" as="geometry" />
         </mxCell>
         <mxCell id="DQWL6Y3L35b5UZnqnHU8-34" value="Natural-language Query" style="whiteSpace=wrap;strokeWidth=1;glass=0;strokeColor=#999999;" parent="1" vertex="1">
@@ -110,10 +110,10 @@
         <mxCell id="DQWL6Y3L35b5UZnqnHU8-58" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=default;" parent="1" source="DQWL6Y3L35b5UZnqnHU8-34" target="DQWL6Y3L35b5UZnqnHU8-35" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="56x2TEef05zbnp8twlGz-1" value="domain-specific&#xa;Entity and Span Rules" style="whiteSpace=wrap;strokeWidth=1;strokeColor=#999999;" vertex="1" parent="1">
+        <mxCell id="56x2TEef05zbnp8twlGz-1" value="domain-specific&#xa;Entity and Span Rules" style="whiteSpace=wrap;strokeWidth=1;strokeColor=#999999;" parent="1" vertex="1">
           <mxGeometry x="530" y="530" width="160" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="56x2TEef05zbnp8twlGz-2" value="domain-specific&#xa;(Phrase)Matcher" style="whiteSpace=wrap;strokeWidth=1;strokeColor=#999999;" vertex="1" parent="1">
+        <mxCell id="56x2TEef05zbnp8twlGz-2" value="domain-specific&#xa;(Phrase)Matcher" style="whiteSpace=wrap;strokeWidth=1;strokeColor=#999999;" parent="1" vertex="1">
           <mxGeometry x="870" y="530" width="160" height="60" as="geometry" />
         </mxCell>
       </root>

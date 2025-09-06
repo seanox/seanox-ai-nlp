@@ -1,4 +1,4 @@
-1.2.0 202509xx
+1.2.0 20250906
 BF: synthetics: annotate, correction for empty values
     No output of annotation for empty values, preventing empty entities.
 BF: Optimization Backward compatibility Python < 3.13.x

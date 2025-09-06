@@ -158,14 +158,11 @@ for data in datas:
 - [Downstream Processing with pandas](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#downstream-processing-with-pandas)
 
 # Changes
-## 1.1.0 20250823
-BF: units Corrections/optimizations of categorization  
-BF: Documentation: Corrections/optimizations  
-BF: Build: Corrections/optimizations in pyproject.toml/setup.py  
-CR: units Renaming of the UNIT-VALUE label to MEASURE  
-CR: units Added unit hl / hL for Hectoliters  
-CR: units Separation of SI prefixes: Multiples / Submultiples  
-CR: synthetics: Added to generate semantic sentences
+## 1.2.0 20250906  
+BF: synthetics: annotate, correction for empty values  
+BF: Optimization Backward compatibility Python < 3.13.x  
+CR: synthetics: Omission of the backslash to control whitespaces  
+CR: synthetics: Optimization of placeholder resolution
 
 [Read more](https://raw.githubusercontent.com/seanox/seanox-ai-nlp/refs/heads/master/CHANGES)
 

@@ -94,15 +94,18 @@ expressions from natural language.
 <details>
   <summary>
 Measurement values appear in diverse numeric formats depending on locale,
-notation, and domain. __units__ supports common representations, including signs
-and tolerance indicators.
+notation, and domain. <b>units</b> supports common representations, including
+signs and tolerance indicators.
   </summary>
+
+<br/>
 
 | Locale | Signs          | Format                   | 
 |--------|----------------|--------------------------|
 | CH     | + - &plusmn; ~ | 1&rsquo;000&rsquo;000,00 |
 | DE     | + - &plusmn; ~ | 1.000.000,00             |
 | EN     | + - &plusmn; ~ | 1,000,000.00             |
+| FR     | + - &plusmn; ~ | 1 000 000,00             |
 | IN     | + - &plusmn; ~ | 1,00,000.00              |
 | ISO    | + - &plusmn; ~ | 1 000 000.00             |
 | plain  | + - &plusmn; ~ | 1000000.00               |
@@ -115,10 +118,12 @@ and tolerance indicators.
 <details>
   <summary>
 Dimensional separators link numerical values to compact measurements such as
-__10 &times; 20 &times; 30 cm__, where each value represents a distinct
+<b>10 &times; 20 &times; 30 cm</b>, where each value represents a distinct
 dimension (e.g. width &times height &times depth). These separators help convey
 structured spatial information in a concise format.
   </summary>
+
+<br/>
 
 | Separator                   | Symbol   |
 |-----------------------------|----------|
@@ -287,6 +292,8 @@ Internationally defined SI prefixes for multiples and submultiples of units of
 measurement.
   </summary>
 
+<br/>
+
 | Multiples | Symbol | Submultiples | Symbol  |
 |-----------|--------|--------------|---------|
 | Quetta    | Q      | Deci         | d       |
@@ -311,6 +318,8 @@ measurement.
 Exponents commonly used in everyday life in combining to SI units.
   </summary>
 
+<br/>
+
 | Positive Exponents | Negative Exponents |
 |--------------------|--------------------|
 | &sup1;             | &#x207B;&sup1;     |
@@ -326,6 +335,8 @@ Exponents commonly used in everyday life in combining to SI units.
 International Electrotechnical Commission (IEC) prefixes for indicating
 multiples and fractions in data processing.
   </summary>
+
+<br/>
 
 | Multiplicative | Symbol | Submultiplicative | Symbol |
 |----------------|--------|-------------------|--------|
@@ -347,6 +358,8 @@ multiples and fractions in data processing.
 Mathematical operators for combining units into expressions.
   </summary>
 
+<br/>
+
 | Operator                                | Symbol   |
 |-----------------------------------------|----------|
 | Asterisk                                | *        |
@@ -364,6 +377,8 @@ Mathematical operators for combining units into expressions.
 Everyday informal prefixes and exponents that are commonly used in certain
 contexts but are not part of the official SI system.
   </summary>
+
+<br/>
 
 | Prefix       | Symbol | Exponents | Symbol | 
 |--------------|--------|-----------|--------|

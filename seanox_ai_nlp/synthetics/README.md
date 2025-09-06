@@ -579,8 +579,6 @@ specified for each template, filters the matching entries, randomly selects one
 of them, and renders the final output using the Jinja2 templating engine.
   </summary>
 
-<br/>
-
 Templates are cached internally to improve performance on repeated invocations.
 
 __Parameters:__

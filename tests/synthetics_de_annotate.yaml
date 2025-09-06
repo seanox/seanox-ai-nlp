@@ -4,31 +4,27 @@
 # section segment is individual.
 segments:
   term:
-    atmosphäre: '{{ "Atmosphäre" | annotate("term") }}'
-    monde: '{{ "Monde" | annotate("term") }}'
-    characteristics: '{{ "characteristics" | annotate("term") }}'
-    atmosphere: '{{ "atmosphere" | annotate("term") }}'
-    moons: '{{ "moons" | annotate("term") }}'
-    turnover: '{{ "turnover" | annotate("term") }}'
-    diameter: '{{ "diameter" | annotate("term") }}'
-    type: '{{ "type" | annotate("term") }}'
-    planet: '{{ "planet" | annotate("term") }}'
-    umlaufbahn: '{{ "Umlaufbahn" | annotate("term") }}'
-    erde: '{{ "Erde" | annotate("term") }}'
-  term-exp:
+    atmosphäre: '("Atmosphäre" | annotate("term"))'
+    monde: '("Monde" | annotate("term"))'
+    characteristics: '("characteristics" | annotate("term"))'
+    atmosphere: '("atmosphere" | annotate("term"))'
+    moons: '("moons" | annotate("term"))'
+    turnover: '("turnover" | annotate("term"))'
+    diameter: '("diameter" | annotate("term"))'
+    type: '("type" | annotate("term"))'
+    planet: '("planet" | annotate("term"))'
+    umlaufbahn: '("Umlaufbahn" | annotate("term"))'
+    erde: '("Erde" | annotate("term"))'
     durchmesser: '("Durchmesser" | annotate("term"))'
     umlaufzeit: '("Umlaufzeit" | annotate("term"))'
   data:
-    planet: '{{ planet | annotate("planet") }}'
-    type: '{{ type | annotate("type") }}'
-    characteristic: '{{ characteristic | annotate("characteristics") }}'
-    moons: '{{ moons | annotate("moons") }}'
-    diameter: '{{ diameter ~ " km" | annotate("diameter") }}'
-    turnover: '{{ turnover ~ " Tage" | annotate("turnover") }}'
-    atmosphere_random: '{{ atmosphere | random_range_join_phrase(", ", " und ") }}'
-  data-exp:
+    planet: '(planet | annotate("planet"))'
+    type: '(type | annotate("type"))'
+    characteristic: '(characteristic | annotate("characteristics"))'
+    moons: '(moons | annotate("moons"))'
     diameter: '(diameter ~ " km" | annotate("diameter"))'
     turnover: '(turnover ~ " Tagen" | annotate("turnover"))'
+    atmosphere_random: '(atmosphere | random_range_join_phrase(", ", " und "))'
   text:
     newline: '{{- "\r\n" -}}'
 
@@ -36,9 +32,9 @@ templates:
 - name: Beispiel 01
   condition: type != "Gesteinsplanet"
   template: |
-    Ist @data:planet ein {{ "Gesteinsplanet" | annotate("type") }}?
+    Ist {{ @data:planet }} ein {{ "Gesteinsplanet" | annotate("type") }}?
     @text:newline
-    Nein, @data:planet {{ ["ist ein", "gehört zur Gruppe"] | random }} @data:type.
+    Nein, {{ @data:planet }} {{ ["ist ein", "gehört zur Gruppe"] | random }} {{ @data:type }}.
     @text:newline
     {{ [
       "Wusstest Du schon Folgendes dazu:",
@@ -55,16 +51,16 @@ templates:
   condition: moons != 1
   template: |
     {% set characteristic = characteristics | random %}
-    Was kannst Du mir zu "@data:characteristic in unserem {{ ["Planetensystem", "Sonnensystem"] | random | annotate("term") }}" sagen?
+    Was kannst Du mir zu "{{ @data:characteristic }} in unserem {{ ["Planetensystem", "Sonnensystem"] | random | annotate("term") }}" sagen?
     @text:newline
-    @data:characteristic trifft auf{{ [" den Planeten", ""] | random }} @data:planet zu.
+    {{ @data:characteristic }} trifft auf{{ [" den Planeten", ""] | random }} {{ @data:planet }} zu.
     @text:newline
-    {{ ["Das ist ein", "Damit gehört der Planet zur Gruppe"] | random }} @data:type.
+    {{ ["Das ist ein", "Damit gehört der Planet zur Gruppe"] | random }} {{ @data:type }}.
     @text:newline
     {% set facts = [
-      "hat einen " ~ @term-exp:durchmesser ~ " von " ~ @data-exp:diameter,
+      "hat einen " ~ @term:durchmesser ~ " von " ~ @data:diameter,
       "besitzt " ~ ((moons == 0 and "keine" or moons) ~ " Monde" | annotate("moons")),
-      "hat eine " ~ @term-exp:umlaufzeit ~ " von " ~ @data-exp:turnover
+      "hat eine " ~ @term:umlaufzeit ~ " von " ~ @data:turnover
     ] %}
     {%- set facts = facts | random_set(2) -%}
     {{ ["Er", "Der Planet"] | random }} {{ facts[0] }} und {{ facts[1] }}.
@@ -89,18 +85,18 @@ templates:
 - name: Beispiel 03
   condition: moons != 1 and len(atmosphere) > 2
   template: |
-    {{ ["Der Planet", ""] | random }} @data:planet ist ein @data:type
+    {{ ["Der Planet", ""] | random }} {{ @data:planet }} ist ein {{ @data:type }}
     {% set facts = [
-      "mit einem " ~ @term-exp:durchmesser ~ " von " ~ ((diameter ~ " km") | annotate("diameter")),
+      "mit einem " ~ @term:durchmesser ~ " von " ~ ((diameter ~ " km") | annotate("diameter")),
       "besitzt " ~ ((moons == 0 and "keine" or moons) ~ " Monde" | annotate("moons")),
-      "mit einer " ~ @term-exp:umlaufzeit ~ " von " ~ @data-exp:turnover
+      "mit einer " ~ @term:umlaufzeit ~ " von " ~ @data:turnover
     ] %}
     {{ facts[0] }} und {{ facts[1] }}.
     {%- set atmosphere = atmosphere | default([]) | map('annotate', 'atmosphere') | list -%}
     @text:newline
-    Die @term:atmosphäre {{ ["besteht", "setzt sich zusammen"] | random }} aus @data:atmosphere_random.
+    Die {{ @term:atmosphäre }} {{ ["besteht", "setzt sich zusammen"] | random }} aus {{ @data:atmosphere_random }}.
     @text:newline
-    {{ ["Typisch", "Charakteristisch", "Markant"] | random }} für @data:planet sind Merkmale wie:
+    {{ ["Typisch", "Charakteristisch", "Markant"] | random }} für {{ @data:planet }} sind Merkmale wie:
     @text:newline
     {% for item in characteristics -%}
       - {{ item | annotate("characteristics") }} @text:newline
@@ -112,16 +108,16 @@ templates:
     {% set turnover = (turnover | default(0, true) | int) - 365 %}
     Vorschläge zur Verbesserung der Meetings?
     @text:newline
-    Ja -- Die Verlagerung auf den @data:planet.
+    Ja -- Die Verlagerung auf den {{ @data:planet }}.
     @text:newline
-    Das Jahr hat @data:turnover mehr und wir Zeit für die Arbeit.
+    Das Jahr hat {{ @data:turnover }} mehr und wir Zeit für die Arbeit.
 
 - name: Beispiel 05
   condition: moons > 2
   template: |
-    Hat @data:planet mehrere @term:monde?
+    Hat {{ @data:planet }} mehrere {{ @term:monde }}?
     @text:newline
-    Ja und zwar genau @data:moons{{ [" davon", ""] | random }}.
+    Ja und zwar genau {{ @data:moons }}{{ [" davon", ""] | random }}.
 
 - name: Beispiel 06
   condition: True
@@ -131,7 +127,7 @@ templates:
     {{ ["und", "sowie", "wie auch"] | random }}
     {{ facts[1] | annotate("characteristics") }}
     {{ ["sind charakteristisch für", "kennzeichnen"] | random }}
-    @data:planet.
+    {{ @data:planet }}.
 
 # During template validation, fields may be undefined if no data is provided.
 # This becomes problematic when those fields are used in functions rather than
@@ -142,8 +138,8 @@ templates:
   condition: turnover > 365
   template: |
     {% set turnover = (turnover | default(0, true) | int) - 365 %}
-    Im Vergleich zur @term:erde
-    benötigt @data:planet @data:turnover länger für seine @term:umlaufbahn.
+    Im Vergleich zur {{ @term:erde }}
+    benötigt {{ @data:planet }} {{ @data:turnover }} länger für seine {{ @term:umlaufbahn }}.
 
 # In addition to named entities, custom spans can be defined between entities
 # using regular expressions. Regex patterns should be applied to the text
@@ -156,14 +152,14 @@ templates:
   - label: "PAIR"
     pattern: (?<=[\"\'])\w+:\s.*?(?=[\"\'])
   template: |
-    '@term:planet: @data:planet',
-    '@term:type: @data:type',
-    '@term:diameter: @data:diameter',
-    '@term:turnover: @data:turnover',
-    '@term:moons: @data:moons'
+    '{{ @term:planet }}: {{ @data:planet }}',
+    '{{ @term:type }}: {{ @data:type }}',
+    '{{ @term:diameter }}: {{ @data:diameter }}',
+    '{{ @term:turnover }}: {{ @data:turnover }}',
+    '{{ @term:moons }}: {{ @data:moons }}'
     {%- for item in atmosphere -%}
-      , '@term:atmosphere: {{ item | annotate("atmosphere") }}'
+      , '{{ @term:atmosphere }}: {{ item | annotate("atmosphere") }}'
     {%- endfor -%}
     {%- for item in characteristics -%}
-      , '@term:characteristics: {{ item | annotate("characteristics") }}'
+      , '{{ @term:characteristics }}: {{ item | annotate("characteristics") }}'
     {%- endfor -%}

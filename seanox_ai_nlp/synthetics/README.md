@@ -168,6 +168,8 @@ Marks a value with a structured entity label for downstream processing (e.g.
 entity extraction).
   </summary>
 
+<br/>
+
 ```
 {{ value | annotate("LABEL") }}
 produce: [[[LABEL]]]value[[[-]]]
@@ -198,6 +200,8 @@ Enables inline annotation of entities in generated text.
 Randomly selects and shuffles a subset of items from the provided list.
   </summary>
 
+<br/>
+
 ```
 {{ random_range(["apple", "banana", "cherry"], 2) }}
 might return: ["banana", "apple"]
@@ -226,6 +230,8 @@ Provides controlled variation in template-generated content.
   <summary>
 Randomly selects and joins a subset of items into a single string.
   </summary>
+
+<br/>
 
 ```
 {{ ["apple", "banana", "cherry"] | random_range_join(",", 2) }}
@@ -257,6 +263,8 @@ Generates dynamic, varied list expressions for use in template-generated text.
   <summary>
 Randomly selects and joins items into a natural-language-like phrase.
   </summary>
+
+<br/>
 
 ```
 {{ ["apple", "banana", "cherry"] | random_range_join_phrase(", ", " and ", 3) }}
@@ -292,6 +300,8 @@ Creates a natural-language-like phrase for use in template-generated text
 Randomly selects a subset of items from a list.
   </summary>
 
+<br/>
+
 ```
 {{ ["apple", "banana", "cherry"] | random_set(2) }}
 might return: ["banana", "apple"]
@@ -322,6 +332,8 @@ or logic.
   <summary>
 Normalizes whitespace in a string.
   </summary>
+
+<br/>
 
 ```
 {{ " apple    banana    cherry "] | normalize }}
@@ -567,6 +579,8 @@ specified for each template, filters the matching entries, randomly selects one
 of them, and renders the final output using the Jinja2 templating engine.
   </summary>
 
+<br/>
+
 Templates are cached internally to improve performance on repeated invocations.
 
 __Parameters:__
@@ -594,6 +608,8 @@ __Raises:__
 Represents the result of a synthetic text generation process including both raw
 and annotated text, as well as entity and span metadata.
   </summary>
+
+<br/>
 
 __Attributes__:
 - `text (str)`: The raw generated text without annotations.

@@ -1,6 +1,6 @@
 # tests/test_synthetics_synthetics.py
 
-from seanox_ai_nlp.synthetics import synthetics
+from seanox_ai_nlp.synthetics import synthetics, TemplateConditionException
 from time import perf_counter
 from pathlib import Path
 
@@ -9,12 +9,13 @@ import random
 import copy
 import json
 import pytest
+import re
 
 TESTS_PATH = Path("./tests") if Path("./tests").is_dir() else Path(".")
 EXAMPLES_PATH = Path("./examples") if Path("./examples").is_dir() else Path("../examples")
 
 
-def test_synthetics_benchmark_00():
+def test_synthetics_usage_07():
     synthetics(
         TESTS_PATH,
         "synthetics_de_annotate.yaml",
@@ -27,6 +28,18 @@ def test_synthetics_benchmark_00():
             "atmosphere": [],
             "characteristics": []
         }
+    )
+
+
+def test_synthetics_usage_08():
+    with pytest.raises(TemplateConditionException) as exception:
+        synthetics(
+                TESTS_PATH,
+                "synthetics_de_annotate.yaml"
+            )
+    assert re.search(
+        r"Condition error \(NameError\): name '.*' is not defined",
+        str(exception.value)
     )
 
 

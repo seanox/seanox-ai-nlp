@@ -4,6 +4,7 @@ from jinja2 import Environment, BaseLoader
 from typing import Any
 from dataclasses import dataclass
 from collections import deque
+from typing import Callable
 
 import os
 import random
@@ -53,6 +54,8 @@ _SEGEMENT_PLACEHOLDER_NAME = r"(?:\w(?:[\w\-\:]*\w)?)"
 _SEGEMENT_PLACEHOLDER_INLINE = rf"@({_SEGEMENT_PLACEHOLDER_NAME})"
 _SEGEMENT_PLACEHOLDER_BRACED = rf"{{@({_SEGEMENT_PLACEHOLDER_NAME})}}"
 _SEGEMENT_PLACEHOLDER_PATTERN = re.compile(rf"{_SEGEMENT_PLACEHOLDER_INLINE}|{_SEGEMENT_PLACEHOLDER_BRACED}")
+
+_FILTER_NAME_PATTERN = re.compile(r"^\w+$")
 
 def _annotate(value: Any = "", label: str = "") -> str:
     """
@@ -317,16 +320,25 @@ def _flat_dict(tree: dict[str, Any], parent: str = "") -> dict[str, str]:
 
 class _Template:
 
-    def __init__(self, directory: str, filename: str):
+    def __init__(self, directory: str, filename: str, filters: dict[str, Callable] = None):
 
         self.variants = {}
-        self.environment = Environment(loader=BaseLoader(), trim_blocks=False, lstrip_blocks=False)
+        self.environment = Environment(
+            loader=BaseLoader(),
+            trim_blocks=False,
+            lstrip_blocks=False
+        )
         self.environment.filters["annotate"] = _annotate
         self.environment.filters["random_set"] = _random_set
         self.environment.filters["random_range"] = _random_range
         self.environment.filters["random_range_join"] = _random_range_join
         self.environment.filters["random_range_join_phrase"] = _random_range_join_phrase
         self.environment.filters["normalize"] = _normalize
+
+        if filters:
+            for name, function in filters.items():
+                if name and _FILTER_NAME_PATTERN.match(name) and callable(function):
+                    self.environment.filters[name] = function
 
         if not filename or not filename.strip():
             raise ValueError("filename is required")
@@ -530,7 +542,12 @@ def _extract_entities(text: str, patterns: dict[str, Any] = None) -> Synthetic:
     return Synthetic(plaintext, text, entities, spans)
 
 
-def synthetics(datasource: str, template: str, data: dict[str, Any]) -> Synthetic:
+def synthetics(
+        datasource: str,
+        template: str,
+        data: dict[str, Any],
+        filters: dict[str, Callable] = None
+) -> Synthetic:
     """
     Generates synthetic text using predefined YAML templates.
 
@@ -548,6 +565,9 @@ def synthetics(datasource: str, template: str, data: dict[str, Any]) -> Syntheti
         template (str): Name of the template file.
         data (dict): Contextual data used to evaluate conditions and render the
             template.
+        filters (dict, optional): Additional custom filters for template
+            rendering. Keys are filter names (str), and values are callable
+            objects (callables) that implement the filter.
 
     Returns:
         Synthetic: A dataclass containing the generated synthetic text, its
@@ -572,7 +592,7 @@ def synthetics(datasource: str, template: str, data: dict[str, Any]) -> Syntheti
         return Synthetic("", "", [], [])
     signature = (datasource or "", template)
     if signature not in _TEMPLATES:
-        _TEMPLATES[signature] = _Template(datasource, template)
+        _TEMPLATES[signature] = _Template(datasource, template, filters)
     template = _TEMPLATES[signature]
     template, condition, spans, content = template.generate(data)
     if not template:

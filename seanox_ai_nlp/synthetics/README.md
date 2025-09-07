@@ -78,7 +78,7 @@ or augmentation in domain-specific NLP workflows.
   - [Single-Pass Evaluation](#single-pass-evaluation)
   - [Scaled Evaluation (×500)](#scaled-evaluation-500)
 - [API Reference](#api-reference)
-  - [`synthetics`](#syntheticsdatasource-str-language-str-data-dictstr-any---synthetic)
+  - [`synthetics`](#syntheticsdatasource-str-template-str-data-dictstr-any-filters-dictstr-callable--none---synthetic)
   - [`Synthetic`](#synthetic)
   - [`TemplateException`](#templateexception)
   - [`TemplateConditionException`](#templateconditionexception)
@@ -567,7 +567,7 @@ The __synthetic__ module offers a compact API for synthetic text generation. It
 is suitable for NLP pipelines, annotation workflows, or automated content
 generation tools. 
 
-## `synthetics(datasource: str, template: str, data: dict[str, Any]) -> Synthetic`
+## `synthetics(datasource: str, template: str, data: dict[str, Any], filters: dict[str, Callable] = None) -> Synthetic`
 
 <details>
   <summary>
@@ -586,6 +586,9 @@ __Parameters:__
 - `template (str)`: Name of the template file.
 - `data (dict)`: Contextual data used to evaluate conditions and render the
   template.
+- `filters (dict, optional)`: Additional custom filters for template rendering.
+  Keys are filter names (str), and values are callable objects (callables) that
+  implement the filter.
 
 __Returns:__
 - `Synthetic`: A dataclass containing the generated synthetic text, its 

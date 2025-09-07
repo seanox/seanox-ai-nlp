@@ -10,7 +10,7 @@ EXAMPLES_PATH = Path("./examples") if Path("./examples").is_dir() else Path("../
 
 def test_synthetics_empty_01():
     synthetic = synthetics(
-        TESTS_PATH, "synthetics_empty_1.yaml", {},  {}
+        TESTS_PATH, "synthetics_empty_1.yaml", {}, {}
     )
     assert synthetic is not None
     assert synthetic.text == ""
@@ -18,7 +18,7 @@ def test_synthetics_empty_01():
 
 def test_synthetics_empty_02():
     synthetic = synthetics(
-        TESTS_PATH, "synthetics_empty_2.yaml", {},  {}
+        TESTS_PATH, "synthetics_empty_2.yaml", {}, {}
     )
     assert synthetic is not None
     assert synthetic.text == ""

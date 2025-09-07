@@ -22,7 +22,7 @@ templates:
     {% endfor %}
 
 - name: Beispiel 02
-  condition: moons != 1
+  condition: characteristics and moons != 1
   template: |
     {% set characteristic = characteristics | random %}
     Was kannst Du mir zu "{{ characteristic }} in unserem {{ ["Planetensystem", "Sonnensystem"] | random }}" sagen?
@@ -76,7 +76,7 @@ templates:
     Ja und zwar genau {{ moons }}{{ [" davon", ""] | random }}.
 
 - name: Beispiel 06
-  condition: True
+  condition: characteristics and len(characteristics) > 1
   template: |
     {% set facts = characteristics | random_set(2) %}
     {{ facts[0] }}

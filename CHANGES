@@ -1,4 +1,6 @@
 1.3.0 202510xx
+BF: synthetics: Correction for empty templates / missing segments
+CR: Python: Increased the requirement to Python 3.10 or higher
 CR: synthetics: Added custom filters for template rendering
     Optional custom filters for template rendering. Keys are filter names (str),
     and values are callable objects (callables) that implement the filter.

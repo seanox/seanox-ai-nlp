@@ -1,6 +1,12 @@
 # seanox_ai_npl/synthetics/synthetics.py
 
-from jinja2 import Environment, BaseLoader
+from jinja2 import (
+    Environment,
+    BaseLoader,
+    DebugUndefined,
+    StrictUndefined,
+    TemplateAssertionError
+)
 from typing import Any
 from dataclasses import dataclass
 from collections import deque
@@ -50,12 +56,13 @@ _ENTITY_MARKER_RAW_PATTERN = rf"""
 _ENTITY_MARKER_NAME_PATTERN = re.compile(rf"^{_ENTITY_MARKER_NAME_RAW_PATTERN}$")
 _ENTITY_MARKER_PATTERN = _re_compile(_ENTITY_MARKER_RAW_PATTERN)
 
-_SEGEMENT_PLACEHOLDER_NAME = r"(?:\w(?:[\w\-\:]*\w)?)"
-_SEGEMENT_PLACEHOLDER_INLINE = rf"@({_SEGEMENT_PLACEHOLDER_NAME})"
-_SEGEMENT_PLACEHOLDER_BRACED = rf"{{@({_SEGEMENT_PLACEHOLDER_NAME})}}"
-_SEGEMENT_PLACEHOLDER_PATTERN = re.compile(rf"{_SEGEMENT_PLACEHOLDER_INLINE}|{_SEGEMENT_PLACEHOLDER_BRACED}")
+_SEGMENT_PLACEHOLDER_NAME = r"(?:\w(?:[\w\-\:]*\w)?)"
+_SEGMENT_PLACEHOLDER_INLINE = rf"@({_SEGMENT_PLACEHOLDER_NAME})"
+_SEGMENT_PLACEHOLDER_BRACED = rf"{{@({_SEGMENT_PLACEHOLDER_NAME})}}"
+_SEGMENT_PLACEHOLDER_PATTERN = re.compile(rf"{_SEGMENT_PLACEHOLDER_INLINE}|{_SEGMENT_PLACEHOLDER_BRACED}")
 
 _FILTER_NAME_PATTERN = re.compile(r"^\w+$")
+
 
 def _annotate(value: Any = "", label: str = "") -> str:
     """
@@ -70,7 +77,7 @@ def _annotate(value: Any = "", label: str = "") -> str:
     If the label is invalid or empty, the original value is returned unchanged.
 
     Example:
-        {{ value | annotate("VALUE") }}
+        {{ value | annotate("LABEL") }}
         produce: [[[LABEL]]]value[[[-]]]
 
     Args:
@@ -320,25 +327,32 @@ def _flat_dict(tree: dict[str, Any], parent: str = "") -> dict[str, str]:
 
 class _Template:
 
+    @staticmethod
+    def create_template_environment(filters: dict[str, Callable] = None, validation: bool = False) -> Environment:
+
+        environment = Environment(
+            loader=BaseLoader(),
+            trim_blocks=False,
+            lstrip_blocks=False,
+            undefined=StrictUndefined if not validation else DebugUndefined
+        )
+
+        environment.filters["annotate"] = _annotate
+        environment.filters["random_set"] = _random_set
+        environment.filters["random_range"] = _random_range
+        environment.filters["random_range_join"] = _random_range_join
+        environment.filters["random_range_join_phrase"] = _random_range_join_phrase
+        environment.filters["normalize"] = _normalize
+
+        if filters:
+            environment.filters.update(**filters)
+
+        return environment
+
     def __init__(self, directory: str, filename: str, filters: dict[str, Callable] = None):
 
         self.variants = {}
-        self.environment = Environment(
-            loader=BaseLoader(),
-            trim_blocks=False,
-            lstrip_blocks=False
-        )
-        self.environment.filters["annotate"] = _annotate
-        self.environment.filters["random_set"] = _random_set
-        self.environment.filters["random_range"] = _random_range
-        self.environment.filters["random_range_join"] = _random_range_join
-        self.environment.filters["random_range_join_phrase"] = _random_range_join_phrase
-        self.environment.filters["normalize"] = _normalize
-
-        if filters:
-            for name, function in filters.items():
-                if name and _FILTER_NAME_PATTERN.match(name) and callable(function):
-                    self.environment.filters[name] = function
+        self.environment = _Template.create_template_environment(filters)
 
         if not filename or not filename.strip():
             raise ValueError("filename is required")
@@ -365,7 +379,7 @@ class _Template:
                     name = match.group(1) or match.group(2)
                     return previous.get(name, match.group(0))
 
-                resolved[key] = _SEGEMENT_PLACEHOLDER_PATTERN.sub(_replace, value)
+                resolved[key] = _SEGMENT_PLACEHOLDER_PATTERN.sub(_replace, value)
 
             return resolved
 
@@ -384,8 +398,23 @@ class _Template:
             condition = str(part.get("condition")) or "True"
 
             content = part["template"] + os.linesep
-            content = _SEGEMENT_PLACEHOLDER_PATTERN.sub(_replace_segments_placeholder, content)
-            payload = re.sub(r"(\s*[\r\n]+\s*){1,}", " ", content).strip()
+            content = _SEGMENT_PLACEHOLDER_PATTERN.sub(_replace_segments_placeholder, content)
+            payload = re.sub(r"(\s*[\r\n]+\s*)+", " ", content).strip()
+
+            try:
+                environment = _Template.create_template_environment(filters, True)
+                template = environment.from_string(payload)
+                template.render({})
+            except TemplateAssertionError as exception:
+                raise TemplateException(
+                    f"[{name}] Template error ({type(exception).__name__}): {str(exception)}"
+                    f"{os.linesep}{content}"
+                )
+            except Exception as exception:
+                raise TemplateSyntaxException(
+                    f"[{name}] Template syntax error ({type(exception).__name__}): {str(exception)}"
+                    f"{os.linesep}{content}"
+                )
 
             try:
                 template = self.environment.from_string(payload)
@@ -420,18 +449,11 @@ class _Template:
                     patterns[label] = re.compile(pattern)
             spans = {label: patterns[label] for label in labels}
 
-            try:
-                template.render({})
-                self.variants[index] = (name, template, condition, spans)
-            except Exception as exception:
-                raise TemplateSyntaxException(
-                    f"[{name}] Template syntax error ({type(exception).__name__}): {str(exception)}"
-                    f"{os.linesep}{content}"
-                )
+            self.variants[index] = (name, template, condition, spans)
 
-            self.filter = deque(maxlen=len(self.variants))
+            self.registry = deque(maxlen=len(self.variants))
 
-    def generate(self, data: dict[str, Any]) -> tuple[Any, str, dict[str, Any], str]:
+    def generate(self, data: dict[str, Any] = None) -> tuple[str, dict[str, Any]] | None:
 
         context = dict(data or {})
         context["random"] = random
@@ -449,22 +471,22 @@ class _Template:
                 )
 
         if not templates:
-            return None, "", {}, ""
+            return None
 
         selection = []
         for index in templates:
-            if index not in self.filter:
+            if index not in self.registry:
                 selection.append(index)
         if selection:
             template_id = random.choice(selection)
         else:
             template_id = random.choice(templates)
-        self.filter.append(template_id)
+        self.registry.append(template_id)
 
         name, template, condition, spans = self.variants[template_id]
         content = template.render(**context).strip()
 
-        return template, condition, spans, content
+        return content, spans
 
 
 _TEMPLATES: dict[tuple[str, str], _Template] = {}
@@ -496,7 +518,7 @@ class Synthetic:
 def _extract_entities(text: str, patterns: dict[str, Any] = None) -> Synthetic:
 
     if patterns is None:
-        patterns = []
+        patterns = {}
     entities: list[tuple[int, int, str]] = []
     plaintext = ""
     last_end = 0
@@ -545,7 +567,7 @@ def _extract_entities(text: str, patterns: dict[str, Any] = None) -> Synthetic:
 def synthetics(
         datasource: str,
         template: str,
-        data: dict[str, Any],
+        data: dict[str, Any] = None,
         filters: dict[str, Callable] = None
 ) -> Synthetic:
     """
@@ -588,13 +610,27 @@ def synthetics(
         TemplateConditionException: If a condition expression in the template
             is invalid or unsafe to evaluate.
     """
+
+    filters = {
+        name: function
+        for name, function in (filters or {}).items()
+        if name and _FILTER_NAME_PATTERN.match(name) and callable(function)
+    }
+
     if not template or not template.strip():
         return Synthetic("", "", [], [])
-    signature = (datasource or "", template)
+
+    # Cache key consists of: (data source, template, flat sequence of (key,
+    # value) from filters sorted by key). For callables, equality is by object
+    # identity – the same function object must be referenced.
+    signature = (
+        (datasource or "", template)
+        + tuple(entry for pairs in sorted(filters.items()) for entry in pairs)
+    )
     if signature not in _TEMPLATES:
         _TEMPLATES[signature] = _Template(datasource, template, filters)
     template = _TEMPLATES[signature]
-    template, condition, spans, content = template.generate(data)
-    if not template:
+    result = template.generate(data)
+    if not result:
         return Synthetic("", "", [], [])
-    return _extract_entities(content, spans)
+    return _extract_entities(*result)

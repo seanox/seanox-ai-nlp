@@ -347,8 +347,8 @@ class _Template:
             raise FileNotFoundError(f"File not found: {path}")
 
         with open(path, encoding="utf-8") as file:
-            data = yaml.safe_load(file)
-        parts = data.get("templates")
+            data = yaml.safe_load(file) or {}
+        parts = data.get("templates", [])
         if not isinstance(parts, list):
             return
 
@@ -372,7 +372,7 @@ class _Template:
         segments = data.get("segments")
         if segments:
             segments = _flat_dict(segments)
-        segments = _resolve_segments_sequential(segments)
+            segments = _resolve_segments_sequential(segments)
 
         def _replace_segments_placeholder(match):
             return segments.get(match.group(1) or match.group(2), match.group(0))

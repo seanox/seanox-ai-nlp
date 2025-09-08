@@ -4,7 +4,7 @@ from jinja2 import (
     Environment,
     BaseLoader,
     DebugUndefined,
-    StrictUndefined,
+    Undefined,
     TemplateAssertionError
 )
 from typing import Any
@@ -328,13 +328,13 @@ def _flat_dict(tree: dict[str, Any], parent: str = "") -> dict[str, str]:
 class _Template:
 
     @staticmethod
-    def create_template_environment(filters: dict[str, Callable] = None, validation: bool = False) -> Environment:
+    def _create_template_environment(filters: dict[str, Callable] = None, validation: bool = False) -> Environment:
 
         environment = Environment(
             loader=BaseLoader(),
             trim_blocks=False,
             lstrip_blocks=False,
-            undefined=StrictUndefined if not validation else DebugUndefined
+            undefined=Undefined if not validation else DebugUndefined
         )
 
         environment.filters["annotate"] = _annotate
@@ -352,7 +352,7 @@ class _Template:
     def __init__(self, directory: str, filename: str, filters: dict[str, Callable] = None):
 
         self.variants = {}
-        self.environment = _Template.create_template_environment(filters)
+        self.environment = _Template._create_template_environment(filters)
 
         if not filename or not filename.strip():
             raise ValueError("filename is required")
@@ -402,7 +402,7 @@ class _Template:
             payload = re.sub(r"(\s*[\r\n]+\s*)+", " ", content).strip()
 
             try:
-                environment = _Template.create_template_environment(filters, True)
+                environment = _Template._create_template_environment(filters, True)
                 template = environment.from_string(payload)
                 template.render({})
             except TemplateAssertionError as exception:

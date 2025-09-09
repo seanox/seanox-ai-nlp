@@ -48,6 +48,7 @@ templates:
       "besitzt " ~ (moons == 0 and "keine" or moons) ~ " Monde",
       "mit einer Umlaufzeit von " ~ turnover ~ " Tagen"
     ] %}
+    {%- set facts = facts | random_set(2) -%}
     {{ facts[0] }} und {{ facts[1] }}.
     @text:newline
     Die Atmosphäre {{ ["besteht", "setzt sich zusammen"] | random }} aus {{ atmosphere | random_range_join_phrase(", ", " und ") }}.

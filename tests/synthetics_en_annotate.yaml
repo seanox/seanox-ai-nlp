@@ -89,6 +89,7 @@ templates:
       moons == 0 and "does not have any moons" or "has " ~ (moons ~ " moons" | annotate("moons")),
       "with an " ~ @term:orbital_period ~ " of " ~ @data:turnover
     ] %}
+    {%- set facts = facts | random_set(2) -%}
     {{ facts[0] }} and {{ facts[1] }}.
     {%- set atmosphere = atmosphere | default([]) | map('annotate', 'atmosphere') | list -%}
     @text:newline

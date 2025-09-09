@@ -48,6 +48,7 @@ templates:
       moons == 0 and "does not have any moons" or "has " ~ moons ~ " moons",
       "with an orbital period of " ~ turnover ~ " days"
     ] %}
+    {%- set facts = facts | random_set(2) -%}
     {{ facts[0] }} and {{ facts[1] }}.
     @text:newline
     The atmosphere {{ ["consists of", "is composed of"] | random }} {{ atmosphere | random_range_join_phrase(", ", " and ") }}.

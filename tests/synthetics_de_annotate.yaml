@@ -91,6 +91,7 @@ templates:
       "besitzt " ~ ((moons == 0 and "keine" or moons) ~ " Monde" | annotate("moons")),
       "mit einer " ~ @term:umlaufzeit ~ " von " ~ @data:turnover
     ] %}
+    {%- set facts = facts | random_set(2) -%}
     {{ facts[0] }} und {{ facts[1] }}.
     {%- set atmosphere = atmosphere | default([]) | map('annotate', 'atmosphere') | list -%}
     @text:newline

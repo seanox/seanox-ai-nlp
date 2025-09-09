@@ -40,7 +40,7 @@ templates:
     {{ ["It", "The planet"] | random }} {{ facts[0] }} and {{ facts[1] }}.
 
 - name: Example 03
-  condition: moons != 1 and len(atmosphere) > 2
+  condition: moons != 1 and len(atmosphere) >= 2
   template: |
     {{ ["The planet ", ""] | random }}{{ planet }} is a {{ type }}
     {% set facts = [

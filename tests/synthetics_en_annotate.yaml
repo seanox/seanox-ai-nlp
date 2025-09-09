@@ -81,7 +81,7 @@ templates:
 # a generator will result in errors. Therefore, generator values must be
 # explicitly converted into lists using list() before further processing.
 - name: Example 03
-  condition: moons != 1 and len(atmosphere) > 2
+  condition: moons != 1 and len(atmosphere) >= 2
   template: |
     {{ ["The planet ", ""] | random }}{{ @data:planet }} is a {{ @data:type }}
     {% set facts = [

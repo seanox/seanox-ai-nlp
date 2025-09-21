@@ -4,13 +4,18 @@ from seanox_ai_nlp.units import units
 from typing import Optional, NamedTuple
 from time import perf_counter
 from pathlib import Path
+from spacy.cli import download
 
 import pytest
 import os
 import pathlib
+import importlib
 
 TESTS_PATH = Path("./tests") if Path("./tests").is_dir() else Path(".")
 EXAMPLES_PATH = Path("./examples") if Path("./examples").is_dir() else Path("../examples")
+
+if importlib.util.find_spec("en_core_web_md") is None:
+    download("en_core_web_md")
 
 
 class Unit(NamedTuple):

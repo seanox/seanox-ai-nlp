@@ -1,0 +1,9 @@
+templates:
+  - template: True
+    condition: True
+    name: True
+    spans:
+      - label: True
+      - regex: True
+      - xxx: True
+test:

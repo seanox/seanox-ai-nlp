@@ -15,6 +15,7 @@ setup(
     python_requires=">=3.10",
     install_requires=[
         "pyyaml>=6.0",
+        "jsonschema>=4.17",
         "jinja2>=3.0.0"
     ],
     classifiers=[
@@ -26,9 +27,10 @@ setup(
         "Natural Language :: English",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Operating System :: OS Independent"
     ],
     keywords=[
@@ -42,7 +44,7 @@ setup(
         # units
         "measurement units", "measurement extraction",
         # synthetics
-        "synthetic data", "data generation", "synthetic text", "template engine",
+        "synthetic data", "data generation", "synthetic text", "template engine", "sentence generator",
         "data annotation", "semantic labeling", "pretraining data",
         "training data augmentation"
     ]

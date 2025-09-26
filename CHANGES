@@ -1,4 +1,5 @@
 1.3.0 202510xx
+BF: Python: Corrections/optimizations of dependencies
 BF: synthetics: Correction for empty templates / missing segments
 CR: Python: Increased the requirement to Python 3.10 or higher
 CR: synthetics: Added schema and validation for template YAML

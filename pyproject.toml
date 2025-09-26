@@ -11,7 +11,15 @@ license = {text = "Apache-2.0"}
 authors = [{name = "Seanox Software Solutions"}]
 requires-python = ">=3.10"
 keywords = [
-    "NLP", "semantic", "units", "domain-specific", "text processing", "information extraction"
+    "NLP", "fine-tuning", "information retrieval", "preprocessing",
+    "semantic retrieval", "retrieval optimization",
+    "domain-specific", "structured data",
+    "semantic processing", "text processing",
+    "information extraction", "entity extraction",
+    "measurement units", "measurement extraction",
+    "synthetic data", "data generation", "synthetic text", "template engine", "sentence generator",
+    "data annotation", "semantic labeling", "pretraining data",
+    "training data augmentation"
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -22,10 +30,17 @@ classifiers = [
     "Natural Language :: English",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Operating System :: OS Independent"
+]
+
+dependencies = [
+    "pyyaml>=6.0",
+    "jsonschema>=4.17",
+    "jinja2>=3.0.0"
 ]
 
 [project.urls]

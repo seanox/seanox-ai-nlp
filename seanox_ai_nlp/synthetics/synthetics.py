@@ -75,16 +75,16 @@ _YAML_SCHEMA = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "template": {"type": "string"},
-                    "name": {"type": "string"},
-                    "condition": {"type": ["string", "boolean", "number"]},
+                    "template": {"type": ["string", "boolean", "number"]},
+                    "name": {"type": ["string", "boolean", "number", "null"]},
+                    "condition": {"type": ["string", "boolean", "number", "null"]},
                     "spans": {
                         "type": "array",
                         "items": {
                             "type": "object",
                             "properties": {
-                                "label": {"type": "string"},
-                                "regex": {"type": "string"}
+                                "label": {"type": ["string", "boolean", "number", "null"]},
+                                "regex": {"type": ["string", "boolean", "number", "null"]}
                             }
                         }
                     }
@@ -421,9 +421,13 @@ class _Template:
             try:
                 jsonschema.validate(instance=data, schema=_YAML_SCHEMA)
             except jsonschema.exceptions.ValidationError as exception:
+                path_concat = lambda path: path[0] + "".join(
+                    f"[{part}]" if isinstance(part, int) else f".{part}"
+                    for part in path[1:]
+                )
                 raise TemplateException(
                     f"Template error ({type(exception).__name__})"
-                    f" in {'.'.join(list(exception.path))}: {str(exception.message)}"
+                    f" in {path_concat(list(exception.path))}: {str(exception.message)}"
                 )
 
         parts = data.get("templates", [])
@@ -458,10 +462,10 @@ class _Template:
         for index, part in enumerate(parts):
             if not part.get("template"):
                 continue
-            name = part.get("name") or f"#{str(index + 1)}"
+            name = str(part.get("name")) or f"#{str(index + 1)}"
             condition = str(part.get("condition")) or "True"
 
-            content = part["template"] + os.linesep
+            content = str(part["template"]) + os.linesep
             content = _SEGMENT_PLACEHOLDER_PATTERN.sub(_replace_segments_placeholder, content)
             payload = re.sub(r"(\s*[\r\n]+\s*)+", " ", content).strip()
 
@@ -505,8 +509,8 @@ class _Template:
             patterns = {}
             labels = []
             for span in part.get("spans", []):
-                label = span.get("label")
-                pattern = span.get("pattern")
+                label = str(span.get("label"))
+                pattern = str(span.get("pattern"))
                 if label:
                     if label not in labels:
                         labels.append(label)

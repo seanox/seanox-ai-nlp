@@ -418,7 +418,13 @@ class _Template:
             data = yaml.safe_load(file) or {}
 
         if data:
-            jsonschema.validate(instance=data, schema=_YAML_SCHEMA)
+            try:
+                jsonschema.validate(instance=data, schema=_YAML_SCHEMA)
+            except jsonschema.exceptions.ValidationError as exception:
+                raise TemplateException(
+                    f"Template error ({type(exception).__name__})"
+                    f" in {'.'.join(list(exception.path))}: {str(exception.message)}"
+                )
 
         parts = data.get("templates", [])
         if not isinstance(parts, list):

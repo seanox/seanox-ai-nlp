@@ -16,6 +16,7 @@ import os
 import random
 import re
 import yaml
+import jsonschema
 
 
 def _re_compile(expression: str, debug: bool = False) -> re.Pattern:
@@ -62,6 +63,54 @@ _SEGMENT_PLACEHOLDER_BRACED = rf"{{@({_SEGMENT_PLACEHOLDER_NAME})}}"
 _SEGMENT_PLACEHOLDER_PATTERN = re.compile(rf"{_SEGMENT_PLACEHOLDER_INLINE}|{_SEGMENT_PLACEHOLDER_BRACED}")
 
 _FILTER_NAME_PATTERN = re.compile(r"^\w+$")
+
+# Loose Requiredness, Strict Typing
+# - wird segments verwendet, ist die Objekt-Struktur beliebig, nur die Sch
+# - wird templates verwendet, muss die Objekt-Struktur darunter das Feld template besitzen
+_YAML_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "templates": {
+            "type": ["array", "null"],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "template": {"type": "string"},
+                    "name": {"type": "string"},
+                    "condition": {"type": ["string", "boolean", "number"]},
+                    "spans": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "label": {"type": "string"},
+                                "regex": {"type": "string"}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "segments": {"$ref": "#/$defs/segments"}
+    },
+    "$defs": {
+        "segments": {
+            "type": ["object", "null"],
+            "propertyNames": {
+                "pattern": r"^(?:\w(?:[\w\-\:]*\w)?)$"
+            },
+            "additionalProperties": {
+                "anyOf": [
+                    {"type": "string"},
+                    {"type": "number"},
+                    {"type": "boolean"},
+                    {"type": "array"},
+                    {"$ref": "#/$defs/segments"}
+                ]
+            }
+        }
+    }
+}
 
 
 def _annotate(value: Any = "", label: str = "") -> str:
@@ -291,6 +340,11 @@ class TemplateSyntaxException(TemplateException):
         super().__init__(message)
 
 
+class TemplateExpressionException(TemplateException):
+    def __init__(self, message):
+        super().__init__(message)
+
+
 _SAFE_BUILTINS = {
     "len": len,
     "min": min,
@@ -362,6 +416,10 @@ class _Template:
 
         with open(path, encoding="utf-8") as file:
             data = yaml.safe_load(file) or {}
+
+        if data:
+            jsonschema.validate(instance=data, schema=_YAML_SCHEMA)
+
         parts = data.get("templates", [])
         if not isinstance(parts, list):
             return

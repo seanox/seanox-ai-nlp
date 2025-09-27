@@ -22,11 +22,11 @@ templates:
   - template: xxx
     condition: True
     spans:
-      - regex:
+      - pattern:
   - template: xxx
     condition: True
     spans:
-      - regex:
+      - pattern:
       - label:
     xxx:
   - template:

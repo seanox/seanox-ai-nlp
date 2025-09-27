@@ -3,6 +3,6 @@ templates:
     condition: True
     spans:
       - label:
-      - regex:
+      - pattern:
       - xxx:
 test:

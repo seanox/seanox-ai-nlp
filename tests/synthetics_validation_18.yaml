@@ -4,6 +4,6 @@ templates:
     name: True
     spans:
       - label: True
-      - regex: True
+      - pattern: True
       - xxx: True
 test:

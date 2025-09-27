@@ -4,6 +4,6 @@ templates:
     name: 1
     spans:
       - label: 1
-      - regex: 1
+      - pattern: 1
       - xxx: 1
 test:

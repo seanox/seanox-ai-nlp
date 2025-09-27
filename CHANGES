@@ -1,6 +1,7 @@
 1.3.0 202510xx
 BF: Python: Corrections/optimizations of dependencies
 BF: synthetics: Correction for empty templates / missing segments
+BF: synthetics: Consistent use of the parameter pattern for RegEx in spans
 CR: Python: Increased the requirement to Python 3.10 or higher
 CR: synthetics: Added schema and validation for template YAML
 CR: synthetics: Added custom filters for template rendering

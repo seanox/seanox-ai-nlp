@@ -1,5 +1,7 @@
 # seanox_ai_npl/synthetics/synthetics.py
 
+from collections import deque, defaultdict
+from dataclasses import dataclass
 from jinja2 import (
     Environment,
     BaseLoader,
@@ -7,16 +9,13 @@ from jinja2 import (
     Undefined,
     TemplateAssertionError
 )
-from typing import Any
-from dataclasses import dataclass
-from collections import deque
-from typing import Callable
+from typing import Callable, Any, Optional
 
+import jsonschema
 import os
 import random
 import re
 import yaml
-import jsonschema
 
 
 def _re_compile(expression: str, debug: bool = False) -> re.Pattern:
@@ -56,6 +55,7 @@ _ENTITY_MARKER_RAW_PATTERN = rf"""
 
 _ENTITY_MARKER_NAME_PATTERN = re.compile(rf"^{_ENTITY_MARKER_NAME_RAW_PATTERN}$")
 _ENTITY_MARKER_PATTERN = _re_compile(_ENTITY_MARKER_RAW_PATTERN)
+_ENTITY_MARKER_REGEX_PATTERN = _re_compile(rf"\{{\$(?:)({_ENTITY_MARKER_NAME_RAW_PATTERN})\}}")
 
 _SEGMENT_PLACEHOLDER_NAME = r"(?:\w(?:[\w\-\:]*\w)?)"
 _SEGMENT_PLACEHOLDER_INLINE = rf"@({_SEGMENT_PLACEHOLDER_NAME})"
@@ -79,12 +79,12 @@ _YAML_SCHEMA = {
                     "name": {"type": ["string", "boolean", "number", "null"]},
                     "condition": {"type": ["string", "boolean", "number", "null"]},
                     "spans": {
-                        "type": "array",
+                        "type": ["array", "null"],
                         "items": {
                             "type": "object",
                             "properties": {
                                 "label": {"type": ["string", "boolean", "number", "null"]},
-                                "regex": {"type": ["string", "boolean", "number", "null"]}
+                                "pattern": {"type": ["string", "boolean", "number", "null"]}
                             }
                         }
                     }
@@ -508,13 +508,21 @@ class _Template:
 
             patterns = {}
             labels = []
-            for span in part.get("spans", []):
-                label = str(span.get("label"))
-                pattern = str(span.get("pattern"))
-                if label:
+
+            for span in part.get("spans") or []:
+                label = span.get("label")
+                pattern = span.get("pattern")
+                if label and pattern:
                     if label not in labels:
                         labels.append(label)
-                    patterns[label] = re.compile(pattern)
+                        try:
+                            re.compile(_ENTITY_MARKER_REGEX_PATTERN.sub("(?:LABEL|LABEL)", pattern))
+                        except Exception as exception:
+                            raise TemplateExpressionException(
+                                f"[{name}] Expression error ({type(exception).__name__}): {str(exception)}"
+                                f"{os.linesep}{str(_ENTITY_MARKER_REGEX_PATTERN.sub('(?:LABEL|LABEL)', pattern))}"
+                            )
+                        patterns[label] = pattern
             spans = {label: patterns[label] for label in labels}
 
             self.variants[index] = (name, template, condition, spans)
@@ -583,6 +591,21 @@ class Synthetic:
     spans: list[tuple[int, int, str]]
 
 
+def _re_compile_span_pattern(labels: dict[str, set[str]], pattern: str) -> Optional[re.Pattern]:
+
+    def replacer(match: re.Match) -> str:
+        label = match.group(1)
+        key = next((key for key in labels if key == label), None)
+        if not key or not labels[key]:
+            raise LookupError
+        return "(?:" + "|".join(re.escape(value) for value in labels[key]) + ")"
+
+    try:
+        return re.compile(_ENTITY_MARKER_REGEX_PATTERN.sub(replacer, pattern))
+    except LookupError:
+        return None
+
+
 def _extract_entities(text: str, patterns: dict[str, Any] = None) -> Synthetic:
 
     if patterns is None:
@@ -590,6 +613,8 @@ def _extract_entities(text: str, patterns: dict[str, Any] = None) -> Synthetic:
     entities: list[tuple[int, int, str]] = []
     plaintext = ""
     last_end = 0
+
+    labels: dict[str, set[str]] = defaultdict(set)
 
     for match in _ENTITY_MARKER_PATTERN.finditer(text):
         span_start, span_end = match.span()
@@ -611,6 +636,7 @@ def _extract_entities(text: str, patterns: dict[str, Any] = None) -> Synthetic:
             entity_end = entity_start + len(value)
             plaintext += value
             entities.append((entity_start, entity_end, entity_name))
+            labels[entity_name].add(value)
         except ValueError:
             plaintext += value
 
@@ -622,8 +648,13 @@ def _extract_entities(text: str, patterns: dict[str, Any] = None) -> Synthetic:
     entity_starts = {start for start, end, label in entities}
     entity_ends = {end for start, end, label in entities}
 
+    labels = {key: list(value) for key, value in labels.items()}
+
     spans: list[tuple[int, int, str]] = []
     for label, pattern in patterns.items():
+        pattern = _re_compile_span_pattern(labels, pattern)
+        if not pattern:
+            continue
         for match in pattern.finditer(plaintext):
             start, end = match.start(), match.end()
             if start in entity_starts and end in entity_ends:
@@ -677,6 +708,8 @@ def synthetics(
         TemplateException: If the template file cannot be loaded or parsed.
         TemplateConditionException: If a condition expression in the template
             is invalid or unsafe to evaluate.
+        TemplateExpressionException: If a span expression in the template is
+            invalid.
     """
 
     filters = {

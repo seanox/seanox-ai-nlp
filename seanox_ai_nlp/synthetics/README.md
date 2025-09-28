@@ -82,6 +82,7 @@ or augmentation in domain-specific NLP workflows.
   - [`Synthetic`](#synthetic)
   - [`TemplateException`](#templateexception)
   - [`TemplateConditionException`](#templateconditionexception)
+  - [`TemplateExpressionException`](#templateexpressionexception)
   - [`TemplateSyntxException`](#templatesyntxexception)
 - [System Design](#system-design)
   - [Components Overview](#components-overview)
@@ -638,6 +639,9 @@ in the YAML.
 
 Raised when a condition expression in the template is invalid or unsafe to
 evaluate.
+
+## `TemplateExpressionException`
+If a span expression in the template is invalid.
 
 ## `TemplateSyntxException`
 

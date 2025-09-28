@@ -149,16 +149,16 @@ interchangeably depending on the formatting needs.
 ```Yaml
 segments:
   term:
-    planet: '{{ planet | annotate("term") }}'
-    diameter: '{{ diameter | annotate("term") }}'
+    planet: '(planet | annotate("term"))'
+    diameter: '(diameter | annotate("term"))'
   data:
-    planet: '{{ planet | annotate("planet") }}'
-    diameter: '{{ (diameter ~ " km") | annotate("diameter") }}'
+    planet: '(planet | annotate("planet"))'
+    diameter: '((diameter ~ " km") | annotate("diameter"))'
 
 templates:
   - name: Example
     condition: True
-    template: The @term:planet @data:planet has a {@term:diameter} of {@data:diameter}.
+    template: The {{ @term:planet }} {{ @data:planet }} has a {{ {@term:diameter} }} of {{ {@data:diameter} }}.
 ```
 
 The structure and depth below the section __segment__ is individual.

@@ -50,7 +50,7 @@ or augmentation in domain-specific NLP workflows.
 
 - __Compatibility with NLP Workflows__  
   The output object __Synthetic__ includes raw text, annotated text, entity
-  spans with labels and positions, and regex-based semantic spans. This
+  spans with labels and positions, and RegEx-based semantic spans. This
   structure supports fine-tuning, evaluation, and data augmentation in
   domain-specific NLP pipelines, including spaCy-style frameworks.
 
@@ -109,7 +109,7 @@ templates:
     template: <string>         # Sentence with annotated placeholders
     spans:                     # Optional: custom span definitions
       - label: <string>        # Name of the span (e.g. "planet", "moon")
-        regex: <string>        # Regex pattern to extract the span
+        pattern: <string>      # RegEx pattern to extract the span
 ```
 
 ## Field Details
@@ -120,11 +120,16 @@ templates:
 - __template__: A sentence string containing placeholders, expressions,
   functions, and optional annotations via (`annotate`).
 - __spans__:
-  - Each span defines a __label__ and a __regex__ pattern.
+  - Each span defines a __label__ and a RegEx __pattern__.
   - The span's position is determined by the full match of the regular
     expression -- from the start to the end of the match.
   - Useful for extracting relationships or nested entities not covered by inline
     annotations (`annotate`).
+  - RegEx pattern may also contain case-sensitive `{$label}` placeholders,
+    which are expanded at runtime into an OR alternation of all values collected
+    for that label. Non-existent labels cause an inapplicable span label, as if
+    the pattern does not match, and so the label is skipped. Syntax errors cause
+    the TemplateExpressionException.
 
 ## Segments
 
@@ -600,6 +605,8 @@ __Raises:__
 - `TemplateException`: If the template file cannot be loaded or parsed.
 - `TemplateConditionException`: If a condition expression in the template is
   invalid or unsafe to evaluate.
+- `TemplateExpressionException`: If a span expression in the template is
+  invalid.
 </details>
 
 ## `Synthetic`
@@ -648,7 +655,7 @@ Design characteristics:
 - Templates are written in YAML and rendered using Jinja2.
 - Conditional logic enables dynamic and context-sensitive template selection.
 - Inline entity annotation is supported via custom markers.
-- Regex-based span extraction allows postprocessing of semantic patterns.
+- RegEx-based span extraction allows postprocessing of semantic patterns.
 - Execution is limited to safe built-in functions.
 
 ## Components Overview
@@ -670,7 +677,7 @@ Design characteristics:
 4. __Template Selection__: One template is chosen randomly from the filtered set
 5. __Rendering__: Jinja2 renders the template with inline annotations
 6. __Entity Extraction__: Markers are parsed and converted to entity spans
-7. __Span Detection__: Regex patterns are applied to extract additional spans
+7. __Span Detection__: RegEx patterns are applied to extract additional spans
 8. __Output__: A `Synthetic` object is returned with all relevant metadata
 
 # Sources & References

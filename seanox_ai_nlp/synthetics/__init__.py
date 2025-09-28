@@ -5,6 +5,7 @@ from .synthetics import (
     Synthetic,
     TemplateException,
     TemplateConditionException,
+    TemplateExpressionException,
     TemplateSyntaxException
 )
 
@@ -13,5 +14,6 @@ __all__ = [
     "Synthetic",
     "TemplateException",
     "TemplateConditionException",
+    "TemplateExpressionException",
     "TemplateSyntaxException"
 ]

@@ -140,7 +140,7 @@ blocks for dynamic content generation.
 There are two supported syntaxes for referencing segments in templates:
 
 - `@data:planet` Inline syntax for direct references
-- `{@data:planet}` Bracketed syntax for embedding in complex or nested
+- `{@data:planet}` Bracketed syntax for embeddings in complex or nested
   contexts
 
 Both syntaxes resolve to the same segment definition and can be used

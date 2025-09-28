@@ -14,19 +14,18 @@
 # Description
 Structured data in technical domains (e.g. engineering, meteorology) often
 contain specialized terminology, measurement units, parameter specifications,
-and symbolic values. These elements pose challenges for embedding-based
-similarity methods due to limited semantic resolution.
+and symbolic values. These elements pose a challenge for similarity methods
+based solely on embeddings due to their limited semantic resolution.
 
 This package follows a hybrid approach that combines rule-based processing with
-NLP-based filtering. It does not rely on embedding-based retrieval methods.
-Instead, it explicitly identifies domain-specific entities and organizes them
-across multiple abstraction levels to support interpretable and reproducible
+NLP-based filtering. Rather than relying solely on embedding-based search
+methods, it identifies domain-specific entities and organizes them across
+multiple levels of abstraction to enable interpretable and reproducible
 retrieval workflows.
 
 The package integrates lightweight components into existing NLP pipelines. These
-components operate independently of large language models (LLMs) and are
-designed to structure relevant data using deterministic and auditable
-mechanisms.
+components are designed to work without relying on large language models (LLMs)
+and to structure relevant data using deterministic and auditable mechanisms.
 
 __Additional modules are planned to support structured query generation,
 including:__
@@ -38,8 +37,8 @@ including:__
 ## Structured NLP Workflow
 
 The following figures illustrate the core motivation and design focus of this
-package design. They outline the typical stages of a structured NLP pipeline and
-highlights the specific components where this package provides support.
+package. They outline the typical stages of a structured NLP pipeline and
+highlight the specific components where this package provides support.
 
 ![Retrieval Process](https://raw.githubusercontent.com/seanox/seanox-ai-nlp/refs/heads/master/assets/retrieval-process.svg)
 

@@ -157,12 +157,12 @@ for data in datas:
 
 # Changes
 ## 1.3.0 20251001
-BF: Python: Corrections/optimizations of dependencies
-BF: synthetics: Correction for empty templates / missing segments
-BF: synthetics: Consistent use of the parameter pattern for RegEx in spans
-CR: Python: Increased the requirement to Python 3.10 or higher
-CR: synthetics: Added schema and validation for template YAML
-CR: synthetics: Added custom filters for template rendering
+BF: Python: Corrections/optimizations of dependencies  
+BF: synthetics: Correction for empty templates / missing segments  
+BF: synthetics: Consistent use of the parameter pattern for RegEx in spans  
+CR: Python: Increased the requirement to Python 3.10 or higher  
+CR: synthetics: Added schema and validation for template YAML  
+CR: synthetics: Added custom filters for template rendering  
 CR: synthetics: Template section span - regex added support for labels
 
 [Read more](https://raw.githubusercontent.com/seanox/seanox-ai-nlp/refs/heads/master/CHANGES)

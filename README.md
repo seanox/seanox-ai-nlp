@@ -29,9 +29,9 @@ and to structure relevant data using deterministic and auditable mechanisms.
 __Additional modules are planned to support structured query generation,
 including:__
 
-- __Logic Query Composer__: Parses natural-language input and produces a logical
-  structure enriched with extracted entities. This structure can be used as a
-  basis for formats such as SQL, JSON or YAML.
+- __Semantic Logic Composer__: Parses natural-language input and produces a
+  logical structure enriched with extracted entities. This structure can be used
+  as a basis for formats such as SQL, JSON or YAML.
 
 ## Structured NLP Workflow
 

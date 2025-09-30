@@ -1,13 +1,13 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36" version="28.2.5">
   <diagram name="Seite-1" id="W8E7Fu8FmdDjgyTMKueG">
-    <mxGraphModel dx="819" dy="547" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1638" dy="1094" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="DQWL6Y3L35b5UZnqnHU8-3" value="&lt;div&gt;Feedback Loop (optional)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontSize=16;fontStyle=1;gradientColor=none;fillColor=default;spacingTop=6;" parent="1" vertex="1">
           <mxGeometry x="1280" y="320" width="380" height="460" as="geometry" />
         </mxCell>
-        <mxCell id="DQWL6Y3L35b5UZnqnHU8-1" value="Retrieval Process" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontSize=16;fontStyle=1;fillColor=none;spacingTop=6;" parent="1" vertex="1">
+        <mxCell id="DQWL6Y3L35b5UZnqnHU8-1" value="Retrieval Process" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontSize=16;fontStyle=1;fillColor=default;spacingTop=6;" parent="1" vertex="1">
           <mxGeometry x="470" y="320" width="750" height="1020" as="geometry" />
         </mxCell>
         <mxCell id="DQWL6Y3L35b5UZnqnHU8-2" value="Training Pipeline" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontSize=16;fontStyle=1;fillColor=default;spacingTop=6;labelBackgroundColor=none;" parent="1" vertex="1">

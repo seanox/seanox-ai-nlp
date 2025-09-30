@@ -156,11 +156,14 @@ for data in datas:
 - [Downstream Processing with pandas](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#downstream-processing-with-pandas)
 
 # Changes
-## 1.2.0 20250906  
-BF: synthetics: annotate, correction for empty values  
-BF: Optimization Backward compatibility Python < 3.13.x  
-CR: synthetics: Omission of the backslash to control whitespaces  
-CR: synthetics: Optimization of placeholder resolution
+## 1.3.0 20251001
+BF: Python: Corrections/optimizations of dependencies
+BF: synthetics: Correction for empty templates / missing segments
+BF: synthetics: Consistent use of the parameter pattern for RegEx in spans
+CR: Python: Increased the requirement to Python 3.10 or higher
+CR: synthetics: Added schema and validation for template YAML
+CR: synthetics: Added custom filters for template rendering
+CR: synthetics: Template section span - regex added support for labels
 
 [Read more](https://raw.githubusercontent.com/seanox/seanox-ai-nlp/refs/heads/master/CHANGES)
 

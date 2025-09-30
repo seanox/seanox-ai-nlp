@@ -1,6 +1,6 @@
 # seanox_ai_nlp/__init__.py
 
-from seanox_ai_nlp.units import (
+from .units import (
     UNIT_PATTERN,
     UNIT_CLASSIFICATION_PATTERN,
     UNIT_OPERATORS_PATTERN,

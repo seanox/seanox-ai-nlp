@@ -1,6 +1,6 @@
 # seanox_ai_nlp/__init__.py
 
-from seanox_ai_nlp.units import (
+from .units import (
     UNIT_PATTERN,
     UNIT_CLASSIFICATION_PATTERN,
     UNIT_OPERATORS_PATTERN,
@@ -24,6 +24,11 @@ from .synthetics import (
     TemplateSyntaxException
 )
 
+from .logics import (
+    logics,
+    Logic
+)
+
 __all__ = [
     # units
     "UNIT_PATTERN",
@@ -45,5 +50,9 @@ __all__ = [
     "TemplateException",
     "TemplateConditionException",
     "TemplateExpressionException",
-    "TemplateSyntaxException"
+    "TemplateSyntaxException",
+
+    # logics
+    "logics",
+    "Logic"
 ]

@@ -25,8 +25,7 @@ from .synthetics import (
 )
 
 from .logics import (
-    logics,
-    Logic
+    logics
 )
 
 __all__ = [
@@ -53,6 +52,5 @@ __all__ = [
     "TemplateSyntaxException",
 
     # logics
-    "logics",
-    "Logic"
+    "logics"
 ]

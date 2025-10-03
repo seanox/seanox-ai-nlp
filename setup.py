@@ -16,7 +16,8 @@ setup(
     install_requires=[
         "pyyaml>=6.0",
         "jsonschema>=4.17",
-        "jinja2>=3.0.0"
+        "jinja2>=3.0.0",
+        "stanza>=1.10.1"
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",

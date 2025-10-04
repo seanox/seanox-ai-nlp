@@ -4,7 +4,7 @@ from seanox_ai_nlp.synthetics.synthetics import _random_range_join_phrase
 
 import itertools
 
-PATTERN_SYMBOLS = ['a', 'b', 'c', 'd']
+PATTERN_SYMBOLS = ["a", "b", "c", "d"]
 PATTERN_SYMBOLS_DEFAULT = ", ".join(PATTERN_SYMBOLS)
 PATTERN_SYMBOLS_CUSTOM = "_".join(PATTERN_SYMBOLS)
 PATTERN_COMBINATIONS_DEFAULT = []

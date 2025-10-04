@@ -32,7 +32,7 @@ def test_synthetics_spans_expression_04():
         "synthetics_spans_expression.yaml",
         {"template": 4}
     )
-    assert synthetic.spans == [(7, 10, 'X'), (18, 21, 'X'), (29, 32, 'X')]
+    assert synthetic.spans == [(7, 10, "X"), (18, 21, "X"), (29, 32, "X")]
 
 
 def test_synthetics_spans_expression_05():

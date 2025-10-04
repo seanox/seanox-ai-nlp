@@ -11,7 +11,7 @@ EXAMPLES_PATH = Path("./examples") if Path("./examples").is_dir() else Path("../
 
 
 def test_synthetics_validation_0x():
-    pattern = re.compile(r'synthetics_validation_0\d\.yaml')
+    pattern = re.compile(r"synthetics_validation_0\d\.yaml")
     for file in Path(TESTS_PATH).iterdir():
         if pattern.fullmatch(file.name):
             synthetics(TESTS_PATH, file.name)

@@ -12,7 +12,7 @@ LABEL_COLORS = {
 
 
 def highlight_entities(text, entities):
-    reset = '\033[0m'
+    reset = "\033[0m"
     for start, end, label in sorted(entities, key=lambda x: -x[0]):
         if label not in LABEL_COLORS:
             label = "term"

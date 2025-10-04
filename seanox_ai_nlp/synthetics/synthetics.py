@@ -321,7 +321,7 @@ def _normalize(text: str = "") -> str:
     if text is None:
         return ""
     text = text.strip()
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"\s+", " ", text)
     return text
 
 

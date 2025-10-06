@@ -14,6 +14,7 @@ class Type(Enum):
     OR = auto()
     NOT = auto()
     INV = auto()
+    GROUP = auto()
     DATA = auto()
 
 
@@ -27,12 +28,13 @@ _LANGUAGE_LOGIC_PATTERN: dict[str, dict[Type, list[re.Pattern] | None]] = {
     "de": {
         Type.AND: None,
         Type.OR: [
-            re.compile("oder|sonst")
+            _re_compile_logic_pattern(
+                r"oder|sonst"
+            )
         ],
         Type.NOT: [
             _re_compile_logic_pattern(
-                r"ohne",
-                r"weder|noch",
+                r"ohne|weder|noch",
                 r"nie(mals)?",
                 r"nicht",
                 r"kein(e|s|((er|es)[a-z]*))?",
@@ -57,7 +59,7 @@ _LANGUAGE_LOGIC_PATTERN: dict[str, dict[Type, list[re.Pattern] | None]] = {
 #   }
 }
 
-_MODEL_DIR = os.path.join(os.getcwd(), "stanza")
+_MODEL_DIR = os.path.join(os.getcwd(), ".stanza")
 
 _pipelines: dict[str, stanza.Pipeline] = {}
 
@@ -71,15 +73,14 @@ def _download_pipeline_lazy(language: str):
 _CLAUSE_RELATIONS = {"ccomp", "xcomp", "advcl", "acl", "relcl", "parataxis", "conj"}
 
 
-def _get_clause_id(word: Word, sentence: Sentence) -> int | None:
+def _get_clause_id(sentence: Sentence, word: Word) -> int | None:
 
     # Search for clause indicators
     current = word
     while current.head != 0:
-        head = sentence.words[current.head - 1]
-        if head.deprel in _CLAUSE_RELATIONS:
-            return head.id
-        current = head
+        if current.deprel in _CLAUSE_RELATIONS:
+            return current.id
+        current = sentence.words[current.head - 1]
 
     # Search for root word if no clause is present (because main clause)
     for word in sentence.words:
@@ -90,16 +91,27 @@ def _get_clause_id(word: Word, sentence: Sentence) -> int | None:
     return None
 
 
+def _get_related_entity(sentence: Sentence, word: Word, entities: dict[int, dict]) -> dict | None:
+    while True:
+        if word.id in entities.keys():
+            return entities.get(word.id)
+        if word.head == 0:
+            break
+        word = sentence.words[word.head - 1]
+    return None
+
+
 def _create_logic_chain(
         doc: stanza.Document,
         entities: list[tuple[int, int, str]],
-        pattern: dict[Type, list[re.Pattern]]
-) -> list[tuple[Type, Optional[dict[str, Any]]]]:
+        patterns: dict[Type, list[re.Pattern]]
+) -> list[tuple[Type, dict[str, Any] | None | list]]:
 
     if not entities:
         return []
 
-    entities = {
+    # New dictionary with the starting positions
+    entities_starts = {
         start: {"start": start, "end": end, "label": label}
         for start, end, label in entities
     }
@@ -107,16 +119,68 @@ def _create_logic_chain(
     structures: dict[int | None, list] = {}
     for sentence in doc.sentences:
         for word in sentence.words:
-            if word.start_char in entities:
-                clause = _get_clause_id(word, sentence)
+            if word.start_char in entities_starts:
+                clause = _get_clause_id(sentence, word)
                 if clause not in structures:
                     structures[clause] = []
-                entity = entities[word.start_char]
+                entity = entities_starts[word.start_char]
+                entity["clause"] = clause
                 entity["word"] = word
-                entity["clause"] = _get_clause_id(word, sentence)
-                structures[clause].append(entity)
+                structures[clause].append((Type.DATA, entity))
 
-    return []
+    # New dictionary with word IDs of the entities
+    entity_index = {
+        entity["word"].id: entity
+        for clause in structures.values()
+        for type, entity in clause
+    }
+
+    # Second pass: Identify logical operators and insert them before entities,
+    # since logical words can also occur semantically after an entity, but must
+    # be entered logically before the entity.
+    for sentence in doc.sentences:
+        for word in sentence.words:
+            for operator, pattern in patterns.items():
+                if not pattern:
+                    continue
+                for regex in pattern:
+                    if not regex or not regex.match(word.lemma):
+                        continue
+                    entity = _get_related_entity(sentence, word, entity_index)
+                    if entity:
+                        structure = structures[entity["clause"]]
+                        structure.insert(structure.index((Type.DATA, entity)), (operator, None))
+                    # Because these are logical flags with no fixed order (which
+                    # is also true for AND and OR, but reads strangely), each
+                    # match can be inserted before the entity -- without a break
+
+    # Assemble final structure
+    # All groups and entities that are not related by a logical operator are
+    # related by AND, based on the assumption that all entities of the input are
+    # related in context and are therefore implicitly related by AND.
+    structures_result = []
+    for structures_index, structure in enumerate(structures.values()):
+        if structures_index > 0:
+            structures_result.append((Type.AND, None))
+        structure_result = []
+        for structure_index, (type, entity) in enumerate(structure):
+            if Type.DATA == type:
+                if structure_index > 0 and Type.DATA == structure[structure_index - 1][0]:
+                    structure_result.append((Type.AND, None))
+                structure_result.append((
+                    Type.DATA,
+                    {
+                        "start": entity["start"],
+                        "end": entity["end"],
+                        "label": entity["label"],
+                        "value": entity["word"].text
+                    }
+                ))
+            else:
+                structure_result.append((type, entity))
+        structures_result.append((Type.GROUP, structure_result))
+
+    return structures_result
 
 
 def _get_pipeline(language: str) -> stanza.Pipeline:

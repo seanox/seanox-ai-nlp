@@ -156,6 +156,10 @@ for data in datas:
 - [Downstream Processing with pandas](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#downstream-processing-with-pandas)
 
 # Changes
+
+## 1.3.0.1 20251009
+BF: Release: Unwanted content in distribution (seanox_ai_nlp.whl / seanox_ai_nlp.gz)
+
 ## 1.3.0 20251001
 BF: Python: Corrections/optimizations of dependencies  
 BF: synthetics: Correction for empty templates / missing segments  

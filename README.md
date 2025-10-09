@@ -26,13 +26,6 @@ The package integrates lightweight components into existing NLP pipelines. These
 components are designed to work without relying on large language models (LLMs)
 and to structure relevant data using deterministic and auditable mechanisms.
 
-__Additional modules are planned to support structured query generation,
-including:__
-
-- __Semantic Logic Composer__: Parses natural-language input and produces a
-  logical structure enriched with extracted entities. This structure can be used
-  as a basis for formats such as SQL, JSON or YAML.
-
 ## Structured NLP Workflow
 
 The following figures illustrate the core motivation and design focus of this
@@ -154,6 +147,23 @@ for data in datas:
 - [Usage](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#usage)
 - [Integration in NLP Workflows](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#integration-in-nlp-workflows)
 - [Downstream Processing with pandas](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#downstream-processing-with-pandas)
+
+## [logics (under development)](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/logics/README.md)
+__Semantic Logic Composer__ parses natural-language input and produces a logical
+structure enriched with extracted entities. This structure can be used as a
+basis for formats such as SQL, JSON or YAML.
+
+TODO:
+
+### Features
+TODO:
+
+### Quickstart
+TODO:
+
+- [Usage](TODO:)
+- [Integration in NLP Workflows](TODO:)
+- [Downstream Processing](TODO:)
 
 # Changes
 

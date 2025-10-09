@@ -4,7 +4,7 @@ from seanox_ai_nlp.synthetics.synthetics import _random_set
 
 import itertools
 
-PATTERN_SYMBOLS = ['a', 'b', 'c', 'd']
+PATTERN_SYMBOLS = ["a", "b", "c", "d"]
 PATTERN_COMBINATIONS = []
 for index in range(1, len(PATTERN_SYMBOLS) + 1):
     perms = itertools.permutations(PATTERN_SYMBOLS, index)

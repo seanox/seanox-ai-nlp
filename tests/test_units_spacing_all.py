@@ -13,10 +13,10 @@ def _generate_spacing_variants(base: str, pattern: str, effect_expected):
     for index, space in enumerate(["", " ", "  "]):
         input = base[:position] + space + base[position:]
         if isinstance(effect_expected, list):
-            effect_expected_interal = effect_expected[index]
+            effect_expected_internal = effect_expected[index]
         else:
-            effect_expected_interal = effect_expected
-        expected_space = " " if effect_expected_interal else space
+            effect_expected_internal = effect_expected
+        expected_space = " " if effect_expected_internal else space
         expected = base[:position] + expected_space + base[position:]
         result.append((input, expected))
     return result

@@ -4,7 +4,7 @@ from seanox_ai_nlp.synthetics.synthetics import _random_range
 
 import itertools
 
-PATTERN_SYMBOLS = ['a', 'b', 'c', 'd']
+PATTERN_SYMBOLS = ["a", "b", "c", "d"]
 PATTERN_COMBINATIONS = []
 for index in range(1, len(PATTERN_SYMBOLS) + 1):
     perms = itertools.permutations(PATTERN_SYMBOLS, index)
@@ -23,7 +23,7 @@ def test_synthetics_random_range_01():
     # Each entry must appear in PATTERN_COMBINATIONS
     assert all(item in PATTERN_COMBINATIONS for item in results)
     # At least one entry differs from another
-    results = [''.join(result) for result in results]
+    results = ["".join(result) for result in results]
     assert len(set(results)) > 1
 
 
@@ -38,7 +38,7 @@ def test_synthetics_random_range_02():
     # Each entry must appear in PATTERN_COMBINATIONS
     assert all(item in PATTERN_COMBINATIONS for item in results)
     # At least one entry differs from another
-    results = [''.join(result) for result in results]
+    results = ["".join(result) for result in results]
     assert len(set(results)) > 1
 
 
@@ -53,7 +53,7 @@ def test_synthetics_random_range_03():
     # Each entry must appear in PATTERN_COMBINATIONS
     assert all(item in PATTERN_COMBINATIONS for item in results)
     # At least one entry differs from another
-    results = [''.join(result) for result in results]
+    results = ["".join(result) for result in results]
     assert len(set(results)) > 1
 
 
@@ -70,7 +70,7 @@ def test_synthetics_random_range_05():
     # Each entry must appear in PATTERN_COMBINATIONS
     assert all(item in PATTERN_COMBINATIONS for item in results)
     # At least one entry differs from another
-    results = [''.join(result) for result in results]
+    results = ["".join(result) for result in results]
     assert len(set(results)) > 1
 
 

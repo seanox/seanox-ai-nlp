@@ -24,6 +24,10 @@ from .synthetics import (
     TemplateSyntaxException
 )
 
+from .logics import (
+    logics
+)
+
 __all__ = [
     # units
     "UNIT_PATTERN",
@@ -45,5 +49,8 @@ __all__ = [
     "TemplateException",
     "TemplateConditionException",
     "TemplateExpressionException",
-    "TemplateSyntaxException"
+    "TemplateSyntaxException",
+
+    # logics
+    "logics"
 ]

@@ -13,7 +13,7 @@ The resulting structure can be expressed in formats such as SQL, JSON, or YAML,
 providing a basis that downstream components may use for retrieval or filtering.
 
 The module is intended as a lightweight component within an NLP pipeline. It
-works independently of large language models (LLMs) and produces a transparent,
+works independently of large language models (LLMs) and creates a transparent,
 deterministic logical structure that downstream components can consume and
 apply. Its design emphasizes auditability and adaptability, allowing
 practitioners to control which entities are considered relevant and which are

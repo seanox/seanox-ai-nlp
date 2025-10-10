@@ -7,9 +7,12 @@ of inclusion and exclusion, which are rarely made explicit in conventional
 retrieval workflows.
 
 The __Semantic Logic Composer__ provides a __rule-based__ approach to extracting
-such logical structures. It identifies entities within free-text input and
-represents their relations through operators like __AND__, __OR__, and __NOT__.
-The resulting structure can be expressed in formats such as SQL, JSON, or YAML,
+logical structures from semantic input. It identifies entities and represents
+their relations through the primitives __ANY__ (union) and __NOT__ (exclusion).
+Enumerations are always interpreted as unions, so OR does not need to be modeled
+explicitly. An explicit __AND__ in the sense of an intersection does not exist;
+the expressiveness comes from combinatorics, nesting, and normalization. The
+resulting structure can be expressed in formats such as SQL, JSON, or YAML,
 providing a basis that downstream components may use for retrieval or filtering.
 
 The module is intended as a lightweight component within an NLP pipeline. It

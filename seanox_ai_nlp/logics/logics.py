@@ -8,6 +8,8 @@ import os
 import re
 import stanza
 
+_MODEL_DIR = os.path.join(os.getcwd(), ".stanza")
+
 
 class Type(Enum):
     AND = auto()
@@ -24,7 +26,27 @@ def _re_compile_logic_pattern(*pattern: str) -> re.Pattern:
     )
 
 
+# TODO: No idea yet how the mapping will work, regex + replace is not enough
+#       excluded X / excluded is X
+_LANGUAGE_LOGIC_MAPPING: list[Any] | None = {
+    "de": None,
+    "dk": None,
+    "en": None,
+    "es": None,
+    "fr": None,
+    "it": None,
+    "ru": None
+}
+
 _LANGUAGE_LOGIC_PATTERN: dict[str, dict[Type, list[re.Pattern] | None]] = {
+
+    # https://universaldependencies.org/docs/en/dep/neg.html
+    # https://universaldependencies.org/de/
+    # nicht / nichts / nicht einmal / nicht mehr / nicht mal / noch nicht
+    # kein / keine / keiner / keines
+    # nie / niemals
+    # ohne, weder (noch)
+
     "de": {
         Type.AND: None,
         Type.OR: [
@@ -59,7 +81,6 @@ _LANGUAGE_LOGIC_PATTERN: dict[str, dict[Type, list[re.Pattern] | None]] = {
 #   }
 }
 
-_MODEL_DIR = os.path.join(os.getcwd(), ".stanza")
 
 _pipelines: dict[str, stanza.Pipeline] = {}
 
@@ -70,130 +91,71 @@ def _download_pipeline_lazy(language: str):
     stanza.download(language, model_dir=_MODEL_DIR)
 
 
-_CLAUSE_RELATIONS = {"ccomp", "xcomp", "advcl", "acl", "relcl", "parataxis", "conj"}
+def _get_related_entities(sentence: Sentence, word: Word, entities: dict[int, dict]) -> list[dict] | None:
+    return []
 
 
-def _get_clause_id(sentence: Sentence, word: Word) -> int | None:
-
-    # Search for clause indicators
-    current = word
-    while current.head != 0:
-        if current.deprel in _CLAUSE_RELATIONS:
-            return current.id
-        current = sentence.words[current.head - 1]
-
-    # Search for root word if no clause is present (because main clause)
-    for word in sentence.words:
-        if word.head == 0:
-            return word.id
-
-    # Special case: Nothing found
-    return None
+Node = tuple[Type, Optional["Tree"]]
+Tree = list[Node]
 
 
-def _get_related_entity(sentence: Sentence, word: Word, entities: dict[int, dict]) -> dict | None:
-    while True:
-        if word.id in entities.keys():
-            return entities.get(word.id)
-        if word.head == 0:
-            break
-        word = sentence.words[word.head - 1]
-    return None
-
+# Retrieval-Union Semantics (RUS)
+# Everything mentioned is retrieved by default (union / ANY). OR does not need
+# to be explicitly modeled, since enumerations are always interpreted as unions.
+# NOT is used for exclusion. An explicit AND in the sense of an intersection
+# does not exist -- sounds too simple, but it's all about combinatorics,
+# nesting, and normalization.
 
 def _create_logic_chain(
         doc: stanza.Document,
         entities: list[tuple[int, int, str]],
         patterns: dict[Type, list[re.Pattern]]
-) -> list[tuple[Type, dict[str, Any] | None | list]]:
+) -> Tree:
 
     if not entities:
         return []
-
-    # New dictionary with the starting positions
-    entities_starts = {
-        start: {"start": start, "end": end, "label": label}
-        for start, end, label in entities
-    }
-
-    structures: dict[int | None, list] = {}
-    for sentence in doc.sentences:
-        for word in sentence.words:
-            if word.start_char in entities_starts:
-                clause = _get_clause_id(sentence, word)
-                if clause not in structures:
-                    structures[clause] = []
-                entity = entities_starts[word.start_char]
-                entity["clause"] = clause
-                entity["word"] = word
-                structures[clause].append((Type.DATA, entity))
-
-    # New dictionary with word IDs of the entities
-    entity_index = {
-        entity["word"].id: entity
-        for clause in structures.values()
-        for type, entity in clause
-    }
-
-    # Second pass: Identify logical operators and insert them before entities,
-    # since logical words can also occur semantically after an entity, but must
-    # be entered logically before the entity.
-    for sentence in doc.sentences:
-        for word in sentence.words:
-            for operator, pattern in patterns.items():
-                if not pattern:
-                    continue
-                for regex in pattern:
-                    if not regex or not regex.match(word.lemma):
-                        continue
-                    entity = _get_related_entity(sentence, word, entity_index)
-                    if entity:
-                        structure = structures[entity["clause"]]
-                        structure.insert(structure.index((Type.DATA, entity)), (operator, None))
-                    # Because these are logical flags with no fixed order (which
-                    # is also true for AND and OR, but reads strangely), each
-                    # match can be inserted before the entity -- without a break
-
-    # Assemble final structure
-    # All groups and entities that are not related by a logical operator are
-    # related by AND, based on the assumption that all entities of the input are
-    # related in context and are therefore implicitly related by AND.
-    structures_result = []
-    for structures_index, structure in enumerate(structures.values()):
-        if structures_index > 0:
-            structures_result.append((Type.AND, None))
-        structure_result = []
-        for structure_index, (type, entity) in enumerate(structure):
-            if Type.DATA == type:
-                if structure_index > 0 and Type.DATA == structure[structure_index - 1][0]:
-                    structure_result.append((Type.AND, None))
-                structure_result.append((
-                    Type.DATA,
-                    {
-                        "start": entity["start"],
-                        "end": entity["end"],
-                        "label": entity["label"],
-                        "value": entity["word"].text
-                    }
-                ))
-            else:
-                structure_result.append((type, entity))
-        structures_result.append((Type.GROUP, structure_result))
-
-    return structures_result
+    return []
 
 
-def _get_pipeline(language: str) -> stanza.Pipeline:
-    if language not in _pipelines:
+def _get_pipeline(language: str, processors: str | None) -> stanza.Pipeline:
+
+    if not processors or not processors.strip():
+        processors = "tokenize,mwt,pos,lemma,depparse"
+
+    # stanza usually requires the tokenize processor for its pipelines. Since
+    # the list of processors is checked before tokenize_pretokenized is
+    # evaluated, tokenize must always be specified to ensure that dependencies
+    # are met. However, in cases where the text is already pre-segmented, this
+    # would distort the logic of the processor list. Therefore, tokenize is
+    # automatically added here if it is missing, and the tokenize_pretokenized
+    # option is set depending on the actual existence of tokenize.
+
+    processors = [
+        processor.strip().lower()
+        for processor in processors.split(",")
+        if processor.strip()
+    ]
+    tokenizer = "tokenize" in processors
+    if not tokenizer:
+        processors.insert(0, "tokenize")
+    processors = ",".join(processors)
+
+    signature = (language, processors)
+    if signature not in _pipelines:
         _download_pipeline_lazy(language)
-        _pipelines[language] = stanza.Pipeline(
+        _pipelines[signature] = stanza.Pipeline(
             lang=language,
-            processors="tokenize,mwt,pos,lemma,depparse",
+            processors=processors,
+            tokenize_pretokenized=not tokenizer,
             model_dir=_MODEL_DIR,
             download_method=None,
             use_gpu=False
         )
-    return _pipelines[language]
+    return _pipelines[signature]
+
+
+def _preparation_sentence_mapping(language: str, sentence: Sentence) -> list[str]:
+    return [token.text for token in sentence.tokens]
 
 
 def logics(
@@ -212,6 +174,17 @@ def logics(
     if not text.strip() or not entities:
         return []
 
-    nlp = _get_pipeline(language)
+    # First pass as a preprocess to change everyday logical words and phrases in
+    # Universal Dependencies words and phrases so that the stanza pipelines can
+    # interpret them.
+    nlp = _get_pipeline(language, processors="tokenize,mwt")
     doc = nlp(text)
+    sentences = []
+    for sentence in doc.sentences:
+        sentences.append(_preparation_sentence_mapping(language, sentence))
+
+    # Second pass to determine the actual logical structure.
+    nlp = _get_pipeline(language, processors="pos,lemma,depparse")
+    print(sentences)
+    doc = nlp(sentences)
     return _create_logic_chain(doc, entities, _LANGUAGE_LOGIC_PATTERN[language])

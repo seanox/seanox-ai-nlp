@@ -2,7 +2,7 @@
 
 from enum import Enum, auto
 from stanza.models.common.doc import Word, Sentence
-from typing import Optional, Any
+from typing import Optional, Callable
 
 import os
 import re
@@ -12,11 +12,9 @@ _MODEL_DIR = os.path.join(os.getcwd(), ".stanza")
 
 
 class Type(Enum):
-    AND = auto()
-    OR = auto()
+    ANY = auto()
     NOT = auto()
-    INV = auto()
-    GROUP = auto()
+    INVERT = auto()
     DATA = auto()
 
 
@@ -26,9 +24,7 @@ def _re_compile_logic_pattern(*pattern: str) -> re.Pattern:
     )
 
 
-# TODO: No idea yet how the mapping will work, regex + replace is not enough
-#       excluded X / excluded is X
-_LANGUAGE_LOGIC_MAPPING: list[Any] | None = {
+_LANGUAGE_SENTENCE_MAPPING: dict[str, Callable[[Sentence], list[str]]] | None = {
     "de": None,
     "dk": None,
     "en": None,
@@ -48,22 +44,17 @@ _LANGUAGE_LOGIC_PATTERN: dict[str, dict[Type, list[re.Pattern] | None]] = {
     # ohne, weder (noch)
 
     "de": {
-        Type.AND: None,
-        Type.OR: [
-            _re_compile_logic_pattern(
-                r"oder|sonst"
-            )
-        ],
+        Type.ANY: None,
         Type.NOT: [
             _re_compile_logic_pattern(
                 r"ohne|weder|noch",
                 r"nie(mals)?",
-                r"nicht",
+                r"nicht(s)?",
                 r"kein(e|s|((er|es)[a-z]*))?",
                 r"ausge(nommen|schlossen)"
             )
         ],
-        Type.INV: [
+        Type.INVERT: [
             None
         ]
     },
@@ -114,6 +105,13 @@ def _create_logic_chain(
 
     if not entities:
         return []
+
+    for sentence_id, sentence in enumerate(doc.sentences):
+        words = []
+        for word in sentence.words:
+            print(word)
+
+
     return []
 
 
@@ -154,15 +152,7 @@ def _get_pipeline(language: str, processors: str | None) -> stanza.Pipeline:
     return _pipelines[signature]
 
 
-def _preparation_sentence_mapping(language: str, sentence: Sentence) -> list[str]:
-    return [token.text for token in sentence.tokens]
-
-
-def logics(
-        language: str,
-        text: str,
-        entities: list[tuple[int, int, str]]
-) -> list[tuple[Type, Optional[dict[str, Any]]]]:
+def logics(language: str, text: str, entities: list[tuple[int, int, str]]) -> Tree:
 
     language = (language or "").strip()
     if not language:
@@ -172,19 +162,25 @@ def logics(
     language = language.lower()
 
     if not text.strip() or not entities:
-        return []
+        return Tree()
 
-    # First pass as a preprocess to change everyday logical words and phrases in
-    # Universal Dependencies words and phrases so that the stanza pipelines can
-    # interpret them.
-    nlp = _get_pipeline(language, processors="tokenize,mwt")
-    doc = nlp(text)
-    sentences = []
-    for sentence in doc.sentences:
-        sentences.append(_preparation_sentence_mapping(language, sentence))
+    mapping = _LANGUAGE_SENTENCE_MAPPING.get(language)
+    if mapping is not None:
 
-    # Second pass to determine the actual logical structure.
-    nlp = _get_pipeline(language, processors="pos,lemma,depparse")
-    print(sentences)
-    doc = nlp(sentences)
+        # First pass as a preprocess to change everyday logical words and phrases in
+        # Universal Dependencies words and phrases so that the stanza pipelines can
+        # interpret them.
+        nlp = _get_pipeline(language, processors="tokenize,mwt")
+        doc = nlp(text)
+        sentences = []
+        for sentence in doc.sentences:
+            sentences.append(mapping(sentence))
+
+        # Second pass to determine the actual logical structure.
+        nlp = _get_pipeline(language, processors="pos,lemma,depparse")
+        doc = nlp(sentences)
+    else:
+        nlp = _get_pipeline(language, processors="tokenize,mwt,pos,lemma,depparse")
+        doc = nlp(text)
+
     return _create_logic_chain(doc, entities, _LANGUAGE_LOGIC_PATTERN[language])

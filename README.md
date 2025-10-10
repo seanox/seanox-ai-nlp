@@ -149,9 +149,25 @@ for data in datas:
 - [Downstream Processing with pandas](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#downstream-processing-with-pandas)
 
 ## [logics (under development)](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/logics/README.md)
-__Semantic Logic Composer__ parses natural-language input and produces a logical
-structure enriched with extracted entities. This structure can be used as a
-basis for formats such as SQL, JSON or YAML.
+The __Semantic Logic Composer (logics)__ provides a __rule-based__ approach to
+extracting logical structures from semantic input. It identifies entities and
+represents their relations through the primitives __ANY__ (union) and __NOT__
+(exclusion). Enumerations are always interpreted as unions, so OR does not need
+to be modeled explicitly. An explicit __AND__ in the sense of an intersection
+does not exist; the expressiveness comes from combinatorics, nesting, and
+normalization. The resulting structure can be expressed in formats such as SQL,
+JSON, or YAML, providing a basis that downstream components may use for
+retrieval or filtering.
+
+The __Semantic Logic Composer__ provides a rule-based approach to extracting
+logical structures from input text. It operates on entities provided by upstream
+components and represents their relations using the primitives __ANY__ (union)
+and __NOT__ (exclusion). Enumerations are interpreted as unions, so OR does not
+need to be modeled explicitly. An explicit __AND__ in the sense of an
+intersection does not exist; __the expressiveness comes from combinatorics,
+nesting, and normalization__. The resulting structures can be expressed in
+formats such as SQL, JSON, or YAML and can be used by downstream components for
+retrieval or filtering.
 
 TODO:
 

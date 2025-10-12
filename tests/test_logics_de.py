@@ -1,4 +1,4 @@
-# tests/test_logics.py
+# tests/test_logics_de.py
 
 from pathlib import Path
 from seanox_ai_nlp.synthetics.synthetics import _extract_entities
@@ -21,7 +21,8 @@ _ANNOTATION_PATTERN = {
     "KEYWORD": [
         r"\bSauerstoff\b", r"\bMagnetfeld\b", r"\bMethan\b", r"\bvulkanisch\b",
         r"\bWasser\b", r"\brückläufig[a-z]*\b", r"\bRotation\b", r"\bStürme\b",
-        r"\bFleck[a-z]*\b", r"\bRingsystem[a-z]*\b", r"\bLeben\b", r"\bDichte\b"
+        r"\bFleck[a-z]*\b", r"\bRingsystem[a-z]*\b", r"\bLeben\b", r"\bDichte\b",
+        r"\bfest[a-z]*\b", r"\bOberfläche\b"
     ],
     "MOONS": [r"\beinen\b", r"\bxkeine\b", r"(?<!\d)\d{1,2}(?!\d)"],
     "PLANET": [
@@ -30,6 +31,7 @@ _ANNOTATION_PATTERN = {
     ],
     "TURNOVER": [r"(?<!\d)\d{3}(?!\d)"],
     "DIAMETER": [r"(?<!\d)\d{5,}(?!\d)"],
+    "DUMMY": [r"^[A-Z](?!\w)|(?<!\w)[A-Z](?!\w)|(?<!\w)[A-Z](?!\w)"]
 }
 
 
@@ -56,11 +58,88 @@ def _annotate_text(text: str) -> str:
     return annotated_text
 
 
-EXAMPLES_TEXT = [
+# Prompt:
+# Erstelle einfache logische Sätze.
+# Nutze dazu primär die Worte:
+#     finde, vergleiche, sortiere, A, B, C, D, E, F, G, H, und, oder, nicht,
+#     nichts, kein, keines, nie, niemals, ohne, weder, noch.
+# ---
+EXAMPLES_TEXT_01 = [
+    "Nicht A, aber B",
+    "Finde A statt B.",
+
+    "Finde A sonst B.",
+
+    "Finde A und B.",
+    "Vergleiche C, D und E.",
+    "Sortiere F oder G.",
+    "Finde A, B, C und D.",
+
+    "Finde A, aber nicht B.",
+    "Vergleiche C und D, nicht E.",
+    "Sortiere F, G, H, aber kein A.",
+    "Finde B oder C, aber nichts von D.",
+
+    "Finde A und B ohne C.",
+    "Vergleiche D, E und F ohne G.",
+    "Sortiere H ohne A und ohne B.",
+
+    "Finde A, aber niemals B.",
+    "Vergleiche C und D, nie E.",
+    "Sortiere F, G, H, aber niemals A.",
+
+    "Finde weder A noch B.",
+    "Vergleiche weder C noch D, aber E.",
+    "Sortiere weder F noch G, sondern H.",
+
+    "Vergleiche A, B und C, aber nicht D und E oder F.",
+    "Finde A und B, ohne C, aber mit D oder E.",
+    "Sortiere A, B, C, aber weder D noch E, und niemals F.",
+    "Vergleiche A, B, C, aber nicht D, und ohne E oder F."
+]
+
+# Prompt:
+# Erstelle logische Sätze mit Haupt und Nebensatz.
+# Nutze dazu primär die Worte:
+#     finde, vergleiche, sortiere, A, B, C, D, E, F, G, H, und, oder, nicht,
+#     nichts, kein, keines, nie, niemals, ohne, weder, noch.
+# ---
+EXAMPLES_TEXT_02 = [
+    "Finde A und B, wobei du C nicht berücksichtigst.",
+    "Vergleiche D und E, dass F niemals erscheint.",
+    "Sortiere G, dass kein H enthalten ist.",
+
+    "Finde A, das nicht B ist.",
+    "Vergleiche C, die weder D noch E enthalten.",
+    "Sortiere F, der ohne G auskommt.",
+
+    "Finde A, wenn B nicht vorkommt.",
+    "Vergleiche C und D, falls E niemals erscheint.",
+    "Sortiere F, sofern weder G noch H berücksichtigt werden.",
+
+    "Finde A, obwohl B ausgeschlossen ist.",
+    "Vergleiche C, auch wenn D und E nicht vorkommen.",
+    "Sortiere F, selbst wenn G niemals berücksichtigt wird."
+]
+
+EXAMPLES_TEXT_03 = [
     "Zeige mir alle Gasriesen mit Ringsystem oder ohne Magnetfeld.",
     "Zeige mir alle Gasriesen mit Ringsystem oder ohne Magnetfeld, aber keine Planeten mit vergleichbarer Atmosphäre wie die Erde.",
     "Zeige mir alle Gasriesen mit Ringsystem oder ohne Magnetfeld, aber keine mit einer der Erde vergleichbaren Atmosphäre.",
     "Zeige mir alle Gasriesen mit Ringsystem. Oder jene, die kein Magnetfeld haben.",
+    "Nicht Mars, sondern Jupiter ist ein Gasriese und kein Gesteinsplanet, weil er kein feste Oberfläche hat.",
+    "Im Text steht nicht Gesteinsplanet, sondern Planeten nicht ohne fester Oberfläche.",
+    "Im Text steht nicht Gesteinsplanet oder Gasriese aber Eisriese.",
+    "Zeige mir keine Gesteinsplanet oder Gasriese aber Eisriese."
+]
+
+EXAMPLES_TEXT_04 = [
+    "Zeige mir alle Gasriesen mit Ringsystem oder ohne Magnetfeld.",
+    "Zeige mir alle Gasriesen mit Ringsystem oder ohne Magnetfeld, aber keine Planeten mit vergleichbarer Atmosphäre wie die Erde.",
+    "Zeige mir alle Gasriesen mit Ringsystem oder ohne Magnetfeld, aber keine mit einer der Erde vergleichbaren Atmosphäre.",
+    "Zeige mir alle Gasriesen mit Ringsystem. Oder jene, die kein Magnetfeld haben.",
+    "Nicht Mars, sondern Jupiter ist ein Gasriese und kein Gesteinsplanet, weil er kein feste Oberfläche hat.",
+    "Im Text steht nicht Gesteinsplanet, sondern Planeten nicht ohne fester Oberfläche.",
 
     "Zeige mir alle Gasriesen mit Ringsystem, aber ohne Magnetfeld.",
     "Zeige mir alle Gasriesen mit Ringsystem oder ohne Magnetfeld.",
@@ -112,10 +191,11 @@ EXAMPLES_TEXT = [
 
 
 def test_logics_01():
-    texts = [
+    examples = [
         {"text": synthetic.text, "entities": synthetic.entities}
-        for text in EXAMPLES_TEXT
+        for text in EXAMPLES_TEXT_01
         for synthetic in [_extract_entities(_annotate_text(text))]
     ]
-    for text in texts:
-        pass
+
+    for example in examples:
+        print(logics("de", example["text"], example["entities"]))

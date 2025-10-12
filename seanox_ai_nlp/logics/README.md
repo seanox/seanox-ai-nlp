@@ -66,3 +66,5 @@ I/O and external dependencies.
 # System Design
 
 # Sources & References
+- https://stanfordnlp.github.io/stanza/neural_pipeline.html
+- https://universaldependencies.org/docs/de/dep/

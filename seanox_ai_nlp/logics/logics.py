@@ -2,7 +2,7 @@
 
 from enum import Enum, auto
 from stanza.models.common.doc import Word, Sentence
-from typing import Optional, Callable
+from typing import Optional, Callable, Union, NamedTuple
 
 import os
 import re
@@ -17,6 +17,13 @@ class Type(Enum):
 
 
 # Additional attributes for the logical structure are added to the stanza word.
+
+Word.add_property(
+    "sentence",
+    default=None,
+    getter=lambda self: getattr(self, "_sentence", None),
+    setter=lambda self, value: setattr(self, "_sentence", value)
+)
 
 Word.add_property(
     "types",
@@ -97,27 +104,27 @@ _LANGUAGE_LOGIC_PATTERN: dict[str, dict[Type, list[re.Pattern] | None]] = {
 
 def _print_sentence_tree(sentence: Sentence):
 
-    children = {0: []}
+    nodes = {0: []}
     for word in sentence.words:
-        children.setdefault(word.id, [])
-        children.setdefault(word.head, []).append(word.id)
+        nodes.setdefault(word.id, [])
+        nodes.setdefault(word.head, []).append(word.id)
 
     def recurse(node_id: int, prefix: str = "", is_last: bool = True, is_root: bool = False):
         word = sentence.words[node_id - 1]
-        label = f"{word.head} {word.text} (id:{word.id}, upos:{word.upos}, deprel:{word.deprel}, feats:{word.feats})"
+        label = f"{word.text} (id:{word.id}, head:{word.head}, upos:{word.upos}, deprel:{word.deprel}, feats:{word.feats})"
         connector = "" if is_root else ("└─ " if is_last else "├─ ")
         print(prefix + connector + label)
 
         # Only expand if a connector has been set
         prefix = prefix if is_root else prefix + ("   " if is_last else "│  ")
-        for index, child_id in enumerate(children.get(node_id, [])):
-            recurse(child_id, prefix, index == len(children[node_id]) - 1)
+        for index, child_id in enumerate(nodes.get(node_id, [])):
+            recurse(child_id, prefix, index == len(nodes[node_id]) - 1)
 
-    # Start directly with the children of ROOT (id 0),
+    # Start directly with the node of ROOT (id 0),
     # without connector and without indentation
-    root_children = children.get(0, [])
-    for index, child_id in enumerate(root_children):
-        recurse(child_id, "", index == len(root_children) - 1, is_root=True)
+    root_nodes = nodes.get(0, [])
+    for index, root_node_id in enumerate(root_nodes):
+        recurse(root_node_id, "", index == len(root_nodes) - 1, is_root=True)
 
 
 # Retrieval-Union Semantics (RUS)
@@ -129,60 +136,154 @@ def _print_sentence_tree(sentence: Sentence):
 
 def _get_logical_relations(sentence: Sentence, word: Word) -> set[Type]:
 
-    relations = set()
+    relations: set[Type] = set()
+
+    heads = {
+        item.head
+        for item in sentence.words
+        if item.entity
+    }
+    if word.id in heads:
+        relations.add(Type.ANY)
+
+    if not relations:
+        relations.add(Type.DATA)
+
     return relations
 
 
-def _get_word_path(word: Word) -> list[str]:
-    pass
+def _get_word_path(sentence, word) -> list[int]:
+    path: list[int] = []
+    while True:
+        path.insert(0, word.head)
+        if word.head <= 0:
+            break
+        word = sentence.words[word.head - 1]
+    return path
 
 
-Node = tuple[Type, Optional["Tree"]]
-Tree = list[Node]
+class Entity(NamedTuple):
+    start: int
+    end: int
+    label: str
+    text: str
 
 
-def _print_structure_tree(structure: Tree):
-    pass
+Data = tuple[Type, Entity]
+Tree = tuple[Type, Optional[list["Node"]]]
+Node = Union[Data, Tree]
+
+
+def _print_structure_tree(node: Node):
+
+    def recurse(node: Node, prefix: str = "", is_root: bool = True):
+
+        typ, tree = node
+
+        connector = "" if is_root else "└─ "
+        print(prefix + connector + typ.name)
+
+        if not tree:
+            return
+
+        for index, node in enumerate(tree):
+
+            is_last = index == len(tree) - 1
+            branch = "└─ " if is_last else "├─ "
+            node_prefix = prefix + ("   " if is_last else "│  ")
+
+            type, nodes = node
+            if type == Type.DATA:
+                words = " ".join(str(w) for w in nodes)
+                print(prefix + branch + f"{type.name} {words}")
+            else:
+                print(prefix + branch + type.name)
+                recurse(node, node_prefix, is_root=False)
+
+    recurse(node)
+
+
+def _create_structure_tree(structure: dict[int, tuple[list[int], Word]]) -> Node:
+
+    words: dict[int, list[int]] = {id: [] for id in structure}
+
+    roots = [word for id, (path, word) in structure.items() if path == [0]]
+    if not roots:
+        roots = [word for id, (path, word) in structure.items()
+                 if len(path) == 2 and path[0] == 0]
+
+    for id, (path, word) in structure.items():
+        if word not in roots:
+            parent = path[-1]
+            if parent in words and parent != id:
+                words[parent].append(id)
+
+    def create_node(word: Word) -> Node:
+        type = next(iter(word.types))
+        if Type.DATA == type:
+            return (type, word.entity if word.entity else None)
+        tree: Tree = [(Type.DATA, word.entity)]
+        for id in words.get(word.id, []):
+            tree.append(create_node(structure[id][1]))
+        return (type, tree if tree else None)
+
+    if not roots:
+        return (Type.ANY, None)
+    tree = [create_node(root) for root in roots]
+    if len(tree) == 1:
+        return tree[0]
+    return (Type.ANY, tree)
 
 
 def _create_logic_chain(
         doc: stanza.Document,
         entities: list[tuple[int, int, str]],
         patterns: dict[Type, list[re.Pattern]]
-) -> Tree:
+) -> Node:
 
     if not entities:
-        return []
+        return (Type.ANY, None)
+
+    # TODO: Multi-Word / Multi-Token Entities
+    # TODO: Entities refer to the entire text with start and end, e.g. beyond sentences
 
     # Dictionary with the starting positions of the entities
-    entities_starts = {
-        start: {"start": start, "end": end, "label": label}
-        for start, end, label in entities
-    }
+    entities = {entity.start: entity for entity in entities}
 
     for sentence in doc.sentences:
+        # 1. Injection of additional attributes
+        for word in sentence.words:
+            word.sentence = sentence
+            word.path = _get_word_path(sentence, word)
+            word.types = set()
+            # ignore MWT (Multi-Word Token without start_char)
+            if word.start_char is not None and word.start_char in entities:
+                word.entity = entities[word.start_char]
+
+        # 2. Tagging logical relations only for entities
+        for word in sentence.words:
+            # ignore MWT (Multi-Word Token without start_char)
+            if word.entity:
+                logic_relations = _get_logical_relations(sentence, word)
+                if logic_relations:
+                    word.types.update(logic_relations)
+
+        # 3. Creating a flat tree structure of only the relevant entities
+        structure = {word.id: (word.path, word) for word in sentence.words if word.types}
+
+        # X. Normalize paths
+        # - shorten each path by removing nodes not present in flat
+        # - only keep parent IDs that are valid keys in flat
+        # - and keep 0 as an indicator for ROOT so that paths are never empty
+        heads = set(structure.keys())
+        for id, (path, word) in structure.items():
+            structure[id] = ([head for head in path if head == 0 or head in heads], word)
+
         # TODO:
         _print_sentence_tree(sentence)
-        # 1. Tagging of entities and logical relations
-        for word in sentence.words:
-            word.types = set()
-            # ignore MWT (Multi-Word Token without starts)
-            word_start = word.start_char
-            if word_start and word_start in entities_starts:
-                word.entity = entities_starts[word_start]
-                word.types.add(Type.DATA)
-            logic_relations = _get_logical_relations(sentence, word)
-            if logic_relations:
-                word.types.update(logic_relations)
-            word.path = _get_word_path(word)
+        _print_structure_tree(_create_structure_tree(structure))
 
-        # 2. Creating a flat tree structure of only the relevant entities
-        flat = dict()
-        for word in sentence.words:
-            # TODO:
-            print(f"id:{word.id}, {word.text}, path:{word.path} types:{word.types}")
-
-    return []
+    return (Type.ANY, None)
 
 
 _PIPELINES_MODEL_DIR = os.path.join(os.getcwd(), ".stanza")
@@ -232,7 +333,7 @@ def _get_pipeline(language: str, processors: str | None) -> stanza.Pipeline:
     return _PIPELINES_CACHE[key]
 
 
-def logics(language: str, text: str, entities: list[tuple[int, int, str]]) -> Tree:
+def logics(language: str, text: str, entities: list[tuple[int, int, str]]) -> Node:
 
     language = (language or "").strip()
     if not language:
@@ -247,9 +348,9 @@ def logics(language: str, text: str, entities: list[tuple[int, int, str]]) -> Tr
     mapping = _LANGUAGE_SENTENCE_MAPPING.get(language)
     if mapping is not None:
 
-        # First pass as a preprocess to change everyday logical words and phrases in
-        # Universal Dependencies words and phrases so that the stanza pipelines can
-        # interpret them.
+        # First pass as a preprocess to change everyday logical words and
+        # phrases in Universal Dependencies words and phrases so that the stanza
+        # pipelines can interpret them.
         nlp = _get_pipeline(language, processors="tokenize,mwt")
         doc = nlp(text)
         sentences = []
@@ -262,5 +363,10 @@ def logics(language: str, text: str, entities: list[tuple[int, int, str]]) -> Tr
     else:
         nlp = _get_pipeline(language, processors="tokenize,mwt,pos,lemma,depparse")
         doc = nlp(text)
+
+    entities = [
+        Entity(start, end, label, text[start:end])
+        for start, end, label in entities
+    ]
 
     return _create_logic_chain(doc, entities, _LANGUAGE_LOGIC_PATTERN[language])

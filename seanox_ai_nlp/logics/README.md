@@ -45,7 +45,7 @@ interpretable retrieval logic.
 - [Sources & References](#sources--references)
 
 
-# Retrieval?Union Semantics (RUS)
+# Retrieval-Union Semantics (RUS)
 
 Retrieval?Union Semantics (RUS) is a minimalist yet complete model for
 representing logical structures in retrieval tasks. Everything mentioned is

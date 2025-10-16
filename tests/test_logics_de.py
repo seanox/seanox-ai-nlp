@@ -57,6 +57,7 @@ def _annotate_text(text: str) -> str:
         offset += len(annotated) - (end - start)
     return annotated_text
 
+# TODO: Examples for Multi-Word/Multi-Token Entities are missing.
 
 # Prompt:
 # Erstelle einfache logische Sätze.
@@ -65,6 +66,9 @@ def _annotate_text(text: str) -> str:
 #     nichts, kein, keines, nie, niemals, ohne, weder, noch.
 # ---
 EXAMPLES_TEXT_01 = [
+    "A und B",
+    "A, B und C",
+
     "Nicht A, aber B",
     "Finde A statt B.",
 
@@ -197,5 +201,6 @@ def test_logics_01():
         for synthetic in [_extract_entities(_annotate_text(text))]
     ]
 
+    # TODO:
     for example in examples:
         print(logics("de", example["text"], example["entities"]))

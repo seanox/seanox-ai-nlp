@@ -19,13 +19,6 @@ class Type(Enum):
 # Additional attributes for the logical structure are added to the stanza word.
 
 Word.add_property(
-    "sentence",
-    default=None,
-    getter=lambda self: getattr(self, "_sentence", None),
-    setter=lambda self, value: setattr(self, "_sentence", value)
-)
-
-Word.add_property(
     "types",
     default=None,
     getter=lambda self: getattr(self, "_types", set()),
@@ -111,7 +104,7 @@ def _print_sentence_tree(sentence: Sentence):
 
     def recurse(node_id: int, prefix: str = "", is_last: bool = True, is_root: bool = False):
         word = sentence.words[node_id - 1]
-        label = f"{word.text} (id:{word.id}, head:{word.head}, upos:{word.upos}, deprel:{word.deprel}, feats:{word.feats})"
+        label = f"{word.text} (id:{word.id}, head:{word.head}, lemma:{word.lemma}, upos:{word.upos}, deprel:{word.deprel}, feats:{word.feats})"
         connector = "" if is_root else ("└─ " if is_last else "├─ ")
         print(prefix + connector + label)
 
@@ -127,12 +120,11 @@ def _print_sentence_tree(sentence: Sentence):
         recurse(root_node_id, "", index == len(root_nodes) - 1, is_root=True)
 
 
-# Retrieval-Union Semantics (RUS)
-# Everything mentioned is retrieved by default (union / ANY). OR does not need
-# to be explicitly modeled, since enumerations are always interpreted as unions.
-# NOT is used for exclusion. An explicit AND in the sense of an intersection
-# does not exist -- sounds too simple, but it's all about combinatorics,
-# nesting, and normalization.
+def _get_word_feats(word: Word) -> dict[str, str]:
+    if not word or not word.feats:
+        return {}
+    return dict(feat.split("=", 1) for feat in word.feats.split("|"))
+
 
 def _get_logical_relations(sentence: Sentence, word: Word) -> set[Type]:
 
@@ -143,9 +135,18 @@ def _get_logical_relations(sentence: Sentence, word: Word) -> set[Type]:
         return relations
 
     for child in sentence.words:
-        if child.head == word.id and child.deprel == "neg":
+        if child.head != word.id:
+            continue
+        if child.deprel == "neg":
             relations.add(Type.NOT)
-
+        if child.feats:
+            feats = _get_word_feats(child)
+            if "Polarity" in feats and feats["Polarity"] == "Neg":
+                relations.add(Type.NOT)
+            if "PronType" in feats and feats["PronType"] == "Neg":
+                relations.add(Type.NOT)
+            if "Negative" in feats and feats["Negative"] == "Neg":
+                relations.add(Type.NOT)
     if word.deprel == "neg":
         relations.add(Type.NOT)
 
@@ -193,12 +194,14 @@ def _print_structure_tree(node: Node):
     def recurse(node: Node, prefix: str = "", is_root: bool = True):
 
         typ, tree = node
-
-        connector = "" if is_root else "└─ "
-        print(prefix + connector + typ.name)
-
         if not tree:
             return
+
+        # The type is only output here for the root node.
+        # For recursive calls (is_root=False), the type was already
+        # output in the previous print().
+        if is_root:
+            print(typ.name)
 
         for index, node in enumerate(tree):
 
@@ -215,6 +218,13 @@ def _print_structure_tree(node: Node):
 
     recurse(node)
 
+
+# Retrieval-Union Semantics (RUS)
+# Everything mentioned is retrieved by default (union / ANY). OR does not need
+# to be explicitly modeled, since enumerations are always interpreted as unions.
+# NOT is used for exclusion. An explicit AND in the sense of an intersection
+# does not exist -- sounds too simple, but it's all about combinatorics,
+# nesting, and normalization.
 
 def _create_structure_tree(structure: dict[int, tuple[list[int], Word]]) -> Node:
 
@@ -266,7 +276,6 @@ def _create_logic_chain(
     for sentence in doc.sentences:
         # 1. Injection of additional attributes
         for word in sentence.words:
-            word.sentence = sentence
             word.path = _get_word_path(sentence, word)
             word.types = set()
             # ignore MWT (Multi-Word Token without start_char)

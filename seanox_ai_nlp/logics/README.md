@@ -80,8 +80,8 @@ integrated into existing NLP pipelines.
 # Known Limitations
 
 - __Focused expressiveness__  
-  The logic layer is intentionally reduced to a small set of primitives (`ANY`,
-  `NOT`). This ensures transparency and auditability, while more complex
+  The logic layer is intentionally reduced to a small set of primitives __ANY__
+  and __NOT__. This ensures transparency and auditability, while more complex
   constructs (e.g., explicit intersections) are represented through nesting and
   normalization.
 - __Language coverage__  

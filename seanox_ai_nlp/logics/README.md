@@ -66,7 +66,7 @@ manner.__
 | Get something for A and B, but not C     | `ANY(A,B,NOT(C))`      | `(A OR B) AND NOT C`    |
 | Get something for A or B, but not C      | `ANY(A,B,NOT(C))`      | `(A OR B) AND NOT C`    |
 | Get something for A, but not B and not C | `ANY(A,NOT(B),NOT(C))` | `A AND NOT B AND NOT C` |
-| Get something for A or (B and C)         | `ANY(A,B,C)`           | `A OR B OR C)`          |
+| Get something for A or (B and C)         | `ANY(A,B,C)`           | `A OR B OR C`           |
 
 # Known Limitations
 

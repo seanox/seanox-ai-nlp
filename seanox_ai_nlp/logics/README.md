@@ -44,6 +44,30 @@ interpretable retrieval logic.
 - [System Design](#system-design)
 - [Sources & References](#sources--references)
 
+
+# Retrieval-Union Semantics (RUS)
+
+Retrieval?Union Semantics (RUS) is a minimalist yet complete model for
+representing logical structures in retrieval tasks. Everything mentioned is
+interpreted by default as a __union (ANY)__, so __OR__ does not need to be
+modeled explicitly. __NOT__ is used for exclusion, while intersections (__AND__)
+emerge through __combinatorics, nesting, and normalization__ rather than as a
+separate operator. This reduction to a small set of primitives creates a
+__transparent, deterministic, and auditable retrieval logic__ that can be easily
+integrated into existing NLP pipelines.
+
+__Interpret logic in a retrieval-oriented manner, not in a formal-mathematical
+manner.__
+
+| Everyday sentence                        | Composer syntax                    | SQL equivalent          |
+|------------------------------------------|------------------------------------|-------------------------|
+| Get something for A or B                 | `ANY(A,B)`                         | `(A OR B)`              |
+| Get something for A and B                | `NOT(ANY(NOT(A), NOT(B)))`         | `(A AND B)`             |
+| Get something for A and B, but not C     | `NOT(ANY(NOT(A), NOT(B), C))`      | `(A AND B) AND NOT C`   |
+| Get something for A or B, but not C      | `ANY(A,B,NOT(C))`                  | `(A OR B) AND NOT C`    |
+| Get something for A, but not B and not C | `ANY(A,NOT(B),NOT(C))`             | `A AND NOT B AND NOT C` |
+| Get something for A or (B and C)         | `ANY(A, NOT(ANY(NOT(B), NOT(C))))` | `A OR (B AND C)`        |
+
 # Known Limitations
 
 # Usage

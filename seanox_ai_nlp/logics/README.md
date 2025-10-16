@@ -37,6 +37,7 @@ interpretable retrieval logic.
 
 - [Introduction](#introduction)
 - [Features](#features)
+- [Retrieval-Union Semantics (RUS)](#retrieval-union-semantics-rus)
 - [Known Limitations](#known-limitations)
 - [Usage](#usage)
 - [Benchmark](#benchmark)
@@ -44,10 +45,9 @@ interpretable retrieval logic.
 - [System Design](#system-design)
 - [Sources & References](#sources--references)
 
-
 # Retrieval-Union Semantics (RUS)
 
-Retrieval?Union Semantics (RUS) is a minimalist yet complete model for
+Retrieval-Union Semantics (RUS) is a minimalist yet complete model for
 representing logical structures in retrieval tasks. Everything mentioned is
 interpreted by default as a __union (ANY)__, so __OR__ does not need to be
 modeled explicitly. __NOT__ is used for exclusion, while intersections (__AND__)

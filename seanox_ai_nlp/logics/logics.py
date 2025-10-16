@@ -138,14 +138,28 @@ def _get_logical_relations(sentence: Sentence, word: Word) -> set[Type]:
 
     relations: set[Type] = set()
 
-    heads = {
-        item.head
-        for item in sentence.words
-        if item.entity
-    }
-    if word.id in heads:
-        relations.add(Type.ANY)
+    # Only entities are considered
+    if not word.entity:
+        return relations
 
+    for child in sentence.words:
+        if child.head == word.id and child.deprel == "neg":
+            relations.add(Type.NOT)
+
+    if word.deprel == "neg":
+        relations.add(Type.NOT)
+
+    # Without anything, but others entities refer to it, it will be ANY
+    if not relations:
+        heads = {
+            item.head
+            for item in sentence.words
+            if item.entity
+        }
+        if word.id in heads:
+            relations.add(Type.ANY)
+
+    # Without anything else, it will be ANY
     if not relations:
         relations.add(Type.DATA)
 
@@ -192,10 +206,9 @@ def _print_structure_tree(node: Node):
             branch = "└─ " if is_last else "├─ "
             node_prefix = prefix + ("   " if is_last else "│  ")
 
-            type, nodes = node
+            type, entity = node
             if type == Type.DATA:
-                words = " ".join(str(w) for w in nodes)
-                print(prefix + branch + f"{type.name} {words}")
+                print(prefix + branch + f"{type.name} (label:{entity.label}, text:{entity.text})")
             else:
                 print(prefix + branch + type.name)
                 recurse(node, node_prefix, is_root=False)
@@ -343,7 +356,7 @@ def logics(language: str, text: str, entities: list[tuple[int, int, str]]) -> No
     language = language.lower()
 
     if not text.strip() or not entities:
-        return Tree()
+        return (Type.ANY, None)
 
     mapping = _LANGUAGE_SENTENCE_MAPPING.get(language)
     if mapping is not None:

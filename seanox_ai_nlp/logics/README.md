@@ -79,6 +79,26 @@ integrated into existing NLP pipelines.
 
 # Known Limitations
 
+- __Focused expressiveness__  
+  The logic layer is intentionally reduced to a small set of primitives (`ANY`,
+  `NOT`). This ensures transparency and auditability, while more complex
+  constructs (e.g., explicit intersections) are represented through nesting and
+  normalization.
+- __Language coverage__  
+  Accuracy depends on the quality of syntactic parsing and the configured
+  lexicons. Domain-specific terminology may require additional curation.
+- __Context sensitivity__  
+  The system operates on syntactic dependencies and lexical mappings. Semantic
+  disambiguation (e.g. resolving polysemy such as _bank_ = "financial
+  institution" vs. "bench") is outside the current scope.
+- __Complementary role__  
+  The approach is not designed to replace large language models. Instead, it
+  provides a practical, interpretable foundation for retrieval and filtering
+  tasks.
+- __Scalability trade-offs__  
+  Rule-based processing favors determinism and auditability, but may be less
+  efficient than purely statistical or neural methods on very large datasets.
+
 # Usage
 
 # Benchmark

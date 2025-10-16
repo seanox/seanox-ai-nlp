@@ -59,14 +59,14 @@ integrated into existing NLP pipelines.
 __Interpret logic in a retrieval-oriented manner, not in a formal-mathematical
 manner.__
 
-| Everyday sentence                        | Composer syntax                    | SQL equivalent          |
-|------------------------------------------|------------------------------------|-------------------------|
-| Get something for A or B                 | `ANY(A,B)`                         | `(A OR B)`              |
-| Get something for A and B                | `NOT(ANY(NOT(A), NOT(B)))`         | `(A AND B)`             |
-| Get something for A and B, but not C     | `NOT(ANY(NOT(A), NOT(B), C))`      | `(A AND B) AND NOT C`   |
-| Get something for A or B, but not C      | `ANY(A,B,NOT(C))`                  | `(A OR B) AND NOT C`    |
-| Get something for A, but not B and not C | `ANY(A,NOT(B),NOT(C))`             | `A AND NOT B AND NOT C` |
-| Get something for A or (B and C)         | `ANY(A, NOT(ANY(NOT(B), NOT(C))))` | `A OR (B AND C)`        |
+| Everyday sentence                        | Composer syntax        | SQL equivalent          |
+|------------------------------------------|------------------------|-------------------------|
+| Get something for A or B                 | `ANY(A,B)`             | `(A OR B)`              |
+| Get something for A and B                | `ANY(A,B)`             | `(A OR B)`              |
+| Get something for A and B, but not C     | `ANY(A,B,NOT(C))`      | `(A OR B) AND NOT C`    |
+| Get something for A or B, but not C      | `ANY(A,B,NOT(C))`      | `(A OR B) AND NOT C`    |
+| Get something for A, but not B and not C | `ANY(A,NOT(B),NOT(C))` | `A AND NOT B AND NOT C` |
+| Get something for A or (B and C)         | `ANY(A,B,C)`           | `A OR B OR C)`          |
 
 # Known Limitations
 

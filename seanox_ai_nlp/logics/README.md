@@ -1,35 +1,44 @@
 # Introduction
 
-Natural-language input often contains implicit logical relations that are
-difficult to capture in a structured and reproducible way. Phrases like
-_"Compare A, B, and C but not D and E or F and G."_ encode nested combinations
-of inclusion and exclusion, which are rarely made explicit in conventional
-retrieval workflows.
+Natural texts often contain terms that stand in implicit logical relationships
+to one another -- for example, inclusion or exclusion relationships. The use of
+modern AI systems for processing large amounts of data has shown that many
+methods trained on general language usage, but without large language models,
+can be too imprecise when applied to technical domain languages such as those
+in industry, engineering and administration. This module addresses this issue:
+it is intended to identify categorized terms and their relationships using
+methods of natural language processing and to represent them in a transparent,
+verifiable logical structure -- independently of large language models.
+The resulting bridge between language and logic provides a foundation on which
+existing AI systems can continue to build.
 
-The __Semantic Logic Composer__ provides a __rule-based__ approach to extracting
-logical structures from semantic input. It operates on entities provided by
-upstream components and represents their relations using the primitives __ANY__
-(union) and __NOT__ (exclusion). Enumerations are always interpreted as unions,
-so OR does not need to be modeled explicitly. An explicit __AND__ in the sense
-of an intersection does not exist; __the expressiveness comes from combinatorics,
-nesting, and normalization__. The resulting structure can be expressed in formats
-such as SQL, JSON, or YAML, providing a basis that downstream components may use
-for retrieval or filtering.
+The module focuses on robust data structures and modular NLP pipelines. The
+linguistic analysis is based on __[stanza](
+    https://stanfordnlp.github.io/stanza/)__ with __[Universal Dependencies](
+    https://universaldependencies.org/)__ and uses __dependency relations
+(deprel)__ to capture syntactic dependencies more precisely.
+These relations form the foundation for systematically identifying implicit
+logical structures such as inclusion, exclusion, or nesting.
 
-The module is intended as a lightweight component within an NLP pipeline. It
-works independently of large language models (LLMs) and creates a transparent,
-deterministic logical structure that downstream components can consume and
-apply. Its design emphasizes auditability and adaptability, allowing
-practitioners to control which entities are considered relevant and which are
-explicitly excluded. The implementation relies on [stanza](
-    https://stanfordnlp.github.io/stanza/) with [Universal Dependencies](
-https://universaldependencies.org/) to create the structured entity
-representations on which the Composer operates.
+In addition, __language-specific keywords with logical meaning are taken from
+configurable lexicons__, ensuring that the approach remains modular and can be
+easily extended to additional languages.
 
-This approach is neither complete nor perfect and will never replace a large
-language model (LLM) -- natural language is simply too complex for exhaustive
-coverage. Instead, it offers a practical and extensible foundation for building
-interpretable retrieval logic.
+Building on this, the __Semantic Logic Composer__ establishes a rule-based logic
+layer, implementing the principles of __[Retrieval-Union Semantics (RUS)](
+    #retrieval-union-semantics-rus)__ as described above. It processes entities
+from upstream components and represents their relations using the basic
+constructs __ANY__ (union) and __NOT__ (exclusion). Enumerations are always
+interpreted as unions, making an explicit __OR__ unnecessary. An __AND__ in the
+sense of an intersection does not exist; expressive power arises through
+combination, nesting, and normalization. The resulting logical structure can be
+expressed in __SQL, JSON, or YAML__ and serves downstream components as a
+foundation for search or filtering.
+
+This approach is __neither complete nor perfect__ and will __never replace a
+large language model (LLM)__ -- natural language is simply too complex for
+exhaustive coverage. Instead, it offers a __practical and extensible 
+foundation__ for building __interpretable retrieval logic__.
 
 # Features
 
@@ -47,6 +56,9 @@ interpretable retrieval logic.
 
 # Retrieval-Union Semantics (RUS)
 
+__Interpret logic in a retrieval-oriented manner, not in a formal-mathematical
+manner.__
+
 Retrieval-Union Semantics (RUS) is a minimalist yet complete model for
 representing logical structures in retrieval tasks. Everything mentioned is
 interpreted by default as a __union (ANY)__, so __OR__ does not need to be
@@ -55,9 +67,6 @@ emerge through __combinatorics, nesting, and normalization__ rather than as a
 separate operator. This reduction to a small set of primitives creates a
 __transparent, deterministic, and auditable retrieval logic__ that can be easily
 integrated into existing NLP pipelines.
-
-__Interpret logic in a retrieval-oriented manner, not in a formal-mathematical
-manner.__
 
 | Everyday sentence                        | Composer syntax        | SQL equivalent          |
 |------------------------------------------|------------------------|-------------------------|

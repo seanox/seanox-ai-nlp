@@ -25,7 +25,15 @@ from .synthetics import (
 )
 
 from .logics import (
-    logics
+    Type,
+    Entity,
+    Data,
+    Tree,
+    logics,
+    sentences,
+    pretty_print_sentence,
+    pretty_print_sentences,
+    pretty_print_node
 )
 
 __all__ = [
@@ -52,5 +60,13 @@ __all__ = [
     "TemplateSyntaxException",
 
     # logics
-    "logics"
+    "Type",
+    "Entity",
+    "Data",
+    "Tree",
+    "logics",
+    "sentences",
+    "pretty_print_sentence",
+    "pretty_print_sentences",
+    "pretty_print_node"
 ]

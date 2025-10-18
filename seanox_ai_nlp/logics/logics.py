@@ -97,6 +97,9 @@ _LANGUAGE_LOGIC_PATTERN: dict[str, dict[Type, list[re.Pattern] | None]] = {
 
 def _print_sentence_tree(sentence: Sentence):
 
+    if not sentence:
+        return
+
     nodes = {0: []}
     for word in sentence.words:
         nodes.setdefault(word.id, [])
@@ -125,6 +128,9 @@ def _get_word_feats(word: Word) -> dict[str, str]:
         return {}
     return dict(feat.split("=", 1) for feat in word.feats.split("|"))
 
+
+# Abstracts:
+# - unusual/ambiguous sentence structure, then do not use NOT
 
 def _get_logical_relations(sentence: Sentence, word: Word) -> set[Type]:
 
@@ -226,6 +232,29 @@ def _print_structure_tree(node: Node):
 # does not exist -- sounds too simple, but it's all about combinatorics,
 # nesting, and normalization.
 
+
+# Retrieval-Union Semantics (RUS)
+#
+# Interpret logic in a retrieval-oriented manner -- not as full semantic
+# reasoning, and not as formal-mathematical logic.
+#
+# Retrieval-Union Semantics (RUS) functions as a pre-retrieval stage in the
+# information retrieval pipeline. It applies only lightweight, coarse-grained
+# logic based on linguistically more stable inclusion and exclusion marker --
+# negators, simple verb particles), which are often detectable in a rule-based
+# manner and may contribute to reducing noise. RUS thus provides a transparent,
+# deterministic filtering layer that narrows the candidate set for downstream
+# processes without attempting full semantic interpretation.
+#
+# Everything mentioned is interpreted by default as a union (ANY), so OR does
+# not need to be modeled explicitly. NOT is used for exclusion, while
+# intersections (AND) emerge through combinatorics, nesting, and normalization
+# rather than as a separate operator. Restrictions or enity bindings (WITH) do
+# not require an explicit operator either, since they are expressed implicitly
+# through tree structure and nesting. This reduction to a small set of
+# primitives creates a transparent, deterministic, and auditable retrieval logic
+# that can be easily integrated into existing NLP pipelines.
+
 def _create_structure_tree(structure: dict[int, tuple[list[int], Word]]) -> Node:
 
     words: dict[int, list[int]] = {id: [] for id in structure}
@@ -237,9 +266,9 @@ def _create_structure_tree(structure: dict[int, tuple[list[int], Word]]) -> Node
 
     for id, (path, word) in structure.items():
         if word not in roots:
-            parent = path[-1]
-            if parent in words and parent != id:
-                words[parent].append(id)
+            head = path[-1]
+            if head in words and head != id:
+                words[head].append(id)
 
     def create_node(word: Word) -> Node:
         type = next(iter(word.types))
@@ -260,7 +289,7 @@ def _create_structure_tree(structure: dict[int, tuple[list[int], Word]]) -> Node
 
 def _create_logic_chain(
         doc: stanza.Document,
-        entities: list[tuple[int, int, str]],
+        entities: list[Entity],
         patterns: dict[Type, list[re.Pattern]]
 ) -> Node:
 
@@ -273,6 +302,7 @@ def _create_logic_chain(
     # Dictionary with the starting positions of the entities
     entities = {entity.start: entity for entity in entities}
 
+    structures = []
     for sentence in doc.sentences:
         # 1. Injection of additional attributes
         for word in sentence.words:
@@ -295,17 +325,19 @@ def _create_logic_chain(
 
         # X. Normalize paths
         # - shorten each path by removing nodes not present in flat
-        # - only keep parent IDs that are valid keys in flat
+        # - only keep parent/head IDs that are valid keys in flat
         # - and keep 0 as an indicator for ROOT so that paths are never empty
         heads = set(structure.keys())
         for id, (path, word) in structure.items():
             structure[id] = ([head for head in path if head == 0 or head in heads], word)
 
-        # TODO:
-        _print_sentence_tree(sentence)
-        _print_structure_tree(_create_structure_tree(structure))
+        structures.append(_create_structure_tree(structure))
 
-    return (Type.ANY, None)
+    if not structures:
+        return (Type.ANY, None)
+    if len(structures) == 1:
+        return structures[0]
+    return (Type.ANY, structures)
 
 
 _PIPELINES_MODEL_DIR = os.path.join(os.getcwd(), ".stanza")
@@ -355,17 +387,18 @@ def _get_pipeline(language: str, processors: str | None) -> stanza.Pipeline:
     return _PIPELINES_CACHE[key]
 
 
-def logics(language: str, text: str, entities: list[tuple[int, int, str]]) -> Node:
-
+def _validate_language(language: str) -> str:
     language = (language or "").strip()
     if not language:
         raise ValueError("Language is required")
     if language.lower() not in set(_LANGUAGE_LOGIC_PATTERN.keys()):
         raise ValueError(f"Language '{language}' is not supported")
-    language = language.lower()
+    return language.lower()
 
-    if not text.strip() or not entities:
-        return (Type.ANY, None)
+
+def _create_doc(language: str, text: str) -> stanza.Document:
+
+    language = _validate_language(language)
 
     mapping = _LANGUAGE_SENTENCE_MAPPING.get(language)
     if mapping is not None:
@@ -386,9 +419,49 @@ def logics(language: str, text: str, entities: list[tuple[int, int, str]]) -> No
         nlp = _get_pipeline(language, processors="tokenize,mwt,pos,lemma,depparse")
         doc = nlp(text)
 
+    return doc
+
+
+def pretty_print_sentence(sentence: Sentence):
+    if not sentence:
+        return
+    if not isinstance(sentence, Sentence):
+        raise TypeError(f"Unsupported type: {type(sentence)}")
+    _print_sentence_tree(sentence)
+
+
+def pretty_print_sentences(sentences: list[Sentence]):
+    if not sentences:
+        return
+    if not isinstance(sentences, list):
+        raise TypeError(f"Unsupported type: {type(sentences)}")
+    if not all(isinstance(sentence, Sentence) for sentence in sentences):
+        raise TypeError(f"Unsupported element type: {type(sentences)}")
+    for sentence in sentences:
+        _print_sentence_tree(sentence)
+
+
+def pretty_print_node(node: Node):
+    if not node:
+        return
+    if not isinstance(node, Node):
+        raise TypeError(f"Unsupported type: {type(node)}")
+    _print_structure_tree(node)
+
+
+def sentences(language: str, text: str) -> list[Sentence]:
+    language = _validate_language(language)
+    if not text.strip():
+        return []
+    return _create_doc(language, text).sentences
+
+
+def logics(language: str, text: str, entities: list[tuple[int, int, str]]) -> Node:
+    language = _validate_language(language)
+    if not text.strip() or not entities:
+        return (Type.ANY, None)
     entities = [
         Entity(start, end, label, text[start:end])
         for start, end, label in entities
     ]
-
-    return _create_logic_chain(doc, entities, _LANGUAGE_LOGIC_PATTERN[language])
+    return _create_logic_chain(_create_doc(language, text), entities, _LANGUAGE_LOGIC_PATTERN[language])

@@ -31,8 +31,10 @@ from upstream components and represents their relations using the basic
 constructs __ANY__ (union) and __NOT__ (exclusion). Enumerations are always
 interpreted as unions, making an explicit __OR__ unnecessary. An __AND__ in the
 sense of an intersection does not exist; expressive power arises through
-combination, nesting, and normalization. The resulting logical structure can be
-expressed in __SQL, JSON, or YAML__ and serves downstream components as a
+combination, nesting, and normalization. Restrictions or entity bindings
+(__WITH__) do not require an explicit operator either, since they are expressed
+implicitly through tree structure and nesting. The resulting logical structure
+can be expressed in __SQL, JSON, or YAML__ and serves downstream components as a
 foundation for search or filtering.
 
 This approach is __neither complete nor perfect__ and will __never replace a
@@ -73,8 +75,8 @@ processes without attempting full semantic interpretation.
 Everything mentioned is interpreted by default as a __union (ANY)__, so __OR__
 does not need to be modeled explicitly. __NOT__ is used for exclusion, while
 intersections (__AND__) emerge through __combinatorics, nesting, and
-normalization__ rather than as a separate operator. Restrictions or attribute  
-bindings (__WITH__) do not require an explicit operator either, since they are  
+normalization__ rather than as a separate operator. Restrictions or entity
+bindings (__WITH__) do not require an explicit operator either, since they are
 expressed __implicitly through tree structure and nesting__. This reduction to
 a small set of primitives creates a __transparent, deterministic, and auditable
 retrieval logic__ that can be easily integrated into existing NLP pipelines.

@@ -16,9 +16,9 @@ The module focuses on robust data structures and modular NLP pipelines. The
 linguistic analysis is based on __[stanza](
     https://stanfordnlp.github.io/stanza/)__ with __[Universal Dependencies](
     https://universaldependencies.org/)__ and uses __dependency relations
-(deprel)__ to capture syntactic dependencies more precisely.
-These relations form the foundation for systematically identifying implicit
-logical structures such as inclusion, exclusion, or nesting.
+(deprel)__ to capture syntactic dependencies more precisely. These relations
+form the foundation for systematically identifying implicit logical structures
+such as inclusion, exclusion, or nesting.
 
 In addition, __language-specific keywords with logical meaning are taken from
 configurable lexicons__, ensuring that the approach remains modular and can be
@@ -36,9 +36,12 @@ expressed in __SQL, JSON, or YAML__ and serves downstream components as a
 foundation for search or filtering.
 
 This approach is __neither complete nor perfect__ and will __never replace a
-large language model (LLM)__ -- natural language is simply too complex for
-exhaustive coverage. Instead, it offers a __practical and extensible 
-foundation__ for building __interpretable retrieval logic__.
+large language model (LLM)__ -- natural language is far too complex for
+exhaustive rule?based coverage. Instead, it offers a __practical and extensible
+foundation__ for building __interpretable retrieval logic__. It functions as a
+__deterministic filter__: reducing noise, capturing inclusion and exclusion
+markers, and providing a transparent pre?retrieval layer on which more complex
+semantic or neural models can operate more efficiently.
 
 # Features
 
@@ -54,19 +57,25 @@ foundation__ for building __interpretable retrieval logic__.
 - [System Design](#system-design)
 - [Sources & References](#sources--references)
 
-# Retrieval-Union Semantics (RUS)
+  # Retrieval-Union Semantics (RUS)
 
-__Interpret logic in a retrieval-oriented manner, not in a formal-mathematical
-manner.__
+__Interpret logic in a retrieval?oriented manner -- not as full semantic
+reasoning, and not as formal?mathematical logic.__
 
-Retrieval-Union Semantics (RUS) is a minimalist yet complete model for
-representing logical structures in retrieval tasks. Everything mentioned is
-interpreted by default as a __union (ANY)__, so __OR__ does not need to be
-modeled explicitly. __NOT__ is used for exclusion, while intersections (__AND__)
-emerge through __combinatorics, nesting, and normalization__ rather than as a
-separate operator. This reduction to a small set of primitives creates a
-__transparent, deterministic, and auditable retrieval logic__ that can be easily
-integrated into existing NLP pipelines.
+__Retrieval?Union Semantics (RUS)__ functions as a __pre?retrieval stage__ in the
+information retrieval pipeline. It applies only __lightweight, coarse?grained
+logic__ based on linguistically more stable inclusion and exclusion marker --
+negators, simple verb particles), which are often detectable in a rule?based
+manner and may contribute to reducing noise. RUS thus provides a __transparent,
+deterministic filtering layer__ that narrows the candidate set for downstream
+processes without attempting full semantic interpretation.
+
+Everything mentioned is interpreted by default as a __union (ANY)__, so __OR__
+does not need to be modeled explicitly. __NOT__ is used for exclusion, while
+intersections (__AND__) emerge through __combinatorics, nesting, and
+normalization__ rather than as a separate operator. This reduction to a small
+set of primitives creates a __transparent, deterministic, and auditable
+retrieval logic__ that can be easily integrated into existing NLP pipelines.
 
 | Everyday sentence                        | Composer syntax        | SQL equivalent          |
 |------------------------------------------|------------------------|-------------------------|

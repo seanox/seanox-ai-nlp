@@ -57,15 +57,15 @@ semantic or neural models can operate more efficiently.
 - [System Design](#system-design)
 - [Sources & References](#sources--references)
 
-  # Retrieval-Union Semantics (RUS)
+# Retrieval-Union Semantics (RUS)
 
-__Interpret logic in a retrieval?oriented manner -- not as full semantic
-reasoning, and not as formal?mathematical logic.__
+__Interpret logic in a retrieval-oriented manner -- not as full semantic
+reasoning, and not as formal-mathematical logic.__
 
-__Retrieval?Union Semantics (RUS)__ functions as a __pre?retrieval stage__ in the
-information retrieval pipeline. It applies only __lightweight, coarse?grained
+__Retrieval-Union Semantics (RUS)__ functions as a __pre-retrieval stage__ in the
+information retrieval pipeline. It applies only __lightweight, coarse-grained
 logic__ based on linguistically more stable inclusion and exclusion marker --
-negators, simple verb particles), which are often detectable in a rule?based
+negators, simple verb particles), which are often detectable in a rule-based
 manner and may contribute to reducing noise. RUS thus provides a __transparent,
 deterministic filtering layer__ that narrows the candidate set for downstream
 processes without attempting full semantic interpretation.
@@ -73,8 +73,10 @@ processes without attempting full semantic interpretation.
 Everything mentioned is interpreted by default as a __union (ANY)__, so __OR__
 does not need to be modeled explicitly. __NOT__ is used for exclusion, while
 intersections (__AND__) emerge through __combinatorics, nesting, and
-normalization__ rather than as a separate operator. This reduction to a small
-set of primitives creates a __transparent, deterministic, and auditable
+normalization__ rather than as a separate operator. Restrictions or attribute  
+bindings (__WITH__) do not require an explicit operator either, since they are  
+expressed __implicitly through tree structure and nesting__. This reduction to
+a small set of primitives creates a __transparent, deterministic, and auditable
 retrieval logic__ that can be easily integrated into existing NLP pipelines.
 
 | Everyday sentence                        | Composer syntax        | SQL equivalent          |

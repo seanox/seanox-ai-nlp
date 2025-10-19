@@ -1,5 +1,6 @@
 # seanox_ai_npl/logics/logics.py
 
+from collections import defaultdict
 from enum import Enum, auto
 from stanza.models.common.doc import Word, Sentence
 from typing import Optional, Callable, Union, NamedTuple
@@ -255,26 +256,62 @@ def _print_structure_tree(node: Node):
 # primitives creates a transparent, deterministic, and auditable retrieval logic
 # that can be easily integrated into existing NLP pipelines.
 
+class Join(NamedTuple):
+    id: int
+    head: int
+    types: set[str]
+    path: list[int]
+    entity: Optional[str] = None
+
+
 def _create_structure_tree(structure: dict[int, tuple[list[int], Word]]) -> Node:
 
-    words: dict[int, list[int]] = {id: [] for id in structure}
+    structure = structure.copy()
 
+    # Find convergence points (joins) in the paths that do not exist as separate
+    # words in the structure. A synthetic word with type ANY will later be
+    # created for each of these convergence points so that the logical nesting
+    # and branching below the entities is displayed correctly.
+    heads: dict[int, list[list[int]]] = defaultdict(list)
+    for id, (path, word) in structure.items():
+        for index, head in enumerate(path):
+            if head not in structure and head > 0:
+                heads[head].append(path[:index] or [head])
+
+    for head, paths in heads.items():
+        if len(paths) > 1:
+            structure[head] = (paths[0], Join(
+                id=head, head=paths[0][-1], path=paths[0], types={Type.ANY}
+            ))
+
+    # Normalize paths
+    # - only keep parent/head IDs that are valid keys in structure
+    # - and keep 0 as an indicator for ROOT so that paths are never empty
+    heads = set(structure.keys())
+    for id, (path, word) in structure.items():
+        structure[id] = ([head for head in path if head == 0 or head in heads], word)
+
+    # Root is determined either directly via path [0] or the shortest path
     roots = [word for id, (path, word) in structure.items() if path == [0]]
     if not roots:
-        roots = [word for id, (path, word) in structure.items()
-                 if len(path) == 2 and path[0] == 0]
+        width = min(len(path) for path, word in structure.values())
+        roots = [word for path, word in structure.values() if len(path) == width]
 
+    # Reference table words:[children IDs]
+    # It serves as a reference work for directly accessing the IDs of
+    # subordinate words from a word ID.
+    words: dict[int, list[int]] = {id: [] for id in structure}
     for id, (path, word) in structure.items():
         if word not in roots:
             head = path[-1]
             if head in words and head != id:
                 words[head].append(id)
 
-    def create_node(word: Word) -> Node:
+    def create_node(word: Word | Join) -> Node:
         type = next(iter(word.types))
         if Type.DATA == type:
             return (type, word.entity if word.entity else None)
-        tree: Tree = [(Type.DATA, word.entity)]
+        tree: Tree = [(Type.DATA, word.entity)] if isinstance(word, Word) else []
         for id in words.get(word.id, []):
             tree.append(create_node(structure[id][1]))
         return (type, tree if tree else None)
@@ -306,10 +343,10 @@ def _create_logic_chain(
     for sentence in doc.sentences:
         # 1. Injection of additional attributes
         for word in sentence.words:
-            word.path = _get_word_path(sentence, word)
-            word.types = set()
             # ignore MWT (Multi-Word Token without start_char)
             if word.start_char is not None and word.start_char in entities:
+                word.path = _get_word_path(sentence, word)
+                word.types = set()
                 word.entity = entities[word.start_char]
 
         # 2. Tagging logical relations only for entities
@@ -323,13 +360,9 @@ def _create_logic_chain(
         # 3. Creating a flat tree structure of only the relevant entities
         structure = {word.id: (word.path, word) for word in sentence.words if word.types}
 
-        # X. Normalize paths
-        # - shorten each path by removing nodes not present in flat
-        # - only keep parent/head IDs that are valid keys in flat
-        # - and keep 0 as an indicator for ROOT so that paths are never empty
-        heads = set(structure.keys())
-        for id, (path, word) in structure.items():
-            structure[id] = ([head for head in path if head == 0 or head in heads], word)
+        # IMPORTANT: Do not shorten or simplify paths; IDs of irrelevant words
+        # without entities can be potential convergence points that will be
+        # needed later for the tree structure.
 
         structures.append(_create_structure_tree(structure))
 
@@ -442,9 +475,21 @@ def pretty_print_sentences(sentences: list[Sentence]):
 
 
 def pretty_print_node(node: Node):
+
+    def is_node(object) -> bool:
+        if isinstance(object, tuple) and len(object) == 2:
+            type, value = object
+            if isinstance(value, Entity):
+                return True
+            elif isinstance(value, list) and all(is_node(entry) for entry in value):
+                return True
+            elif value is None:
+                return True
+        return False
+
     if not node:
         return
-    if not isinstance(node, Node):
+    if not is_node(node):
         raise TypeError(f"Unsupported type: {type(node)}")
     _print_structure_tree(node)
 
@@ -456,6 +501,10 @@ def sentences(language: str, text: str) -> list[Sentence]:
     return _create_doc(language, text).sentences
 
 
+# TODO: entities must correspond to the output format and not the input format
+#       correct is: (text, start, char, label)
+#       https://spacy.io/usage/spacy-101#annotations-ner
+#       or no, we keep simple tuples, as with spaCy input
 def logics(language: str, text: str, entities: list[tuple[int, int, str]]) -> Node:
     language = _validate_language(language)
     if not text.strip() or not entities:

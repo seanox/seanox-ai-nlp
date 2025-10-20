@@ -90,45 +90,31 @@ retrieval logic__ that can be easily integrated into existing NLP pipelines.
 | Get something for A, but not B and not C | `ANY(A,NOT(B),NOT(C))` | `A AND NOT B AND NOT C` |
 | Get something for A or (B and C)         | `ANY(A,B,C)`           | `A OR B OR C`           |
 
+## Example
+
 ```
 Get apples for the fruit cake, chocolate for the cookies, but no strawberries.
-
-ANY
-?? DATA (label:FRUITS, text:apples)
-?? ANY
-   ?? DATA (label:TREATS, text:fruit cake)
-   ?? ANY
-   ?  ?? DATA (label:INGREDIENTS, text:chocolate)
-   ?  ?? DATA (label:TREATS, text:cookies)
-   ?? NOT
-      ?? DATA (label:FRUITS, text:strawberries)
-
-{
-  "ANY",
-  [
-    {"DATA", {"label": "FRUITS", "start": 4, "end": 10, "text": "apples"}},
-    {
-      "ANY",
-      [
-        {"DATA", {"label": "TREATS", "start": 19, "end": 29, "text": "fruit cake"}},
-        {
-          "ANY",
-          [
-            {"DATA", {"label": "INGREDIENTS", "start": 31, "end": 40, "text": "chocolate"}},
-            {"DATA", {"label": "TREATS", "start": 49, "end": 56, "text": "cookies"}}
-          ]
-        },
-        {
-          "NOT",
-          [
-            {"DATA", {"label": "FRUITS", "start": 65, "end": 77, "text": "strawberries"}}
-          ]
-        }
-      ]
-    }
-  ]
-}
 ```
+_Semantic input_
+
+```
+ANY
++- DATA (label:FRUITS, text:apples)
++- ANY
+   +- DATA (label:TREATS, text:fruit cake)
+   +- ANY
+   |  +- DATA (label:INGREDIENTS, text:chocolate)
+   |  +- DATA (label:TREATS, text:cookies)
+   +- NOT
+      +- DATA (label:FRUITS, text:strawberries)
+```
+_Tree representation of the return value (a node object)_
+
+In the tree representation, the logical binding (e.g. _apples_ __with__
+_fruit cake_) -- or the logical grouping of _chocolate_ __and__ _cookies_
+becomes visible -- it arises implicitly through nesting, without the need for a
+separate operator, and shows that the statement is much more than just `apples
+    OR cake OR chocolate OR cookies`.
 
 # Known Limitations
 

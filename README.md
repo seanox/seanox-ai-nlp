@@ -12,10 +12,10 @@
 </p>
 
 # Description
-Structured data in technical domains (e.g. engineering, meteorology) often
-contain specialized terminology, measurement units, parameter specifications,
-and symbolic values. These elements pose a challenge for similarity methods
-based solely on embeddings due to their limited semantic resolution.
+Structured data in technical domains (e.g. industry, government) often contain
+specialized terminology, measurement units, parameter specifications, and
+symbolic values. These elements pose a challenge for similarity methods based
+solely on embeddings due to their limited semantic resolution.
 
 This package follows a hybrid approach, in which rule-based processing,
 NLP-based filtering, and embeddings can be combined so that domain-specific
@@ -149,15 +149,16 @@ for data in datas:
 - [Downstream Processing with pandas](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#downstream-processing-with-pandas)
 
 ## [logics (under development)](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/logics/README.md)
-The __Semantic Logic Composer (logics)__ provides a rule-based approach to
+The __Semantic Logic Composer (logics)__ provides a rule‑based approach to
 extracting logical structures from semantic input. It operates on entities
 provided by upstream components and represents their relations using the
-primitives __ANY__ (union) and __NOT__ (exclusion). Enumerations are interpreted
-as unions, so OR does not need to be modeled explicitly. An explicit __AND__ in
-the sense of an intersection does not exist; __the expressiveness comes from
-combinatorics, nesting, and normalization__. The resulting structures can be
-expressed in formats such as SQL, JSON, or YAML and can be used by downstream
-components for retrieval or filtering.
+primitives __ANY__ (union), __NOT__ (exclusion), and implicit bindings
+(__WITH__). Enumerations are interpreted as unions, so OR does not need to be
+modeled explicitly. An explicit __AND__ in the sense of an intersection does not
+exist; __the expressiveness comes from combinatorics, nesting, normalization,
+and implicit WITH‑relations__. The resulting structures can be expressed in
+formats such as SQL, JSON, or YAML and can be used by downstream components for
+retrieval or filtering.
 
 TODO:
 

@@ -5,12 +5,12 @@ to one another -- for example, inclusion or exclusion relationships. The use of
 modern AI systems for processing large amounts of data has shown that many
 methods trained on general language usage, but without large language models,
 can be too imprecise when applied to technical domain languages such as those
-in industry, engineering and administration. This module addresses this issue:
-it is intended to identify categorized terms and their relationships using
-methods of natural language processing and to represent them in a transparent,
-verifiable logical structure -- independently of large language models.
-The resulting bridge between language and logic provides a foundation on which
-existing AI systems can continue to build.
+in industry and government. This module addresses this issue: it is intended to
+identify categorized terms and their relationships using methods of natural
+language processing and to represent them in a transparent, verifiable logical
+structure -- independently of large language models. The resulting bridge
+between language and logic provides a foundation on which existing AI systems
+can continue to build.
 
 The module focuses on robust data structures and modular NLP pipelines. The
 linguistic analysis is based on __[stanza](

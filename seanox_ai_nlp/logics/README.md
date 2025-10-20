@@ -52,6 +52,7 @@ semantic or neural models can operate more efficiently.
 - [Introduction](#introduction)
 - [Features](#features)
 - [Retrieval-Union Semantics (RUS)](#retrieval-union-semantics-rus)
+  - [Example](#example)
 - [Known Limitations](#known-limitations)
 - [Usage](#usage)
 - [Benchmark](#benchmark)

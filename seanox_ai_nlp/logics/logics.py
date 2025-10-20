@@ -227,14 +227,6 @@ def _print_structure_tree(node: Node):
 
 
 # Retrieval-Union Semantics (RUS)
-# Everything mentioned is retrieved by default (union / ANY). OR does not need
-# to be explicitly modeled, since enumerations are always interpreted as unions.
-# NOT is used for exclusion. An explicit AND in the sense of an intersection
-# does not exist -- sounds too simple, but it's all about combinatorics,
-# nesting, and normalization.
-
-
-# Retrieval-Union Semantics (RUS)
 #
 # Interpret logic in a retrieval-oriented manner -- not as full semantic
 # reasoning, and not as formal-mathematical logic.

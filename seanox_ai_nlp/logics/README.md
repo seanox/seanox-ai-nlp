@@ -15,10 +15,11 @@ can continue to build.
 The module focuses on robust data structures and modular NLP pipelines. The
 linguistic analysis is based on __[stanza](
     https://stanfordnlp.github.io/stanza/)__ with __[Universal Dependencies](
-    https://universaldependencies.org/)__ and uses __dependency relations
-(deprel)__ to capture syntactic dependencies more precisely. These relations
-form the foundation for systematically identifying implicit logical structures
-such as inclusion, exclusion, or nesting.
+    https://universaldependencies.org/)__ and uses __[dependency relations
+(deprel)](https://universaldependencies.org/u/dep/all.html)__ to capture
+syntactic dependencies more precisely. These relations form the foundation for
+systematically identifying implicit logical structures such as inclusion,
+exclusion, or nesting.
 
 In addition, __language-specific keywords with logical meaning are taken from
 configurable lexicons__, ensuring that the approach remains modular and can be

@@ -39,10 +39,10 @@ foundation for search or filtering.
 
 This approach is __neither complete nor perfect__ and will __never replace a
 large language model (LLM)__ -- natural language is far too complex for
-exhaustive rule?based coverage. Instead, it offers a __practical and extensible
+exhaustive rule-based coverage. Instead, it offers a __practical and extensible
 foundation__ for building __interpretable retrieval logic__. It functions as a
 __deterministic filter__: reducing noise, capturing inclusion and exclusion
-markers, and providing a transparent pre?retrieval layer on which more complex
+markers, and providing a transparent pre-retrieval layer on which more complex
 semantic or neural models can operate more efficiently.
 
 # Features

@@ -11,10 +11,11 @@ import stanza
 
 
 class Type(Enum):
-    ANY = auto()
+    EMPTY = auto()
+    BRANCH = auto()
     NOT = auto()
     INVERT = auto()
-    DATA = auto()
+    ENTITY = auto()
 
 
 # Additional attributes for the logical structure are added to the stanza word.
@@ -58,28 +59,20 @@ _LANGUAGE_SENTENCE_MAPPING: dict[str, Optional[Callable[[Sentence], list[str]]]]
 }
 
 _LANGUAGE_LOGIC_PATTERN: dict[str, dict[Type, list[re.Pattern] | None]] = {
-
-    # https://universaldependencies.org/docs/en/dep/neg.html
-    # https://universaldependencies.org/de/
-    # nicht / nichts / nicht einmal / nicht mehr / nicht mal / noch nicht
-    # kein / keine / keiner / keines
-    # nie / niemals
-    # ohne, weder (noch)
-
     "de": {
     },
-#   "dk": {
-#   },
+    "dk": {
+    },
     "en": {
     },
-#   "es": {
-#   },
-#   "fr": {
-#   },
-#   "it": {
-#   },
-#   "ru": {
-#   }
+    "es": {
+    },
+    "fr": {
+    },
+    "it": {
+    },
+    "ru": {
+    }
 }
 
 
@@ -120,7 +113,7 @@ def _get_word_feats(word: Word) -> dict[str, str]:
 # Abstracts:
 # - unusual/ambiguous sentence structure, then do not use NOT
 
-def _get_logical_relations(sentence: Sentence, word: Word) -> set[Type]:
+def _get_structure_types(sentence: Sentence, word: Word) -> set[Type]:
 
     relations: set[Type] = set()
 
@@ -156,7 +149,7 @@ def _get_logical_relations(sentence: Sentence, word: Word) -> set[Type]:
 
     # Without anything else, it will be ANY
     if not relations:
-        relations.add(Type.DATA)
+        relations.add(Type.ENTITY)
 
     return relations
 
@@ -183,7 +176,7 @@ Tree = tuple[Type, Optional[list["Node"]]]
 Node = Union[Data, Tree]
 
 
-def _print_structure_tree(node: Node):
+def _print_relation_tree(node: Node):
 
     def recurse(node: Node, prefix: str = "", is_root: bool = True):
 
@@ -204,7 +197,7 @@ def _print_structure_tree(node: Node):
             node_prefix = prefix + ("   " if is_last else "│  ")
 
             type, entity = node
-            if type == Type.DATA:
+            if type == Type.ENTITY:
                 print(prefix + branch + f"{type.name} (label:{entity.label}, text:{entity.text})")
             else:
                 print(prefix + branch + type.name)
@@ -243,7 +236,7 @@ class Join(NamedTuple):
     entity: Optional[str] = None
 
 
-def _create_structure_tree(structure: dict[int, tuple[list[int], Word]]) -> Node:
+def _create_relation_tree(structure: dict[int, tuple[list[int], Word]]) -> Node:
 
     structure = structure.copy()
 
@@ -288,29 +281,29 @@ def _create_structure_tree(structure: dict[int, tuple[list[int], Word]]) -> Node
 
     def create_node(word: Word | Join) -> Node:
         type = next(iter(word.types))
-        if Type.DATA == type:
+        if Type.ENTITY == type:
             return (type, word.entity if word.entity else None)
-        tree: Tree = [(Type.DATA, word.entity)] if isinstance(word, Word) else []
+        tree: Tree = [(Type.ENTITY, word.entity)] if isinstance(word, Word) else []
         for id in words.get(word.id, []):
             tree.append(create_node(structure[id][1]))
         return (type, tree if tree else None)
 
     if not roots:
-        return (Type.ANY, None)
+        return (Type.EMPTY, None)
     tree = [create_node(root) for root in roots]
     if len(tree) == 1:
         return tree[0]
     return (Type.ANY, tree)
 
 
-def _create_logic_chain(
+def _create_relations(
         doc: stanza.Document,
         entities: list[Entity],
         patterns: dict[Type, list[re.Pattern]]
 ) -> Node:
 
     if not entities:
-        return (Type.ANY, None)
+        return (Type.EMPTY, None)
 
     # TODO: Multi-Word / Multi-Token Entities
     # TODO: Entities refer to the entire text with start and end, e.g. beyond sentences
@@ -331,11 +324,8 @@ def _create_logic_chain(
 
         # 2. Tagging logical relations only for entities
         for word in sentence.words:
-            # ignore MWT (Multi-Word Token without start_char)
             if word.entity:
-                logic_relations = _get_logical_relations(sentence, word)
-                if logic_relations:
-                    word.types.update(logic_relations)
+                word.types.update(_get_structure_types(sentence, word))
 
         # 3. Creating a flat tree structure of only the relevant entities
         structure = {word.id: (word.path, word) for word in sentence.words if word.types}
@@ -344,10 +334,10 @@ def _create_logic_chain(
         # without entities can be potential convergence points that will be
         # needed later for the tree structure.
 
-        structures.append(_create_structure_tree(structure))
+        structures.append(_create_relation_tree(structure))
 
     if not structures:
-        return (Type.ANY, None)
+        return (Type.EMPTY, None)
     if len(structures) == 1:
         return structures[0]
     return (Type.ANY, structures)
@@ -471,7 +461,7 @@ def pretty_print_node(node: Node):
         return
     if not is_node(node):
         raise TypeError(f"Unsupported type: {type(node)}")
-    _print_structure_tree(node)
+    _print_relation_tree(node)
 
 
 def sentences(language: str, text: str) -> list[Sentence]:
@@ -488,9 +478,9 @@ def sentences(language: str, text: str) -> list[Sentence]:
 def logics(language: str, text: str, entities: list[tuple[int, int, str]]) -> Node:
     language = _validate_language(language)
     if not text.strip() or not entities:
-        return (Type.ANY, None)
+        return (Type.EMPTY, None)
     entities = [
         Entity(start, end, label, text[start:end])
         for start, end, label in entities
     ]
-    return _create_logic_chain(_create_doc(language, text), entities, _LANGUAGE_LOGIC_PATTERN[language])
+    return _create_relations(_create_doc(language, text), entities, _LANGUAGE_LOGIC_PATTERN[language])

@@ -67,24 +67,11 @@ _LANGUAGE_LOGIC_PATTERN: dict[str, dict[Type, list[re.Pattern] | None]] = {
     # ohne, weder (noch)
 
     "de": {
-        Type.ANY: None,
-        Type.NOT: [
-            _re_compile_logic_pattern(
-                r"ohne|weder|noch",
-                r"nie(mals)?",
-                r"nicht(s)?",
-                r"kein(e|s|((er|es)[a-z]*))?",
-                r"ausge(nommen|schlossen)"
-            )
-        ],
-        Type.INVERT: [
-            None
-        ]
     },
 #   "dk": {
 #   },
-#   "en": {
-#   },
+    "en": {
+    },
 #   "es": {
 #   },
 #   "fr": {
@@ -328,18 +315,19 @@ def _create_logic_chain(
     # TODO: Multi-Word / Multi-Token Entities
     # TODO: Entities refer to the entire text with start and end, e.g. beyond sentences
 
-    # Dictionary with the starting positions of the entities
-    entities = {entity.start: entity for entity in entities}
-
     structures = []
     for sentence in doc.sentences:
         # 1. Injection of additional attributes
         for word in sentence.words:
             # ignore MWT (Multi-Word Token without start_char)
-            if word.start_char is not None and word.start_char in entities:
-                word.path = _get_word_path(sentence, word)
-                word.types = set()
-                word.entity = entities[word.start_char]
+            if word.start_char is None:
+                continue
+            for entity in entities:
+                if entity.start <= word.start_char < entity.end:
+                    word.path = _get_word_path(sentence, word)
+                    word.types = set()
+                    word.entity = entity
+                    break
 
         # 2. Tagging logical relations only for entities
         for word in sentence.words:

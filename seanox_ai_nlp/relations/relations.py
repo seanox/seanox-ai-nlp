@@ -1,4 +1,4 @@
-# seanox_ai_npl/logics/logics.py
+# seanox_ai_npl/relations/relations.py
 
 from collections import defaultdict
 from enum import Enum, auto

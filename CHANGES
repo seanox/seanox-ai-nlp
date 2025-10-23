@@ -1,5 +1,5 @@
 1.4.0 2025xxxx
-CR: logics: Added to create a logical structure for natural language input
+CR: relations: Added entity relation composer for natural language input
 
 1.3.0.1 20251009
 BF: Release: Unwanted content in distribution (seanox_ai_nlp.whl / seanox_ai_nlp.gz)

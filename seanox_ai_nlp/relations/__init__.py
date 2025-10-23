@@ -1,6 +1,6 @@
-# seanox_ai_nlp/logics/__init__.py
+# seanox_ai_nlp/relations/__init__.py
 
-from .logics import (
+from .relations import (
     Type,
     Entity,
     Data,

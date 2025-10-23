@@ -24,7 +24,7 @@ from .synthetics import (
     TemplateSyntaxException
 )
 
-from .logics import (
+from .relations import (
     Type,
     Entity,
     Data,

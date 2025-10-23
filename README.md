@@ -14,8 +14,9 @@
 # Description
 Structured data in technical domains (e.g. industry, government) often contain
 specialized terminology, measurement units, parameter specifications, and
-symbolic values. These elements pose a challenge for similarity methods based
-solely on embeddings due to their limited semantic resolution.
+symbolic values. These elements pose a challenge for similarity methods based on
+general‑purpose language embeddings, because such embeddings have limited
+semantic resolution in domain‑specific contexts.
 
 This package follows a hybrid approach, in which rule-based processing,
 NLP-based filtering, and embeddings can be combined so that domain-specific
@@ -24,7 +25,8 @@ enabling interpretable and reproducible retrieval workflows.
 
 The package integrates lightweight components into existing NLP pipelines. These
 components are designed to work without relying on large language models (LLMs)
-and to structure relevant data using deterministic and auditable mechanisms.
+and to structure relevant data using deterministic and auditable mechanisms for
+more reliable search and filtering.
 
 ## Structured NLP Workflow
 
@@ -148,17 +150,15 @@ for data in datas:
 - [Integration in NLP Workflows](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#integration-in-nlp-workflows)
 - [Downstream Processing with pandas](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#downstream-processing-with-pandas)
 
-## [logics (under development)](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/logics/README.md)
-The __Semantic Logic Composer (logics)__ provides a rule‑based approach to
-extracting logical structures from semantic input. It operates on entities
-provided by upstream components and represents their relations using the
-primitives __ANY__ (union), __NOT__ (exclusion), and implicit bindings
-(__WITH__). Enumerations are interpreted as unions, so OR does not need to be
-modeled explicitly. An explicit __AND__ in the sense of an intersection does not
-exist; __the expressiveness comes from combinatorics, nesting, normalization,
-and implicit WITH‑relations__. The resulting structures can be expressed in
-formats such as SQL, JSON, or YAML and can be used by downstream components for
-retrieval or filtering.
+## [relations (under development)](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/logics/README.md)
+The __Entity Relation Composer (relations)__ provides a rule‑based method for
+turning natural language input into transparent, hierarchical structures. It
+takes entities identified by upstream components and arranges them into object
+trees that reflect their semantic relationships -- __including groupings,
+dependencies, and explicit exclusions. The expressiveness arises from
+combinatorics.__ The resulting structures can be expressed in formats such as
+SQL, JSON, or YAML and can be used by downstream components for retrieval or
+filtering.
 
 TODO:
 

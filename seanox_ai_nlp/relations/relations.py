@@ -1,6 +1,7 @@
 # seanox_ai_npl/relations/relations.py
 
 from collections import defaultdict
+from dataclasses import dataclass, field
 from enum import Enum, auto
 from stanza.models.common.doc import Word, Sentence
 from typing import Optional, Callable, Union, NamedTuple
@@ -12,13 +13,15 @@ import stanza
 
 class Type(Enum):
     EMPTY = auto()
-    BRANCH = auto()
+    SET = auto()
     NOT = auto()
     INVERT = auto()
     ENTITY = auto()
 
 
-# Additional attributes for the logical structure are added to the stanza word.
+# Custom annotation slots (properties) for entity relations.
+# stanza.Word is a central object and is extended with additional meta
+# information through these properties.
 
 Word.add_property(
     "types",
@@ -27,12 +30,22 @@ Word.add_property(
     setter=lambda self, value: setattr(self, "_types", value)
 )
 
+
 Word.add_property(
     "path",
     default=None,
     getter=lambda self: getattr(self, "_path", []),
     setter=lambda self, value: setattr(self, "_path", value)
 )
+
+
+Word.add_property(
+    "relation",
+    default=None,
+    getter=lambda self: getattr(self, "_relation", None),
+    setter=lambda self, value: setattr(self, "_relation", value)
+)
+
 
 Word.add_property(
     "entity",
@@ -94,8 +107,8 @@ def _print_sentence_tree(sentence: Sentence):
 
         # Only expand if a connector has been set
         prefix = prefix if is_root else prefix + ("   " if is_last else "│  ")
-        for index, child_id in enumerate(nodes.get(node_id, [])):
-            recurse(child_id, prefix, index == len(nodes[node_id]) - 1)
+        for index, relation_id in enumerate(nodes.get(node_id, [])):
+            recurse(relation_id, prefix, index == len(nodes[node_id]) - 1)
 
     # Start directly with the node of ROOT (id 0),
     # without connector and without indentation
@@ -113,47 +126,6 @@ def _get_word_feats(word: Word) -> dict[str, str]:
 # Abstracts:
 # - unusual/ambiguous sentence structure, then do not use NOT
 
-def _get_structure_types(sentence: Sentence, word: Word) -> set[Type]:
-
-    relations: set[Type] = set()
-
-    # Only entities are considered
-    if not word.entity:
-        return relations
-
-    for child in sentence.words:
-        if child.head != word.id:
-            continue
-        if child.deprel == "neg":
-            relations.add(Type.NOT)
-        if child.feats:
-            feats = _get_word_feats(child)
-            if "Polarity" in feats and feats["Polarity"] == "Neg":
-                relations.add(Type.NOT)
-            if "PronType" in feats and feats["PronType"] == "Neg":
-                relations.add(Type.NOT)
-            if "Negative" in feats and feats["Negative"] == "Neg":
-                relations.add(Type.NOT)
-    if word.deprel == "neg":
-        relations.add(Type.NOT)
-
-    # Without anything, but others entities refer to it, it will be ANY
-    if not relations:
-        heads = {
-            item.head
-            for item in sentence.words
-            if item.entity
-        }
-        if word.id in heads:
-            relations.add(Type.ANY)
-
-    # Without anything else, it will be ANY
-    if not relations:
-        relations.add(Type.ENTITY)
-
-    return relations
-
-
 def _get_word_path(sentence, word) -> list[int]:
     path: list[int] = []
     while True:
@@ -164,6 +136,51 @@ def _get_word_path(sentence, word) -> list[int]:
     return path
 
 
+def _get_word_relation_path(sentence, word) -> list[int]:
+    path: list[int] = []
+    while True:
+        path.insert(0, word.relation)
+        if word.relation <= 0:
+            break
+        word = sentence.words[word.relation - 1]
+    return path
+
+
+def _annotate_word(sentence: Sentence, word: Word):
+
+    # Only entities are considered
+    if not word.entity:
+        return
+
+    # Every entity is ENTITY
+    word.types = {Type.ENTITY}
+
+    # TODO:
+    # NOT is more complex
+    # - in ambiguous/contradictory cases, NOT must be omitted
+    # - NOT can/must also be recognized through keywords and spread phrases
+    for relation in sentence.words:
+        if relation.head != word.id:
+            continue
+        if relation.deprel == "neg":
+            word.types.add(Type.NOT)
+        if relation.feats:
+            feats = _get_word_feats(relation)
+            if "Polarity" in feats and feats["Polarity"] == "Neg":
+                word.types.add(Type.NOT)
+            elif "PronType" in feats and feats["PronType"] == "Neg":
+                word.types.add(Type.NOT)
+            elif "Negative" in feats and feats["Negative"] == "Neg":
+                word.types.add(Type.NOT)
+    if word.deprel == "neg":
+        word.types.add(Type.NOT)
+
+    # TODO:
+    # Relation is initially based on UD deprel head, but to correctly map UNION,
+    # SET and NOT, this must be adjusted by an extended rule.
+    word.relation = word.head
+
+
 class Entity(NamedTuple):
     start: int
     end: int
@@ -171,9 +188,35 @@ class Entity(NamedTuple):
     text: str
 
 
-Data = tuple[Type, Entity]
-Tree = tuple[Type, Optional[list["Node"]]]
-Node = Union[Data, Tree]
+@dataclass
+class NodeEmpty:
+    type: Type = field(init=False, default=Type.EMPTY)
+
+
+@dataclass
+class NodeSet:
+    type: Type = field(init=False, default=Type.SET)
+    relations: list[Union["NodeSet", "NodeEntity", "NodeNot"]]
+
+    def __post_init__(self):
+        if not self.relations or len(self.relations) < 2:
+            raise ValueError("At least two relationships are required")
+
+
+@dataclass
+class NodeEntity:
+    type: Type = field(init=False, default=Type.ENTITY)
+    entity: Entity
+    relations: Optional[list[Union["NodeSet", "NodeEntity", "NodeNot"]]] = None
+
+
+@dataclass
+class NodeNot:
+    type: Type = field(init=False, default=Type.NOT)
+    relations: list[Union["NodeSet", "NodeEntity", "NodeNot"]] = None
+
+
+Node = Union[NodeEmpty, NodeSet, NodeEntity, NodeNot]
 
 
 def _print_relation_tree(node: Node):
@@ -214,7 +257,7 @@ def _print_relation_tree(node: Node):
 # Retrieval-Union Semantics (RUS) functions as a pre-retrieval stage in the
 # information retrieval pipeline. It applies only lightweight, coarse-grained
 # logic based on linguistically more stable inclusion and exclusion marker --
-# negators, simple verb particles), which are often detectable in a rule-based
+# negators, simple verb particles, which are often detectable in a rule-based
 # manner and may contribute to reducing noise. RUS thus provides a transparent,
 # deterministic filtering layer that narrows the candidate set for downstream
 # processes without attempting full semantic interpretation.
@@ -228,33 +271,39 @@ def _print_relation_tree(node: Node):
 # primitives creates a transparent, deterministic, and auditable retrieval logic
 # that can be easily integrated into existing NLP pipelines.
 
-class Join(NamedTuple):
-    id: int
-    head: int
-    types: set[str]
-    path: list[int]
-    entity: Optional[str] = None
-
-
 def _create_relation_tree(structure: dict[int, tuple[list[int], Word]]) -> Node:
+
+    class ConvergencePoint(NamedTuple):
+        path: list[int]
+        id: int
+        head: int
+        types: set[str]
+        entity: Optional[str] = None
 
     structure = structure.copy()
 
     # Find convergence points (joins) in the paths that do not exist as separate
-    # words in the structure. A synthetic word with type ANY will later be
+    # words in the structure. A synthetic element with type SET will later be
     # created for each of these convergence points so that the logical nesting
     # and branching below the entities is displayed correctly.
+    # Convergence points are determined from right to left. As soon as an
+    # existing reference point is found in structure, the search is terminated
+    # because the remaining path is already covered by this reference point in
+    # structure.
     heads: dict[int, list[list[int]]] = defaultdict(list)
     for id, (path, word) in structure.items():
-        for index, head in enumerate(path):
-            if head not in structure and head > 0:
+        for index in reversed(range(len(path))):
+            head = path[index]
+            if head in structure:
+                break
+            if head > 0:
                 heads[head].append(path[:index] or [head])
 
     for head, paths in heads.items():
         if len(paths) > 1:
-            structure[head] = (paths[0], Join(
-                id=head, head=paths[0][-1], path=paths[0], types={Type.ANY}
-            ))
+            structure[head] = (
+                paths[0], ConvergencePoint(path=paths[0], id=head, head=paths[0][-1], types={Type.SET})
+            )
 
     # Normalize paths
     # - only keep parent/head IDs that are valid keys in structure
@@ -269,7 +318,7 @@ def _create_relation_tree(structure: dict[int, tuple[list[int], Word]]) -> Node:
         width = min(len(path) for path, word in structure.values())
         roots = [word for path, word in structure.values() if len(path) == width]
 
-    # Reference table words:[children IDs]
+    # Reference table words:[relations IDs]
     # It serves as a reference work for directly accessing the IDs of
     # subordinate words from a word ID.
     words: dict[int, list[int]] = {id: [] for id in structure}
@@ -279,21 +328,36 @@ def _create_relation_tree(structure: dict[int, tuple[list[int], Word]]) -> Node:
             if head in words and head != id:
                 words[head].append(id)
 
-    def create_node(word: Word | Join) -> Node:
-        type = next(iter(word.types))
-        if Type.ENTITY == type:
-            return (type, word.entity if word.entity else None)
-        tree: Tree = [(Type.ENTITY, word.entity)] if isinstance(word, Word) else []
-        for id in words.get(word.id, []):
-            tree.append(create_node(structure[id][1]))
-        return (type, tree if tree else None)
+    def create_node(object: Word | ConvergencePoint) -> Node:
+
+        # Virtual ConvergencePoint
+        if isinstance(object, ConvergencePoint):
+            return NodeSet(
+                relations=[
+                    create_node(structure[id][1])
+                    for id in words.get(object.id, [])
+                ]
+            )
+
+        # Logical NOT
+        # TODO: if Type.NOT in object.types:
+
+        # Logical entities
+        relations = [
+            create_node(structure[id][1])
+            for id in words.get(object.id, [])
+        ]
+        return NodeEntity(
+            entity=object.entity,
+            relations=relations or None
+        )
 
     if not roots:
-        return (Type.EMPTY, None)
-    tree = [create_node(root) for root in roots]
-    if len(tree) == 1:
-        return tree[0]
-    return (Type.ANY, tree)
+        return Node(Type.EMPTY)
+    nodes = [create_node(root) for root in roots]
+    if len(nodes) == 1:
+        return nodes[0]
+    return Node(Type.SET, nodes)
 
 
 def _create_relations(
@@ -303,44 +367,54 @@ def _create_relations(
 ) -> Node:
 
     if not entities:
-        return (Type.EMPTY, None)
+        return Node(Type.EMPTY)
 
     # TODO: Multi-Word / Multi-Token Entities
     # TODO: Entities refer to the entire text with start and end, e.g. beyond sentences
 
-    structures = []
+    relations = []
     for sentence in doc.sentences:
-        # 1. Injection of additional attributes
+        # 1. Assignment of entities
+        #    The remaining annotations for the entity relation are filled in
+        #    during the second pass, as it may then be necessary to recognize
+        #    other dependencies between entities. Since these do not occur
+        #    continuously in the sentence, all entities must first be set.
         for word in sentence.words:
             # ignore MWT (Multi-Word Token without start_char)
             if word.start_char is None:
                 continue
             for entity in entities:
                 if entity.start <= word.start_char < entity.end:
-                    word.path = _get_word_path(sentence, word)
-                    word.types = set()
                     word.entity = entity
                     break
 
-        # 2. Tagging logical relations only for entities
+        # 2. Annotate word with entities
         for word in sentence.words:
             if word.entity:
-                word.types.update(_get_structure_types(sentence, word))
+                _annotate_word(sentence, word, entity)
 
-        # 3. Creating a flat tree structure of only the relevant entities
+        # 3. Annotate relation-based path
+        #    In the third pass, the relation-based path must be determined.
+        #    However, this requires that the relation annotations for all
+        #    entities are set correctly.
+        for word in sentence.words:
+            if word.entity:
+                word.path = _get_word_relation_path(sentence, word)
+
+        # X. Creating a flat tree structure of only the relevant entities
         structure = {word.id: (word.path, word) for word in sentence.words if word.types}
 
         # IMPORTANT: Do not shorten or simplify paths; IDs of irrelevant words
         # without entities can be potential convergence points that will be
         # needed later for the tree structure.
 
-        structures.append(_create_relation_tree(structure))
+        relations.append(_create_relation_tree(structure))
 
-    if not structures:
-        return (Type.EMPTY, None)
-    if len(structures) == 1:
-        return structures[0]
-    return (Type.ANY, structures)
+    if not relations:
+        return NodeEmpty()
+    if len(relations) == 1:
+        return relations[0]
+    return NodeSet(relations=relations)
 
 
 _PIPELINES_MODEL_DIR = os.path.join(os.getcwd(), ".stanza")
@@ -475,7 +549,7 @@ def sentences(language: str, text: str) -> list[Sentence]:
 #       correct is: (text, start, char, label)
 #       https://spacy.io/usage/spacy-101#annotations-ner
 #       or no, we keep simple tuples, as with spaCy input
-def logics(language: str, text: str, entities: list[tuple[int, int, str]]) -> Node:
+def relations(language: str, text: str, entities: list[tuple[int, int, str]]) -> Node:
     language = _validate_language(language)
     if not text.strip() or not entities:
         return (Type.EMPTY, None)
@@ -483,4 +557,8 @@ def logics(language: str, text: str, entities: list[tuple[int, int, str]]) -> No
         Entity(start, end, label, text[start:end])
         for start, end, label in entities
     ]
-    return _create_relations(_create_doc(language, text), entities, _LANGUAGE_LOGIC_PATTERN[language])
+    return _create_relations(
+        _create_doc(language, text),
+        entities,
+        _LANGUAGE_LOGIC_PATTERN[language]
+    )

@@ -32,6 +32,7 @@ def test_logics_03():
 
     entities = _create_entities(text, BAKING_ENTITIES_PATTERN)
     entities = [(ent["start"], ent["end"], ent["label"]) for ent in entities]
+    print(entities)
 
     node = relations("de", text, entities)
     print(node)

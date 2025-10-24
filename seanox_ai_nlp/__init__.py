@@ -27,9 +27,8 @@ from .synthetics import (
 from .relations import (
     Type,
     Entity,
-    Data,
-    Tree,
-    logics,
+    Node,
+    relations,
     sentences,
     pretty_print_sentence,
     pretty_print_sentences,
@@ -62,9 +61,8 @@ __all__ = [
     # logics
     "Type",
     "Entity",
-    "Data",
-    "Tree",
-    "logics",
+    "Node",
+    "relations",
     "sentences",
     "pretty_print_sentence",
     "pretty_print_sentences",

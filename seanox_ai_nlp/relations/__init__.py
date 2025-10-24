@@ -3,9 +3,8 @@
 from .relations import (
     Type,
     Entity,
-    Data,
-    Tree,
-    logics,
+    Node,
+    relations,
     sentences,
     pretty_print_sentence,
     pretty_print_sentences,
@@ -15,9 +14,8 @@ from .relations import (
 __all__ = [
     "Type",
     "Entity",
-    "Data",
-    "Tree",
-    "logics",
+    "Node",
+    "relations",
     "sentences",
     "pretty_print_sentence",
     "pretty_print_sentences",

@@ -196,55 +196,64 @@ class NodeEmpty:
 @dataclass
 class NodeSet:
     type: Type = field(init=False, default=Type.SET)
-    relations: list[Union["NodeSet", "NodeEntity", "NodeNot"]]
+    relations: list[Union["NodeNot", "NodeSet", "NodeEntity"]]
 
     def __post_init__(self):
-        if not self.relations or len(self.relations) < 2:
-            raise ValueError("At least two relationships are required")
+        if not self.relations:
+            raise ValueError("Relations are required")
 
 
 @dataclass
 class NodeEntity:
     type: Type = field(init=False, default=Type.ENTITY)
     entity: Entity
-    relations: Optional[list[Union["NodeSet", "NodeEntity", "NodeNot"]]] = None
+    relations: Optional[list[Union["NodeNot", "NodeSet", "NodeEntity"]]] = None
 
 
 @dataclass
 class NodeNot:
     type: Type = field(init=False, default=Type.NOT)
-    relations: list[Union["NodeSet", "NodeEntity", "NodeNot"]] = None
+    relations: list[Union["NodeNot", "NodeSet", "NodeEntity"]] = None
+
+    def __post_init__(self):
+        if not self.relations:
+            raise ValueError("Relations are required")
 
 
-Node = Union[NodeEmpty, NodeSet, NodeEntity, NodeNot]
+Node = Union[NodeEmpty, NodeNot, NodeSet, NodeEntity]
 
 
 def _print_relation_tree(node: Node):
 
-    def recurse(node: Node, prefix: str = "", is_root: bool = True):
+    def recurse(node: Node, prefix: str = "", root: bool = True):
 
-        typ, tree = node
-        if not tree:
+        if not isinstance(node, Node):
+            return
+        if not root and isinstance(node, NodeEmpty):
             return
 
         # The type is only output here for the root node.
-        # For recursive calls (is_root=False), the type was already
-        # output in the previous print().
-        if is_root:
-            print(typ.name)
+        # For recursive calls (root=False), the type was already output in the
+        # previous print().
+        if root:
+            output = node.type.name
+            if isinstance(node, NodeEntity):
+                output = f"{output} (label:{node.entity.label}, text:{node.entity.text})"
+            print(output)
 
-        for index, node in enumerate(tree):
+        if isinstance(node, NodeEmpty):
+            return
+        if not node.relations:
+            return
 
-            is_last = index == len(tree) - 1
-            branch = "└─ " if is_last else "├─ "
-            node_prefix = prefix + ("   " if is_last else "│  ")
-
-            type, entity = node
-            if type == Type.ENTITY:
-                print(prefix + branch + f"{type.name} (label:{entity.label}, text:{entity.text})")
-            else:
-                print(prefix + branch + type.name)
-                recurse(node, node_prefix, is_root=False)
+        for index, relation in enumerate(node.relations):
+            last = index == len(node.relations) - 1
+            branch = "└─ " if last else "├─ "
+            output = prefix + branch + relation.type.name
+            if isinstance(relation, NodeEntity):
+                output = f"{output} (label:{relation.entity.label}, text:{relation.entity.text})"
+            print(output)
+            recurse(relation, prefix + ("   " if last else "│  "), root=False)
 
     recurse(node)
 
@@ -278,6 +287,7 @@ def _create_relation_tree(structure: dict[int, tuple[list[int], Word]]) -> Node:
         id: int
         head: int
         types: set[str]
+        relation: int
         entity: Optional[str] = None
 
     structure = structure.copy()
@@ -391,7 +401,7 @@ def _create_relations(
         # 2. Annotate word with entities
         for word in sentence.words:
             if word.entity:
-                _annotate_word(sentence, word, entity)
+                _annotate_word(sentence, word)
 
         # 3. Annotate relation-based path
         #    In the third pass, the relation-based path must be determined.
@@ -519,21 +529,7 @@ def pretty_print_sentences(sentences: list[Sentence]):
 
 
 def pretty_print_node(node: Node):
-
-    def is_node(object) -> bool:
-        if isinstance(object, tuple) and len(object) == 2:
-            type, value = object
-            if isinstance(value, Entity):
-                return True
-            elif isinstance(value, list) and all(is_node(entry) for entry in value):
-                return True
-            elif value is None:
-                return True
-        return False
-
-    if not node:
-        return
-    if not is_node(node):
+    if not isinstance(node, Node):
         raise TypeError(f"Unsupported type: {type(node)}")
     _print_relation_tree(node)
 

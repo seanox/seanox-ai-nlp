@@ -4,11 +4,23 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from stanza.models.common.doc import Word, Sentence
-from typing import Optional, Callable, Union, NamedTuple
+from typing import Optional, Callable, Union, NamedTuple, FrozenSet
 
 import os
 import re
 import stanza
+
+
+# Custom annotation slots (properties) for entity relations.
+# stanza.Word is a central object and is extended with additional meta
+# information through these properties.
+
+Word.add_property(
+    "path",
+    default=None,
+    getter=lambda self: getattr(self, "_path", ()),
+    setter=lambda self, value: setattr(self, "_path", tuple(value))
+)
 
 
 class Type(Enum):
@@ -19,40 +31,59 @@ class Type(Enum):
     ENTITY = auto()
 
 
-# Custom annotation slots (properties) for entity relations.
-# stanza.Word is a central object and is extended with additional meta
-# information through these properties.
-
-Word.add_property(
-    "types",
-    default=None,
-    getter=lambda self: getattr(self, "_types", set()),
-    setter=lambda self, value: setattr(self, "_types", value)
-)
+class Entity(NamedTuple):
+    start: int
+    end: int
+    label: str
+    text: str
 
 
-Word.add_property(
-    "path",
-    default=None,
-    getter=lambda self: getattr(self, "_path", []),
-    setter=lambda self, value: setattr(self, "_path", value)
-)
+class Substance(NamedTuple):
+    path: tuple[int, ...]
+    id: int
+    relation: int
+    word: Word
+    entity: Entity
+    types: FrozenSet[str] = frozenset()
 
 
-Word.add_property(
-    "relation",
-    default=None,
-    getter=lambda self: getattr(self, "_relation", None),
-    setter=lambda self, value: setattr(self, "_relation", value)
-)
+@dataclass
+class NodeEmpty:
+    type: Type = field(init=False, default=Type.EMPTY)
 
 
-Word.add_property(
-    "entity",
-    default=None,
-    getter=lambda self: getattr(self, "_entity", None),
-    setter=lambda self, value: setattr(self, "_entity", value)
-)
+@dataclass
+class NodeSet:
+    type: Type = field(init=False, default=Type.SET)
+    relations: list[Union["NodeNot", "NodeSet", "NodeEntity"]]
+
+    def __post_init__(self):
+        if not self.relations:
+            raise ValueError("Relations are required")
+
+
+@dataclass
+class NodeEntity:
+    type: Type = field(init=False, default=Type.ENTITY)
+    entity: Entity
+    relations: Optional[list[Union["NodeNot", "NodeSet", "NodeEntity"]]] = None
+
+
+@dataclass
+class NodeNot:
+    type: Type = field(init=False, default=Type.NOT)
+    relations: list[Union["NodeNot", "NodeSet", "NodeEntity"]] = None
+
+    def __post_init__(self):
+        if not self.relations:
+            raise ValueError("Relations are required")
+
+
+Node = Union[NodeEmpty, NodeNot, NodeSet, NodeEntity]
+
+
+_PIPELINES_MODEL_DIR = os.path.join(os.getcwd(), ".stanza")
+_PIPELINES_CACHE: dict[tuple[str, str], stanza.Pipeline] = {}
 
 
 def _re_compile_logic_pattern(*pattern: str) -> re.Pattern:
@@ -123,37 +154,33 @@ def _get_word_feats(word: Word) -> dict[str, str]:
     return dict(feat.split("=", 1) for feat in word.feats.split("|"))
 
 
-# Abstracts:
-# - unusual/ambiguous sentence structure, then do not use NOT
-
-def _get_word_path(sentence, word) -> list[int]:
+def _get_word_path(sentence: Sentence, word: Word) -> tuple[int, ...]:
     path: list[int] = []
     while True:
         path.insert(0, word.head)
         if word.head <= 0:
             break
         word = sentence.words[word.head - 1]
-    return path
+    return tuple(path)
 
 
-def _get_word_relation_path(sentence, word) -> list[int]:
+def _get_substance_path(substances: dict[int, Substance], substance: Substance) -> tuple[int, ...]:
     path: list[int] = []
     while True:
-        path.insert(0, word.relation)
-        if word.relation <= 0:
+        path.insert(0, substance.relation)
+        if substance.relation <= 0:
             break
-        word = sentence.words[word.relation - 1]
-    return path
+        substance = substances[substance.relation]
+    return tuple(path)
 
 
-def _annotate_word(sentence: Sentence, word: Word):
+def _create_substance(sentence: Sentence, word: Word, entity: Entity) -> Substance:
 
-    # Only entities are considered
-    if not word.entity:
-        return
+    # Abstracts:
+    # - unusual/ambiguous sentence structure, then do not use NOT
 
     # Every entity is ENTITY
-    word.types = {Type.ENTITY}
+    types = {Type.ENTITY}
 
     # TODO:
     # NOT is more complex
@@ -163,64 +190,30 @@ def _annotate_word(sentence: Sentence, word: Word):
         if relation.head != word.id:
             continue
         if relation.deprel == "neg":
-            word.types.add(Type.NOT)
+            types.add(Type.NOT)
         if relation.feats:
             feats = _get_word_feats(relation)
             if "Polarity" in feats and feats["Polarity"] == "Neg":
-                word.types.add(Type.NOT)
+                types.add(Type.NOT)
             elif "PronType" in feats and feats["PronType"] == "Neg":
-                word.types.add(Type.NOT)
+                types.add(Type.NOT)
             elif "Negative" in feats and feats["Negative"] == "Neg":
-                word.types.add(Type.NOT)
+                types.add(Type.NOT)
     if word.deprel == "neg":
-        word.types.add(Type.NOT)
+        types.add(Type.NOT)
 
     # TODO:
-    # Relation is initially based on UD deprel head, but to correctly map UNION,
-    # SET and NOT, this must be adjusted by an extended rule.
-    word.relation = word.head
-
-
-class Entity(NamedTuple):
-    start: int
-    end: int
-    label: str
-    text: str
-
-
-@dataclass
-class NodeEmpty:
-    type: Type = field(init=False, default=Type.EMPTY)
-
-
-@dataclass
-class NodeSet:
-    type: Type = field(init=False, default=Type.SET)
-    relations: list[Union["NodeNot", "NodeSet", "NodeEntity"]]
-
-    def __post_init__(self):
-        if not self.relations:
-            raise ValueError("Relations are required")
-
-
-@dataclass
-class NodeEntity:
-    type: Type = field(init=False, default=Type.ENTITY)
-    entity: Entity
-    relations: Optional[list[Union["NodeNot", "NodeSet", "NodeEntity"]]] = None
-
-
-@dataclass
-class NodeNot:
-    type: Type = field(init=False, default=Type.NOT)
-    relations: list[Union["NodeNot", "NodeSet", "NodeEntity"]] = None
-
-    def __post_init__(self):
-        if not self.relations:
-            raise ValueError("Relations are required")
-
-
-Node = Union[NodeEmpty, NodeNot, NodeSet, NodeEntity]
+    # Relation is initially based on UD deprel head from the word, but to
+    # correctly map UNION, SET and NOT, this must be adjusted by an extended
+    # rule.
+    return Substance(
+        path=None,
+        id=word.id,
+        relation=word.head,
+        types=types,
+        word=word,
+        entity=entity
+    )
 
 
 def _print_relation_tree(node: Node):
@@ -258,94 +251,104 @@ def _print_relation_tree(node: Node):
     recurse(node)
 
 
-# Retrieval-Union Semantics (RUS)
+# For the creation of entity-relations from semantic text and the recognized
+# entities, the processing is divided into three clearly separated layers: from
+# the semantic text and entities, a logical representation of the entities is
+# constructed via an auditable intermediate layer.
 #
-# Interpret logic in a retrieval-oriented manner -- not as full semantic
-# reasoning, and not as formal-mathematical logic.
+# 1. Linguistic Level (Stanza object)
+# Sentence, Word, Entity from the NLP pipeline
+# Raw data from linguistic analysis: tokens, lemmas, dependencies, start/end
+# offsets. This level is detailed, but too complex, too raw and too strict  for
+# direct logical processing.
 #
-# Retrieval-Union Semantics (RUS) functions as a pre-retrieval stage in the
-# information retrieval pipeline. It applies only lightweight, coarse-grained
-# logic based on linguistically more stable inclusion and exclusion marker --
-# negators, simple verb particles, which are often detectable in a rule-based
-# manner and may contribute to reducing noise. RUS thus provides a transparent,
-# deterministic filtering layer that narrows the candidate set for downstream
-# processes without attempting full semantic interpretation.
+# 2. Substances + Structure (intermediary)
+# Substance (NamedTuple) + Structure (Mapping id -> (path, substance))
+# Reduced, immutable snapshots of relevant words, enriched with additional
+# fields (path, types, entity). This layer abstracts linguistic details and
+# makes them auditable, reproducible, and stable. It is the explicit
+# intermediate layer between NLP output and logical relation.
 #
-# Everything mentioned is interpreted by default as a union (ANY), so OR does
-# not need to be modeled explicitly. NOT is used for exclusion, while
-# intersections (AND) emerge through combinatorics, nesting, and normalization
-# rather than as a separate operator. Restrictions or enity bindings (WITH) do
-# not require an explicit operator either, since they are expressed implicitly
-# through tree structure and nesting. This reduction to a small set of
-# primitives creates a transparent, deterministic, and auditable retrieval logic
-# that can be easily integrated into existing NLP pipelines.
+# 3. Relations / Node‑Tree
+# Node, NodeSet, NodeEmpty, ConvergencePoint
+# Logical representation of entities and their relationships. Here, the
+# substances are assembled into a tree or graph that maps the semantic relations
+# (e.g. UNION, NOT, SET). This level is the basis for further processing, e.g.
+# reasoning or queries.
 
-def _create_relation_tree(structure: dict[int, tuple[list[int], Word]]) -> Node:
+def _create_relation_tree(structure: dict[int, tuple(list[int], Substance)]) -> Node:
 
     class ConvergencePoint(NamedTuple):
         path: list[int]
         id: int
-        head: int
-        types: set[str]
         relation: int
-        entity: Optional[str] = None
+        types: set[str]
+        entity: Optional[Entity] = None
 
     structure = structure.copy()
 
     # Find convergence points (joins) in the paths that do not exist as separate
-    # words in the structure. A synthetic element with type SET will later be
-    # created for each of these convergence points so that the logical nesting
-    # and branching below the entities is displayed correctly.
+    # substances in the structure. A synthetic element with type SET will later
+    # be created for each of these convergence points so that the logical
+    # nesting and branching below the entities is displayed correctly.
     # Convergence points are determined from right to left. As soon as an
     # existing reference point is found in structure, the search is terminated
     # because the remaining path is already covered by this reference point in
     # structure.
-    heads: dict[int, list[list[int]]] = defaultdict(list)
-    for id, (path, word) in structure.items():
+    relations: dict[int, list[list[int]]] = defaultdict(list)
+    for id, (path, substance) in structure.items():
         for index in reversed(range(len(path))):
-            head = path[index]
-            if head in structure:
+            relation = path[index]
+            if relation in structure:
                 break
-            if head > 0:
-                heads[head].append(path[:index] or [head])
+            if relation > 0:
+                relations[relation].append(path[:index] or [relation])
 
-    for head, paths in heads.items():
+    for relation, paths in relations.items():
         if len(paths) > 1:
-            structure[head] = (
-                paths[0], ConvergencePoint(path=paths[0], id=head, head=paths[0][-1], types={Type.SET})
+            structure[relation] = (
+                paths[0],
+                ConvergencePoint(
+                    path=paths[0],
+                    id=relation,
+                    relation=paths[0][-1],
+                    types={Type.SET}
+                )
             )
 
     # Normalize paths
-    # - only keep parent/head IDs that are valid keys in structure
+    # - only keep parent/relation IDs that are valid keys in structure
     # - and keep 0 as an indicator for ROOT so that paths are never empty
-    heads = set(structure.keys())
-    for id, (path, word) in structure.items():
-        structure[id] = ([head for head in path if head == 0 or head in heads], word)
+    relations = set(structure.keys())
+    for id, (path, substance) in list(structure.items()):
+        structure[id] = (
+            [relation for relation in path if relation == 0 or relation in relations],
+            substance
+        )
 
     # Root is determined either directly via path [0] or the shortest path
-    roots = [word for id, (path, word) in structure.items() if path == [0]]
+    roots = [substance for id, (path, substance) in structure.items() if path == [0]]
     if not roots:
-        width = min(len(path) for path, word in structure.values())
-        roots = [word for path, word in structure.values() if len(path) == width]
+        width = min(len(path) for path, substance in structure.values())
+        roots = [substance for path, substance in structure.values() if len(path) == width]
 
-    # Reference table words:[relations IDs]
+    # Reference table substances:[relations IDs]
     # It serves as a reference work for directly accessing the IDs of
-    # subordinate words from a word ID.
-    words: dict[int, list[int]] = {id: [] for id in structure}
-    for id, (path, word) in structure.items():
-        if word not in roots:
-            head = path[-1]
-            if head in words and head != id:
-                words[head].append(id)
+    # subordinate substances from a word ID.
+    substances: dict[int, list[int]] = {id: [] for id in structure}
+    for id, (path, substance) in structure.items():
+        if substance not in roots:
+            relation = path[-1]
+            if relation in substances and relation != id:
+                substances[relation].append(id)
 
-    def create_node(object: Word | ConvergencePoint) -> Node:
-
+    def create_node(object: Substance | ConvergencePoint) -> Node:
         # Virtual ConvergencePoint
         if isinstance(object, ConvergencePoint):
             return NodeSet(
                 relations=[
                     create_node(structure[id][1])
-                    for id in words.get(object.id, [])
+                    for id in substances.get(object.id, [])
                 ]
             )
 
@@ -355,7 +358,7 @@ def _create_relation_tree(structure: dict[int, tuple[list[int], Word]]) -> Node:
         # Logical entities
         relations = [
             create_node(structure[id][1])
-            for id in words.get(object.id, [])
+            for id in substances.get(object.id, [])
         ]
         return NodeEntity(
             entity=object.entity,
@@ -384,35 +387,45 @@ def _create_relations(
 
     relations = []
     for sentence in doc.sentences:
-        # 1. Assignment of entities
-        #    The remaining annotations for the entity relation are filled in
-        #    during the second pass, as it may then be necessary to recognize
-        #    other dependencies between entities. Since these do not occur
-        #    continuously in the sentence, all entities must first be set.
-        for word in sentence.words:
-            # ignore MWT (Multi-Word Token without start_char)
-            if word.start_char is None:
-                continue
-            for entity in entities:
-                if entity.start <= word.start_char < entity.end:
-                    word.entity = entity
-                    break
 
-        # 2. Annotate word with entities
+        # 1. Annotate words and detect words relevant to entities
+        #    Ignore MWT (Multi-Word Token without start_char).
+        words: dict[Word, list[Entity]] = defaultdict(list)
         for word in sentence.words:
-            if word.entity:
-                _annotate_word(sentence, word)
+            word.path = _get_word_path(sentence, word)
+            if word.start_char is not None:
+                for entity in entities:
+                    if entity.start <= word.start_char < entity.end:
+                        words[word].append(entity)
+                        break
 
-        # 3. Annotate relation-based path
-        #    In the third pass, the relation-based path must be determined.
-        #    However, this requires that the relation annotations for all
-        #    entities are set correctly.
-        for word in sentence.words:
-            if word.entity:
-                word.path = _get_word_relation_path(sentence, word)
+        # 2. Create a Substance object for all relevant words.
+        #    Substance is a reduced snapshot of Word, enriched with additional
+        #    fields (e.g. types, word, entity and relation for head) that are
+        #    required for building logical relationships. Enclosed by structure,
+        #    it forms an explicit intermediate layer between the linguistic data
+        #    (stanza) and the final entity relationships (node tree).
+        #
+        #    Because Substance is immutable/read-only, its construction requires
+        #    two passes: in the first pass, raw Substances are created with
+        #    basic fields (id, relation, entity, etc.); in the second pass, once
+        #    all relation are known, the correct dependency path can be computed
+        #    and new enriched Substances are produced. This ensures consistency
+        #    and auditability without mutating existing objects.
+        substances: dict[int, Substance] = {}
+        for word in words:
+            for entity in words[word]:
+                substance = _create_substance(sentence, word, entity)
+                substances[substance.id] = substance
 
-        # X. Creating a flat tree structure of only the relevant entities
-        structure = {word.id: (word.path, word) for word in sentence.words if word.types}
+        # 3. Finalizing the substance with the correct dependency path
+        substances = [
+            substance._replace(path=_get_substance_path(substances, substance))
+            for substance in substances.values()
+        ]
+
+        # X. Creating a flat tree structure of entities based on substances
+        structure = {substance.id: (substance.path, substance) for substance in substances}
 
         # IMPORTANT: Do not shorten or simplify paths; IDs of irrelevant words
         # without entities can be potential convergence points that will be
@@ -425,10 +438,6 @@ def _create_relations(
     if len(relations) == 1:
         return relations[0]
     return NodeSet(relations=relations)
-
-
-_PIPELINES_MODEL_DIR = os.path.join(os.getcwd(), ".stanza")
-_PIPELINES_CACHE: dict[tuple[str, str], stanza.Pipeline] = {}
 
 
 def _download_pipeline_lazy(language: str):

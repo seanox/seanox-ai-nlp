@@ -550,10 +550,11 @@ def sentences(language: str, text: str) -> list[Sentence]:
     return _create_doc(language, text).sentences
 
 
-# TODO: entities must correspond to the output format and not the input format
-#       correct is: (text, start, char, label)
-#       https://spacy.io/usage/spacy-101#annotations-ner
-#       or no, we keep simple tuples, as with spaCy input
+# DESIGN DECISION:
+# Simple tuples based on the spaCy input format for ents are used; the detail
+# fields of the output format are deliberately omitted in order to keep the
+# structure lean and consistent.
+
 def relations(language: str, text: str, entities: list[tuple[int, int, str]]) -> Node:
     language = _validate_language(language)
     if not text.strip() or not entities:

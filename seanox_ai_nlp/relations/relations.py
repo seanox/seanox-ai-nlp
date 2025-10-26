@@ -1,6 +1,6 @@
 # seanox_ai_npl/relations/relations.py
 
-from seanox_ai_nlp.relations.lang import languages, module
+from seanox_ai_nlp.relations.lang import languages, language_module
 
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -183,14 +183,15 @@ def _create_substance(lang: str, sentence: Sentence, word: Word, entity: Entity)
     if word.deprel == "neg":
         types.add(Type.NOT)
 
-    # TODO:
-    # Relation is initially based on UD deprel head from the word, but to
-    # correctly map UNION, SET and NOT, this must be adjusted by an extended
-    # rule.
+    module = language_module(lang)
+
+    # Relation is initially based on UD and the head from the stanza word, but
+    # in order to correctly map UNION, SET, and NOT, this must be adjusted using
+    # extended language-specific rules.
     return Substance(
         path=None,
         id=word.id,
-        relation=word.head,
+        relation=module.infer_logical_relation(sentence, word),
         types=types,
         word=word,
         entity=entity
@@ -473,7 +474,7 @@ def _create_doc(lang: str, text: str) -> stanza.Document:
 
     lang = _validate_language(lang)
 
-    preprocessor = module(lang).sentence_preprocessor()
+    preprocessor = language_module(lang).sentence_preprocessor()
     if preprocessor is not None:
 
         # First pass as a preprocess to change everyday logical words and
@@ -481,6 +482,7 @@ def _create_doc(lang: str, text: str) -> stanza.Document:
         # pipelines can interpret them.
         nlp = _get_pipeline(lang, processors="tokenize,mwt")
         doc = nlp(text)
+        doc.lang = lang
         sentences = []
         for sentence in doc.sentences:
             sentences.append(preprocessor(sentence))
@@ -488,9 +490,11 @@ def _create_doc(lang: str, text: str) -> stanza.Document:
         # Second pass to determine the actual logical structure.
         nlp = _get_pipeline(lang, processors="pos,lemma,depparse")
         doc = nlp(sentences)
+        doc.lang = lang
     else:
         nlp = _get_pipeline(lang, processors="tokenize,mwt,pos,lemma,depparse")
         doc = nlp(text)
+        doc.lang = lang
 
     return doc
 

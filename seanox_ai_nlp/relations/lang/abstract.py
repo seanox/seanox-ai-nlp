@@ -1,9 +1,10 @@
 # seanox_ai_npl/relations/abstract.py
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Callable
-
 from stanza.models.common.doc import Sentence, Word
 
 
@@ -43,5 +44,6 @@ class Relations(ABC):
 #   def find_markers(self, sentence: Sentence, word: Word) -> frozenset[str]:
         ...
 
-    def infer_logical_relation(self, sentence: Sentence, word: Word) -> int:
-        return word.head
+    def infer_relation_scope(self, sentence: Sentence, word: Word) -> Scope:
+        from seanox_ai_nlp.relations.relations import Scope
+        return Scope(id=word.id, relation=word.head)

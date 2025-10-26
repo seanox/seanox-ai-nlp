@@ -1,14 +1,23 @@
 # seanox_ai_npl/relations/relations.py
 
+from seanox_ai_nlp.relations.lang import languages, module
+
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from stanza.models.common.doc import Word, Sentence
-from typing import Optional, Callable, Union, NamedTuple, FrozenSet
+from typing import Optional, Union, NamedTuple, FrozenSet
 
 import os
 import re
 import stanza
+
+
+# DESIGN DECISION:
+# Use "lang" for a single language code (e.g. de, en) to follow common API
+# conventions. Use "languages" for the set of all supported codes. The full word
+# in plural form is more pythonic and idiomatic, improving readability and
+# auditability compared to "langs".
 
 
 # Custom annotation slots (properties) for entity relations.
@@ -92,34 +101,6 @@ def _re_compile_logic_pattern(*pattern: str) -> re.Pattern:
     )
 
 
-_LANGUAGE_SENTENCE_MAPPING: dict[str, Optional[Callable[[Sentence], list[str]]]] = {
-    "de": None,
-    "dk": None,
-    "en": None,
-    "es": None,
-    "fr": None,
-    "it": None,
-    "ru": None
-}
-
-_LANGUAGE_LOGIC_PATTERN: dict[str, dict[Type, list[re.Pattern] | None]] = {
-    "de": {
-    },
-    "dk": {
-    },
-    "en": {
-    },
-    "es": {
-    },
-    "fr": {
-    },
-    "it": {
-    },
-    "ru": {
-    }
-}
-
-
 def _print_sentence_tree(sentence: Sentence):
 
     if not sentence:
@@ -174,7 +155,7 @@ def _get_substance_path(substances: dict[int, Substance], substance: Substance) 
     return tuple(path)
 
 
-def _create_substance(sentence: Sentence, word: Word, entity: Entity) -> Substance:
+def _create_substance(lang: str, sentence: Sentence, word: Word, entity: Entity) -> Substance:
 
     # Abstracts:
     # - unusual/ambiguous sentence structure, then do not use NOT
@@ -276,7 +257,7 @@ def _print_relation_tree(node: Node):
 # (e.g. UNION, NOT, SET). This level is the basis for further processing, e.g.
 # reasoning or queries.
 
-def _create_relation_tree(structure: dict[int, tuple(list[int], Substance)]) -> Node:
+def _create_relation_tree(structure: dict[int, tuple[list[int], Substance]]) -> Node:
 
     class ConvergencePoint(NamedTuple):
         path: list[int]
@@ -373,11 +354,7 @@ def _create_relation_tree(structure: dict[int, tuple(list[int], Substance)]) -> 
     return Node(Type.SET, nodes)
 
 
-def _create_relations(
-        doc: stanza.Document,
-        entities: list[Entity],
-        patterns: dict[Type, list[re.Pattern]]
-) -> Node:
+def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
 
     if not entities:
         return Node(Type.EMPTY)
@@ -415,7 +392,7 @@ def _create_relations(
         substances: dict[int, Substance] = {}
         for word in words:
             for entity in words[word]:
-                substance = _create_substance(sentence, word, entity)
+                substance = _create_substance(doc.lang, sentence, word, entity)
                 substances[substance.id] = substance
 
         # 3. Finalizing the substance with the correct dependency path
@@ -440,13 +417,13 @@ def _create_relations(
     return NodeSet(relations=relations)
 
 
-def _download_pipeline_lazy(language: str):
-    if os.path.exists(os.path.join(_PIPELINES_MODEL_DIR, language)):
+def _download_pipeline_lazy(lang: str):
+    if os.path.exists(os.path.join(_PIPELINES_MODEL_DIR, lang)):
         return
-    stanza.download(language, model_dir=_PIPELINES_MODEL_DIR)
+    stanza.download(lang, model_dir=_PIPELINES_MODEL_DIR)
 
 
-def _get_pipeline(language: str, processors: str | None) -> stanza.Pipeline:
+def _get_pipeline(lang: str, processors: str | None) -> stanza.Pipeline:
 
     if not processors or not processors.strip():
         processors = "tokenize,mwt,pos,lemma,depparse"
@@ -469,11 +446,11 @@ def _get_pipeline(language: str, processors: str | None) -> stanza.Pipeline:
         processors.insert(0, "tokenize")
     processors = ",".join(processors)
 
-    key = (language, processors)
+    key = (lang, processors)
     if key not in _PIPELINES_CACHE:
-        _download_pipeline_lazy(language)
+        _download_pipeline_lazy(lang)
         _PIPELINES_CACHE[key] = stanza.Pipeline(
-            lang=language,
+            lang=lang,
             processors=processors,
             tokenize_pretokenized=not tokenizer,
             model_dir=_PIPELINES_MODEL_DIR,
@@ -483,36 +460,36 @@ def _get_pipeline(language: str, processors: str | None) -> stanza.Pipeline:
     return _PIPELINES_CACHE[key]
 
 
-def _validate_language(language: str) -> str:
-    language = (language or "").strip()
-    if not language:
+def _validate_language(lang: str) -> str:
+    lang = (lang or "").strip()
+    if not lang:
         raise ValueError("Language is required")
-    if language.lower() not in set(_LANGUAGE_LOGIC_PATTERN.keys()):
-        raise ValueError(f"Language '{language}' is not supported")
-    return language.lower()
+    if lang.lower() not in languages():
+        raise ValueError(f"Unsupported language: {lang}")
+    return lang.lower()
 
 
-def _create_doc(language: str, text: str) -> stanza.Document:
+def _create_doc(lang: str, text: str) -> stanza.Document:
 
-    language = _validate_language(language)
+    lang = _validate_language(lang)
 
-    mapping = _LANGUAGE_SENTENCE_MAPPING.get(language)
-    if mapping is not None:
+    preprocessor = module(lang).sentence_preprocessor()
+    if preprocessor is not None:
 
         # First pass as a preprocess to change everyday logical words and
         # phrases in Universal Dependencies words and phrases so that the stanza
         # pipelines can interpret them.
-        nlp = _get_pipeline(language, processors="tokenize,mwt")
+        nlp = _get_pipeline(lang, processors="tokenize,mwt")
         doc = nlp(text)
         sentences = []
         for sentence in doc.sentences:
-            sentences.append(mapping(sentence))
+            sentences.append(preprocessor(sentence))
 
         # Second pass to determine the actual logical structure.
-        nlp = _get_pipeline(language, processors="pos,lemma,depparse")
+        nlp = _get_pipeline(lang, processors="pos,lemma,depparse")
         doc = nlp(sentences)
     else:
-        nlp = _get_pipeline(language, processors="tokenize,mwt,pos,lemma,depparse")
+        nlp = _get_pipeline(lang, processors="tokenize,mwt,pos,lemma,depparse")
         doc = nlp(text)
 
     return doc
@@ -543,11 +520,11 @@ def pretty_print_node(node: Node):
     _print_relation_tree(node)
 
 
-def sentences(language: str, text: str) -> list[Sentence]:
-    language = _validate_language(language)
+def sentences(lang: str, text: str) -> list[Sentence]:
+    lang = _validate_language(lang)
     if not text.strip():
         return []
-    return _create_doc(language, text).sentences
+    return _create_doc(lang, text).sentences
 
 
 # DESIGN DECISION:
@@ -555,8 +532,8 @@ def sentences(language: str, text: str) -> list[Sentence]:
 # fields of the output format are deliberately omitted in order to keep the
 # structure lean and consistent.
 
-def relations(language: str, text: str, entities: list[tuple[int, int, str]]) -> Node:
-    language = _validate_language(language)
+def relations(lang: str, text: str, entities: list[tuple[int, int, str]]) -> Node:
+    lang = _validate_language(lang)
     if not text.strip() or not entities:
         return (Type.EMPTY, None)
     entities = [
@@ -564,7 +541,6 @@ def relations(language: str, text: str, entities: list[tuple[int, int, str]]) ->
         for start, end, label in entities
     ]
     return _create_relations(
-        _create_doc(language, text),
-        entities,
-        _LANGUAGE_LOGIC_PATTERN[language]
+        _create_doc(lang, text),
+        entities
     )

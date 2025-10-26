@@ -7,7 +7,8 @@ from enum import Enum
 from typing import Callable
 from stanza.models.common.doc import Sentence, Word
 
-
+# TODO: Check RELATIVE and CLAUSE for deprel / upos relevance
+#       PrimitiveMarker should only contain deprel-/upos-relevant constants.
 class PrimitiveMarker(Enum):
     NMOD = "nmod"
     PREP = "prep"

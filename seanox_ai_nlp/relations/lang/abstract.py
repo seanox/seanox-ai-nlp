@@ -46,4 +46,4 @@ class Relations(ABC):
 
     def infer_relation_scope(self, sentence: Sentence, word: Word) -> Scope:
         from seanox_ai_nlp.relations.relations import Scope
-        return Scope(id=word.id, relation=word.head)
+        return Scope(id=word.id, relation=0)

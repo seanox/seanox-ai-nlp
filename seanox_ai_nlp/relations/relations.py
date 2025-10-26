@@ -31,6 +31,13 @@ Word.add_property(
     setter=lambda self, value: setattr(self, "_path", tuple(value))
 )
 
+Word.add_property(
+    "entity",
+    default=None,
+    getter=lambda self: getattr(self, "_entity", None),
+    setter=lambda self, value: setattr(self, "_entity", value)
+)
+
 
 class Type(Enum):
     EMPTY = auto()
@@ -368,6 +375,10 @@ def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
 
         # 1. Annotate words and detect words relevant to entities
         #    Ignore MWT (Multi-Word Token without start_char).
+        #    In addition, mark words that refer to entities by assigning the
+        #    respective entity to the word. This allows the logical meaning of a
+        #    word to be correctly evaluated later in the sentence and entity
+        #    context.
         words: dict[Word, list[Entity]] = defaultdict(list)
         for word in sentence.words:
             word.path = _get_word_path(sentence, word)
@@ -375,6 +386,7 @@ def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
                 for entity in entities:
                     if entity.start <= word.start_char < entity.end:
                         words[word].append(entity)
+                        word.entity = entity
                         break
 
         # 2. Create a Substance object for all relevant words.
@@ -473,6 +485,12 @@ def _validate_language(lang: str) -> str:
 def _create_doc(lang: str, text: str) -> stanza.Document:
 
     lang = _validate_language(lang)
+
+    # DESIGN DECISION:
+    # stanza.models.common.doc
+    # https://github.com/stanfordnlp/stanza/blob/main/stanza/models/common/doc.py
+    # The property "lang" is set by Design to None, so it is set manually.
+    # doc.lang is only used internally; the public API uses a separate "lang".
 
     preprocessor = language_module(lang).sentence_preprocessor()
     if preprocessor is not None:

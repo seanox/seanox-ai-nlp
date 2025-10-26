@@ -43,6 +43,5 @@ class Relations(ABC):
 #   def find_markers(self, sentence: Sentence, word: Word) -> frozenset[str]:
         ...
 
- #  @abstractmethod
- #  def find_logical_relation(self, sentence: Sentence, word: Word) -> int:
-        ...
+    def infer_logical_relation(self, sentence: Sentence, word: Word) -> int:
+        return word.head

@@ -25,7 +25,7 @@ def languages() -> frozenset[str]:
     return frozenset(_RELATIONS.keys())
 
 
-def module(lang: str) -> Relations:
+def language_module(lang: str) -> Relations:
     if lang not in _RELATIONS.keys():
         raise ValueError(f"Unsupported language: {lang}")
     return _RELATIONS[lang]()
@@ -34,5 +34,5 @@ def module(lang: str) -> Relations:
 __all__ = [
     "Relations",
     "languages",
-    "module"
+    "language_module"
 ]

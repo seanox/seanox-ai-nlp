@@ -3,11 +3,7 @@
 from collections import deque, defaultdict
 from dataclasses import dataclass
 from jinja2 import (
-    Environment,
-    BaseLoader,
-    DebugUndefined,
-    Undefined,
-    TemplateAssertionError
+    Environment, BaseLoader, DebugUndefined, Undefined, TemplateAssertionError
 )
 from typing import Callable, Any, Optional
 

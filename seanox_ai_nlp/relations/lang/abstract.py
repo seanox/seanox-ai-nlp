@@ -45,6 +45,6 @@ class Relations(ABC):
 #   def find_markers(self, sentence: Sentence, word: Word) -> frozenset[str]:
         ...
 
-    def infer_relation_scope(self, sentence: Sentence, word: Word) -> Scope:
-        from seanox_ai_nlp.relations.relations import Scope
-        return Scope(id=word.id, relation=0)
+    def infer_relations(self, sentence: Sentence, word: Word) -> Relations:
+        from seanox_ai_nlp.relations.relations import Relations
+        return Relations(head=0, relations=[word.id])

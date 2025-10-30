@@ -10,9 +10,9 @@ from seanox_ai_nlp.relations.relations import (
 
 
 BAKING_ENTITIES_PATTERN = [
-    ("FRUITS", r"(?i)\bÄpfel|Birnen|Pflaumen|Erdbeeren\b"),
+    ("FRUITS", r"(?i)\bÄpfel|Birnen|Kirschen|Pflaumen|Erdbeeren\b"),
     ("TREATS", r"(?i)\bObstkuchen|Plätzchen|Dessert\b"),
-    ("INGREDIENTS", r"(?i)\bSchokolade\b"),
+    ("INGREDIENTS", r"(?i)\bSchokolade|Zucker|Mehl|Eier\b"),
     ("TERM", r"(?i)\bZutaten\b")
 ]
 
@@ -21,12 +21,27 @@ EXAMPLES_TEXT_01 = [
     "Hole Äpfel und Birnen für den Obstkuchen, Schokolade für die Plätzchen aber keine Erdbeeren.",
     "Hole Äpfel, Pflaumen und Birnen für den Obstkuchen, Schokolade für die Plätzchen aber keine Erdbeeren.",
     "Hole keine Äpfel und Pflaumen, aber Birnen für den Obstkuchen, Schokolade für die Plätzchen und keine Erdbeeren.",
-    "Gibt es ein Dessert ohne Äpfel, Schokolade oder Erdbeeren?"
+    "Gibt es ein Dessert ohne Äpfel, Schokolade oder Erdbeeren?",
+
+    "Hole keine Äpfel, Pflaumen oder Birnen aber Erdbeeren.",
+    "Hole keine Äpfel, Pflaumen oder Birnen, sondern Erdbeeren.",
+
+    "Hole Äpfel, keine Pflaumen oder Birnen aber Erdbeeren.",
+    "Hole Äpfel und Erdbeeren, aber keine Pflaumen oder Birnen.",
+
+    "Hole Äpfel, keine Pflaumen und Birnen aber Erdbeeren."
+    "Hole Äpfel und Erdbeeren, aber keine Pflaumen und keine Birnen.",
+
+    "Das Mehl brauche ich für den Kuchen und ich brauche es für die Plätzchen.",
+    "Ich brauche keine Kirschen aber Äpfel.",
+    "Hole keine Äpfel, jedoch Birnen.",
+    "Hole Äpfel, jedoch keine Birnen."
 ]
 
 
 def test_logics_03():
 
+    # TODO:
     text = EXAMPLES_TEXT_01[2]
     pretty_print_sentences(sentences("de", text))
 

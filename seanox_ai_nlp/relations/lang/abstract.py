@@ -47,4 +47,4 @@ class Relations(ABC):
 
     def infer_relations(self, sentence: Sentence, word: Word) -> Relations:
         from seanox_ai_nlp.relations.relations import Relations
-        return Relations(head=0, relations=[word.id])
+        return Relations(head=0, associations=[word.id])

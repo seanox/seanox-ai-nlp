@@ -54,10 +54,15 @@ class Entity(NamedTuple):
     text: str
 
 
+class Relations(NamedTuple):
+    head: Optional[int]
+    associations: tuple[int, ...]
+
+
 class Substance(NamedTuple):
     path: tuple[int, ...]
     id: int
-    relation: int
+    relations: Relations
     word: Word
     entity: Entity
     types: FrozenSet[str] = frozenset()
@@ -154,11 +159,12 @@ def _get_word_path(sentence: Sentence, word: Word) -> tuple[int, ...]:
 
 def _get_substance_path(substances: dict[int, Substance], substance: Substance) -> tuple[int, ...]:
     path: list[int] = []
-    while True:
-        path.insert(0, substance.relation)
-        if substance.relation <= 0:
-            break
-        substance = substances[substance.relation]
+#    TODO:
+#    while True:
+#        path.insert(0, substance.associations)
+#        if substance.associations <= 0:
+#            break
+#        substance = substances[substance.relation]
     return tuple(path)
 
 
@@ -198,7 +204,7 @@ def _create_substance(lang: str, sentence: Sentence, word: Word, entity: Entity)
     return Substance(
         path=None,
         id=word.id,
-        relation=module.infer_logical_relation(sentence, word),
+        relations=module.infer_relations(sentence, word),
         types=types,
         word=word,
         entity=entity
@@ -355,17 +361,17 @@ def _create_relation_tree(structure: dict[int, tuple[list[int], Substance]]) -> 
         )
 
     if not roots:
-        return Node(Type.EMPTY)
+        return NodeEmpty()
     nodes = [create_node(root) for root in roots]
     if len(nodes) == 1:
         return nodes[0]
-    return Node(Type.SET, nodes)
+    return NodeSet(nodes)
 
 
 def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
 
     if not entities:
-        return Node(Type.EMPTY)
+        return NodeEmpty()
 
     # TODO: Multi-Word / Multi-Token Entities
     # TODO: Entities refer to the entire text with start and end, e.g. beyond sentences

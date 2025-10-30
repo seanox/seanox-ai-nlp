@@ -1,6 +1,6 @@
 # seanox_ai_npl/relations/relations.py
 
-from seanox_ai_nlp.relations.lang import languages, language_module
+from seanox_ai_nlp.relations.lang import languages, language_schema
 
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -54,15 +54,11 @@ class Entity(NamedTuple):
     text: str
 
 
-class Relations(NamedTuple):
-    head: Optional[int]
-    associations: tuple[int, ...]
-
-
 class Substance(NamedTuple):
     path: tuple[int, ...]
     id: int
-    relations: Relations
+    head: int
+    association: int
     word: Word
     entity: Entity
     types: FrozenSet[str] = frozenset()
@@ -158,12 +154,12 @@ def _get_word_path(sentence: Sentence, word: Word) -> tuple[int, ...]:
 
 
 def _get_substance_path(substances: dict[int, Substance], substance: Substance) -> tuple[int, ...]:
-    path: list[int] = []
+    path: list[int] = [substance.association]
     while True:
-        path.insert(0, substance.relations.head)
-        if substance.relations.head <= 0:
+        path.insert(0, substance.head)
+        if substance.head <= 0:
             break
-        substance = substances.get(substance.relations.head)
+        substance = substances.get(substance.head)
     return tuple(path)
 
 
@@ -195,7 +191,7 @@ def _create_substance(lang: str, sentence: Sentence, word: Word, entity: Entity)
     if word.deprel == "neg":
         types.add(Type.NOT)
 
-    module = language_module(lang)
+    schema = language_schema(lang)
 
     # There are two types of relations:
     #
@@ -210,12 +206,14 @@ def _create_substance(lang: str, sentence: Sentence, word: Word, entity: Entity)
     # Together, head and associations provide a bidirectional view of the
     # dependency structure. To correctly represent logical constructs such as
     # UNION, SET, and NOT, these relations must be further refined using
-    # extended, language‑specific rules.
+    # extended, language-specific rules.
 
+    relation = schema.infer_relation(sentence, word)
     return Substance(
         path=None,
         id=word.id,
-        relations=module.infer_relations(sentence, word),
+        head=relation.head,
+        association=relation.association,
         types=types,
         word=word,
         entity=entity
@@ -275,7 +273,7 @@ def _print_relation_tree(node: Node):
 # makes them auditable, reproducible, and stable. It is the explicit
 # intermediate layer between NLP output and logical relation.
 #
-# 3. Relations / Node‑Tree
+# 3. Relations / Node-Tree
 # Node, NodeSet, NodeEmpty, ConvergencePoint
 # Logical representation of entities and their relationships. Here, the
 # substances are assembled into a tree or graph that maps the semantic relations
@@ -509,7 +507,7 @@ def _create_doc(lang: str, text: str) -> stanza.Document:
     # The property "lang" is set by Design to None, so it is set manually.
     # doc.lang is only used internally; the public API uses a separate "lang".
 
-    preprocessor = language_module(lang).sentence_preprocessor()
+    preprocessor = language_schema(lang).sentence_preprocessor()
     if preprocessor is not None:
 
         # First pass as a preprocess to change everyday logical words and

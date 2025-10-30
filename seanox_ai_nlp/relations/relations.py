@@ -159,12 +159,11 @@ def _get_word_path(sentence: Sentence, word: Word) -> tuple[int, ...]:
 
 def _get_substance_path(substances: dict[int, Substance], substance: Substance) -> tuple[int, ...]:
     path: list[int] = []
-#    TODO:
-#    while True:
-#        path.insert(0, substance.associations)
-#        if substance.associations <= 0:
-#            break
-#        substance = substances[substance.relation]
+    while True:
+        path.insert(0, substance.relations.head)
+        if substance.relations.head <= 0:
+            break
+        substance = substances.get(substance.relations.head)
     return tuple(path)
 
 
@@ -198,9 +197,21 @@ def _create_substance(lang: str, sentence: Sentence, word: Word, entity: Entity)
 
     module = language_module(lang)
 
-    # Relation is initially based on UD and the head from the stanza word, but
-    # in order to correctly map UNION, SET, and NOT, this must be adjusted using
-    # extended language-specific rules.
+    # There are two types of relations:
+    #
+    # 1. head (dependency): refers to the parent substance.
+    #    - The value always starts at 0 (root)
+    #    - Must be explicitly determined using semantic rules
+    #
+    # 2. associations: refers to dependent substances
+    #    - Determined using rules based on UD features
+    #      deprel + upos from Universal Dependencies
+    #
+    # Together, head and associations provide a bidirectional view of the
+    # dependency structure. To correctly represent logical constructs such as
+    # UNION, SET, and NOT, these relations must be further refined using
+    # extended, language‑specific rules.
+
     return Substance(
         path=None,
         id=word.id,

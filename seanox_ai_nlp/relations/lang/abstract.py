@@ -8,7 +8,7 @@ from stanza.models.common.doc import Sentence, Word
 
 class Relation(NamedTuple):
     head: int
-    association: int
+    cluster: int
 
 
 # TODO: Check RELATIVE and CLAUSE for deprel / upos relevance
@@ -50,4 +50,4 @@ class Schema(ABC):
         ...
 
     def infer_relation(self, sentence: Sentence, word: Word) -> Relation:
-        return Relation(head=0, associations=[word.id])
+        return Relation(head=0, cluster=word.id)

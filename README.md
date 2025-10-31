@@ -150,7 +150,7 @@ for data in datas:
 - [Integration in NLP Workflows](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#integration-in-nlp-workflows)
 - [Downstream Processing with pandas](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/synthetics/README.md#downstream-processing-with-pandas)
 
-## [relations (under development)](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/logics/README.md)
+## [relations (under development)](https://github.com/seanox/seanox-ai-nlp/blob/master/seanox_ai_nlp/relations/README.md)
 The __Entity Relation Composer (relations)__ provides a rule‑based method for
 turning natural language input into transparent, hierarchical structures. It
 takes entities identified by upstream components and arranges them into object

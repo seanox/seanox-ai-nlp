@@ -58,7 +58,7 @@ class Substance(NamedTuple):
     path: tuple[int, ...]
     id: int
     head: int
-    association: int
+    cluster: int
     word: Word
     entity: Entity
     types: FrozenSet[str] = frozenset()
@@ -154,7 +154,7 @@ def _get_word_path(sentence: Sentence, word: Word) -> tuple[int, ...]:
 
 
 def _get_substance_path(substances: dict[int, Substance], substance: Substance) -> tuple[int, ...]:
-    path: list[int] = [substance.association]
+    path: list[int] = [substance.cluster]
     while True:
         path.insert(0, substance.head)
         if substance.head <= 0:
@@ -199,21 +199,21 @@ def _create_substance(lang: str, sentence: Sentence, word: Word, entity: Entity)
     #    - The value always starts at 0 (root)
     #    - Must be explicitly determined using semantic rules
     #
-    # 2. associations: refers to dependent substances
+    # 2. cluster: refers to the grouping of related substances.
     #    - Determined using rules based on UD features
     #      deprel + upos from Universal Dependencies
     #
-    # Together, head and associations provide a bidirectional view of the
-    # dependency structure. To correctly represent logical constructs such as
-    # UNION, SET, and NOT, these relations must be further refined using
-    # extended, language-specific rules.
+    # Together, head and cluster provide a bidirectional view of the relation
+    # structure. To correctly represent logical constructs such as SET and NOT,
+    # these relations must be further refined using extended, language-specific
+    # rules.
 
     relation = schema.infer_relation(sentence, word)
     return Substance(
         path=None,
         id=word.id,
         head=relation.head,
-        association=relation.association,
+        cluster=relation.cluster,
         types=types,
         word=word,
         entity=entity

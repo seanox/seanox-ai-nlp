@@ -63,7 +63,15 @@ class Substance(NamedTuple):
     cluster: int
     word: Word
     entity: Entity
-    types: FrozenSet[str] = frozenset()
+    types: FrozenSet[Type] = frozenset()
+
+
+class Cluster(NamedTuple):
+    path: tuple[int, ...]
+    id: int
+    head: int
+    elements: list[Substance | Cluster]
+    types: set[Type]
 
 
 @dataclass
@@ -171,7 +179,7 @@ def _create_substance(lang: str, sentence: Sentence, word: Word, entity: Entity)
     # - unusual/ambiguous sentence structure, then do not use NOT
 
     # Every entity is ENTITY
-    types = {Type.ENTITY}
+    types: set[Type] = {Type.ENTITY}
 
     # TODO:
     # NOT is more complex

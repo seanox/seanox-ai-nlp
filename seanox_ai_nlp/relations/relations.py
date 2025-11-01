@@ -1,12 +1,14 @@
 # seanox_ai_npl/relations/relations.py
 
+from __future__ import annotations
+
 from seanox_ai_nlp.relations.lang import languages, language_schema
 
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from stanza.models.common.doc import Word, Sentence
-from typing import Optional, Union, NamedTuple, FrozenSet
+from typing import Optional, NamedTuple, FrozenSet
 
 import os
 import re
@@ -72,7 +74,7 @@ class NodeEmpty:
 @dataclass
 class NodeSet:
     type: Type = field(init=False, default=Type.SET)
-    relations: list[Union["NodeNot", "NodeSet", "NodeEntity"]]
+    relations: list[NodeNot | NodeSet | NodeEntity]
 
     def __post_init__(self):
         if not self.relations:
@@ -83,20 +85,20 @@ class NodeSet:
 class NodeEntity:
     type: Type = field(init=False, default=Type.ENTITY)
     entity: Entity
-    relations: Optional[list[Union["NodeNot", "NodeSet", "NodeEntity"]]] = None
+    relations: Optional[list[NodeNot | NodeSet | NodeEntity]] = None
 
 
 @dataclass
 class NodeNot:
     type: Type = field(init=False, default=Type.NOT)
-    relations: list[Union["NodeNot", "NodeSet", "NodeEntity"]] = None
+    relations: list[NodeNot | NodeSet | NodeEntity] = None
 
     def __post_init__(self):
         if not self.relations:
             raise ValueError("Relations are required")
 
 
-Node = Union[NodeEmpty, NodeNot, NodeSet, NodeEntity]
+Node = NodeEmpty | NodeNot | NodeSet | NodeEntity
 
 
 _PIPELINES_MODEL_DIR = os.path.join(os.getcwd(), ".stanza")
@@ -277,7 +279,7 @@ def _print_relation_tree(node: Node):
 # Node, NodeSet, NodeEmpty, ConvergencePoint
 # Logical representation of entities and their relationships. Here, the
 # substances are assembled into a tree or graph that maps the semantic relations
-# (e.g. UNION, NOT, SET). This level is the basis for further processing, e.g.
+# (e.g. NOT, SET). This level is the basis for further processing, e.g.
 # reasoning or queries.
 
 def _create_relation_tree(structure: dict[int, tuple[list[int], Substance]]) -> Node:

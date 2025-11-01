@@ -84,10 +84,6 @@ class NodeSet:
     type: Type = field(init=False, default=Type.SET)
     relations: list[NodeNot | NodeSet | NodeEntity]
 
-    def __post_init__(self):
-        if not self.relations:
-            raise ValueError("Relations are required")
-
 
 @dataclass
 class NodeEntity:
@@ -268,7 +264,7 @@ def _print_relation_tree(node: Node):
 # For the creation of entity-relations from semantic text and the recognized
 # entities, the processing is divided into three clearly separated layers: from
 # the semantic text and entities, a logical representation of the entities is
-# constructed via an auditable intermediate layer.
+# constructed via intermediate layers.
 #
 # 1. Linguistic Level (Stanza object)
 # Sentence, Word, Entity from the NLP pipeline
@@ -279,112 +275,139 @@ def _print_relation_tree(node: Node):
 # 2. Substances + Structure (intermediary)
 # Substance (NamedTuple) + Structure (Mapping id -> (path, substance))
 # Reduced, immutable snapshots of relevant words, enriched with additional
-# fields (path, types, entity). This layer abstracts linguistic details and
-# makes them auditable, reproducible, and stable. It is the explicit
-# intermediate layer between NLP output and logical relation.
+# fields (path, types, entity). This layer abstracts and extracts linguistic
+# details. It is one of the intermediate layers between the NLP output and the
+# logical relationship.
 #
-# 3. Relations / Node-Tree
-# Node, NodeSet, NodeEmpty, ConvergencePoint
+# 3. Clustering / Normalization
+# Substance + Node + Cluster (Mapping cluster id  -> (path, cluster, node)
+# Substances are grouped into clusters, synthetic clusters are inserted for
+# convergence points, and paths are normalized. The result: a consistent tree
+# topology. It is next one of the intermediate layers between the NLP output and
+# the logical relationship.
+#
+# 4. Relations / Node-Tree
+# Node, NodeSet, NodeEmpty, NodeEntity
 # Logical representation of entities and their relationships. Here, the
-# substances are assembled into a tree or graph that maps the semantic relations
-# (e.g. NOT, SET). This level is the basis for further processing, e.g.
-# reasoning or queries.
+# substances in the clusters are assembled into a tree or graph that maps the
+# semantic relations (e.g. NOT, SET). This level is the basis for further
+# processing, e.g. reasoning or queries.
 
 def _create_relation_tree(structure: dict[int, tuple[list[int], Substance]]) -> Node:
 
-    class ConvergencePoint(NamedTuple):
-        path: list[int]
-        id: int
-        relation: int
-        types: set[str]
-        entity: Optional[Entity] = None
+    # Convert nad group structure into cluster(s)
+    clusters: dict[int, tuple[list[int], Cluster, Optional[Node]]] = {}
+    for id, (path, substance) in structure.items():
+        if substance.cluster not in clusters:
+            cluster = Cluster(path=None, id=substance.cluster, head=0, elements=[], types=None)
+            clusters[substance.cluster] = (None, cluster, None)
+        path, cluster, node = clusters[substance.cluster]
+        if substance.id == substance.cluster:
+            path = tuple(substance.path)
+            cluster = Cluster(
+                path=path,
+                id=substance.cluster,
+                head=path[-2] if len(path) >= 2 else 0,
+                elements=cluster.elements,
+                types=substance.types
+            )
+        cluster.elements.append(substance)
+        clusters[substance.cluster] = (path, cluster, node)
 
-    structure = structure.copy()
-
-    # Find convergence points (joins) in the paths that do not exist as separate
-    # substances in the structure. A synthetic element with type SET will later
-    # be created for each of these convergence points so that the logical
-    # nesting and branching below the entities is displayed correctly.
+    # Find convergence points (branches) in the paths that do not exist as
+    # separate cluster in the clusters. A synthetic cluster without element
+    # will later be created for each of these convergence points so that the
+    # logical nesting and branching below the entities is displayed correctly.
     # Convergence points are determined from right to left. As soon as an
     # existing reference point is found in structure, the search is terminated
     # because the remaining path is already covered by this reference point in
     # structure.
+
+    # relations collects subpaths of cluster paths that are not already covered
+    # by other cluster nodes. This captures the “gaps” in the hierarchy path
+    # that may later become convergence points.
     relations: dict[int, list[list[int]]] = defaultdict(list)
-    for id, (path, substance) in structure.items():
+    for id, (path, cluster, node) in clusters.items():
         for index in reversed(range(len(path))):
             relation = path[index]
-            if relation in structure:
+            if relation in clusters:
                 break
             if relation > 0:
                 relations[relation].append(path[:index] or [relation])
 
+    # For convergence points without clusters, synthetic clusters without
+    # elements are inserted. These clusters will be needed later for nesting.
     for relation, paths in relations.items():
         if len(paths) > 1:
-            structure[relation] = (
-                paths[0],
-                ConvergencePoint(
-                    path=paths[0],
-                    id=relation,
-                    relation=paths[0][-1],
-                    types={Type.SET}
-                )
+            path = paths[0]
+            head = path[-2] if len(path) >= 2 else 0
+            clusters[relation] = (
+                path, Cluster(path=path, id=relation, head=head, elements=[]), None
             )
 
-    # Normalize paths
-    # - only keep parent/relation IDs that are valid keys in structure
+    # Normalize paths (in the dict and in the cluster objects)
+    # - only keep parent/relation IDs that are valid keys in clusters
     # - and keep 0 as an indicator for ROOT so that paths are never empty
-    relations = set(structure.keys())
-    for id, (path, substance) in list(structure.items()):
-        structure[id] = (
-            [relation for relation in path if relation == 0 or relation in relations],
-            substance
+    relations = set(clusters.keys())
+    for id, (path, cluster, node) in list(clusters.items()):
+        path = [relation for relation in path if relation == 0 or relation in relations]
+        cluster = Cluster(
+            path=path,
+            id=cluster.id,
+            head=path[-2] if len(path) >= 2 else 0,
+            elements=cluster.elements,
+            types=cluster.types
         )
+        clusters[id] = (path, cluster, node)
 
-    # Root is determined either directly via path [0] or the shortest path
-    roots = [substance for id, (path, substance) in structure.items() if path == [0]]
-    if not roots:
-        width = min(len(path) for path, substance in structure.values())
-        roots = [substance for path, substance in structure.values() if len(path) == width]
-
-    # Reference table substances:[relations IDs]
-    # It serves as a reference work for directly accessing the IDs of
-    # subordinate substances from a word ID.
-    substances: dict[int, list[int]] = {id: [] for id in structure}
-    for id, (path, substance) in structure.items():
-        if substance not in roots:
-            relation = path[-1]
-            if relation in substances and relation != id:
-                substances[relation].append(id)
-
-    def create_node(object: Substance | ConvergencePoint) -> Node:
-        # Virtual ConvergencePoint
-        if isinstance(object, ConvergencePoint):
-            return NodeSet(
-                relations=[
-                    create_node(structure[id][1])
-                    for id in substances.get(object.id, [])
-                ]
+    # Insert a root cluster (id=0, head=0) only if necessary:
+    # - no root cluster exists yet, and
+    # - and there are at least two clusters with different root path prefixes
+    # In that case, the root cluster serves as a container to enable proper
+    # nesting.
+    if 0 not in clusters:
+        roots = {tuple(path[:2]) for path, cluster, node in clusters.values() if len(path) >= 2}
+        if len(roots) > 1:
+            clusters[0] = (
+                [0], Cluster(path=[0], id=0, head=0, elements=[], types=None), None
             )
 
-        # Logical NOT
-        # TODO: if Type.NOT in object.types:
+    # The node objects are determined and added to the clusters. From this point
+    # on, the node objects form the final layer/view.
+    for id, (path, cluster, node) in clusters.items():
+        # TODO: NOT must be implemented
+        # without elements, it must be a convergence point
+        if not cluster.elements:
+            node = NodeSet(relations=[])
+        elif len(cluster.elements) > 1:
+            node = NodeSet(relations=[
+                NodeEntity(entity=substance.entity, relations=None) for substance in cluster.elements
+            ])
+        else:
+            element = cluster.elements[0]
+            if isinstance(element, Substance):
+                node = NodeEntity(entity=element)
+            else:
+                # TODO This case must be considered/reconsidered.
+                pass
+        clusters[id] = (path, cluster, node)
 
-        # Logical entities
-        relations = [
-            create_node(structure[id][1])
-            for id in substances.get(object.id, [])
-        ]
-        return NodeEntity(
-            entity=object.entity,
-            relations=relations or None
-        )
+    # Nesting is based on the insertion of clusters and nodes in their parents
+    clusters = {id: (cluster, node) for id, (path, cluster, node) in clusters.items()}
+    for id, (cluster, node) in clusters.items():
+        if id != 0:
+            parent = clusters.get(cluster.head)
+            if parent:
+                parent_cluster, parent_node = clusters[cluster.head]
+                parent_cluster.elements.append(cluster)
+                parent_node.relations.append(node)
 
-    if not roots:
-        return NodeEmpty()
-    nodes = [create_node(root) for root in roots]
-    if len(nodes) == 1:
-        return nodes[0]
-    return NodeSet(nodes)
+    # root element is determined via the shortest path
+    root_id, (cluster, node) = min(
+        clusters.items(),
+        key=lambda item: len(item[1][0].path)  # item[1][0] ist cluster
+    )
+    return node
 
 
 def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:

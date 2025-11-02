@@ -205,13 +205,15 @@ def _print_relation_tree(node: Node):
         if not root and isinstance(node, NodeEmpty):
             return
 
+        details = lambda node: f"label:{node.entity.label}, text:{node.entity.text}"
+
         # The type is only output here for the root node.
         # For recursive calls (root=False), the type was already output in the
         # previous print().
         if root:
             output = node.name
             if isinstance(node, NodeEntity):
-                output = f"{output} (label:{node.entity.label}, text:{node.entity.text})"
+                output = f"{output} ({details(node)})"
             print(output)
 
         if isinstance(node, NodeEmpty):
@@ -224,7 +226,7 @@ def _print_relation_tree(node: Node):
             branch = "└─ " if last else "├─ "
             output = prefix + branch + relation.name
             if isinstance(relation, NodeEntity):
-                output = f"{output} (label:{relation.entity.label}, text:{relation.entity.text})"
+                output = f"{output} ({details(relation)})"
             print(output)
             recurse(relation, prefix + ("   " if last else "│  "), root=False)
 
@@ -345,21 +347,22 @@ def _create_relation_tree(structure: dict[int, tuple[list[int], Substance]]) -> 
     # The node objects are determined and added to the clusters. From this point
     # on, the node objects form the final layer/view.
     for id, (path, cluster, node) in clusters.items():
+
+        # Substances and clusters are permitted as elements, but at this stage
+        # only substances and clusters in the form of convergence points may be
+        # included. Other clusters would be an error.
+
         # TODO: NOT must be implemented
         # without elements, it must be a convergence point
         if not cluster.elements:
             node = NodeSet(relations=[])
         elif len(cluster.elements) > 1:
             node = NodeSet(relations=[
-                NodeEntity(entity=substance.entity, relations=None) for substance in cluster.elements
+                NodeEntity(entity=substance.entity, relations=None)
+                for substance in cluster.elements
             ])
         else:
-            element = cluster.elements[0]
-            if isinstance(element, Substance):
-                node = NodeEntity(entity=element)
-            else:
-                # TODO This case must be considered/reconsidered.
-                pass
+            node = NodeEntity(entity=cluster.elements[0])
         clusters[id] = (path, cluster, node)
 
     # Nesting is based on the insertion of clusters and nodes in their parents

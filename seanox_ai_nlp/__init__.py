@@ -25,9 +25,12 @@ from .synthetics import (
 )
 
 from .relations import (
-    Type,
     Entity,
     Node,
+    NodeEmpty,
+    NodeEntity,
+    NodeSet,
+    NodeNot,
     relations,
     sentences,
     pretty_print_sentence,
@@ -58,10 +61,13 @@ __all__ = [
     "TemplateExpressionException",
     "TemplateSyntaxException",
 
-    # logics
-    "Type",
+    # relations
     "Entity",
     "Node",
+    "NodeEmpty",
+    "NodeEntity",
+    "NodeSet",
+    "NodeNot",
     "relations",
     "sentences",
     "pretty_print_sentence",

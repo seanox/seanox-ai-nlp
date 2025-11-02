@@ -1,9 +1,12 @@
 # seanox_ai_nlp/relations/__init__.py
 
 from .relations import (
-    Type,
     Entity,
     Node,
+    NodeEmpty,
+    NodeEntity,
+    NodeSet,
+    NodeNot,
     relations,
     sentences,
     pretty_print_sentence,
@@ -12,9 +15,12 @@ from .relations import (
 )
 
 __all__ = [
-    "Type",
     "Entity",
     "Node",
+    "NodeEmpty",
+    "NodeEntity",
+    "NodeSet",
+    "NodeNot",
     "relations",
     "sentences",
     "pretty_print_sentence",

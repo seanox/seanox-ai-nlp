@@ -1,14 +1,20 @@
 # seanox_ai_npl/relations/abstract.py
 
 from abc import ABC, abstractmethod
-from enum import Enum
-from typing import Callable, NamedTuple
+from enum import Enum, auto
 from stanza.models.common.doc import Sentence, Word
+from typing import Callable, NamedTuple, FrozenSet
+
+
+class Feature(Enum):
+    NEGATION = auto()
+    CONTRAST = auto()
 
 
 class Relation(NamedTuple):
     head: int
     cluster: int
+    features: FrozenSet[Feature] = frozenset()
 
 
 # TODO: Check RELATIVE and CLAUSE for deprel / upos relevance

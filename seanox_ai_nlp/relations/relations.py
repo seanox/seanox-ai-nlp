@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from seanox_ai_nlp.relations.lang import languages, language_schema
+from seanox_ai_nlp.relations.lang.abstract import Feature
 
+from abc import ABC
 from collections import defaultdict
-from dataclasses import dataclass, field
-from enum import Enum, auto
+from dataclasses import dataclass
 from stanza.models.common.doc import Word, Sentence
 from typing import Optional, NamedTuple, FrozenSet
 
@@ -41,14 +42,6 @@ Word.add_property(
 )
 
 
-class Type(Enum):
-    EMPTY = auto()
-    SET = auto()
-    NOT = auto()
-    INVERT = auto()
-    ENTITY = auto()
-
-
 class Entity(NamedTuple):
     start: int
     end: int
@@ -63,7 +56,7 @@ class Substance(NamedTuple):
     cluster: int
     word: Word
     entity: Entity
-    types: FrozenSet[Type] = frozenset()
+    features: FrozenSet[Feature] = frozenset()
 
 
 class Cluster(NamedTuple):
@@ -71,38 +64,41 @@ class Cluster(NamedTuple):
     id: int
     head: int
     elements: list[Substance | Cluster]
-    types: set[Type]
+    features: set[Feature]
+
+
+# DESIGN DECISION:
+# In the nodes, relations deliberately uses a union to document which object
+# types are explicitly expected.
+
+class Node(ABC):
+    @property
+    def name(self) -> str:
+        name = self.__class__.__name__
+        if name == "Node":
+            return "NODE"
+        return name.replace("Node", "").upper()
 
 
 @dataclass
-class NodeEmpty:
-    type: Type = field(init=False, default=Type.EMPTY)
+class NodeEmpty(Node):
+    ...
 
 
 @dataclass
-class NodeSet:
-    type: Type = field(init=False, default=Type.SET)
+class NodeSet(Node):
     relations: list[NodeNot | NodeSet | NodeEntity]
 
 
 @dataclass
-class NodeEntity:
-    type: Type = field(init=False, default=Type.ENTITY)
+class NodeEntity(Node):
     entity: Entity
     relations: Optional[list[NodeNot | NodeSet | NodeEntity]] = None
 
 
 @dataclass
-class NodeNot:
-    type: Type = field(init=False, default=Type.NOT)
+class NodeNot(Node):
     relations: list[NodeNot | NodeSet | NodeEntity] = None
-
-    def __post_init__(self):
-        if not self.relations:
-            raise ValueError("Relations are required")
-
-
-Node = NodeEmpty | NodeNot | NodeSet | NodeEntity
 
 
 _PIPELINES_MODEL_DIR = os.path.join(os.getcwd(), ".stanza")
@@ -171,32 +167,6 @@ def _get_substance_path(substances: dict[int, Substance], substance: Substance) 
 
 def _create_substance(lang: str, sentence: Sentence, word: Word, entity: Entity) -> Substance:
 
-    # Abstracts:
-    # - unusual/ambiguous sentence structure, then do not use NOT
-
-    # Every entity is ENTITY
-    types: set[Type] = {Type.ENTITY}
-
-    # TODO:
-    # NOT is more complex
-    # - in ambiguous/contradictory cases, NOT must be omitted
-    # - NOT can/must also be recognized through keywords and spread phrases
-    for relation in sentence.words:
-        if relation.head != word.id:
-            continue
-        if relation.deprel == "neg":
-            types.add(Type.NOT)
-        if relation.feats:
-            feats = _get_word_feats(relation)
-            if "Polarity" in feats and feats["Polarity"] == "Neg":
-                types.add(Type.NOT)
-            elif "PronType" in feats and feats["PronType"] == "Neg":
-                types.add(Type.NOT)
-            elif "Negative" in feats and feats["Negative"] == "Neg":
-                types.add(Type.NOT)
-    if word.deprel == "neg":
-        types.add(Type.NOT)
-
     schema = language_schema(lang)
 
     # There are two types of relations:
@@ -220,7 +190,7 @@ def _create_substance(lang: str, sentence: Sentence, word: Word, entity: Entity)
         id=word.id,
         head=relation.head,
         cluster=relation.cluster,
-        types=types,
+        features=relation.features,
         word=word,
         entity=entity
     )
@@ -239,7 +209,7 @@ def _print_relation_tree(node: Node):
         # For recursive calls (root=False), the type was already output in the
         # previous print().
         if root:
-            output = node.type.name
+            output = node.name
             if isinstance(node, NodeEntity):
                 output = f"{output} (label:{node.entity.label}, text:{node.entity.text})"
             print(output)
@@ -252,7 +222,7 @@ def _print_relation_tree(node: Node):
         for index, relation in enumerate(node.relations):
             last = index == len(node.relations) - 1
             branch = "└─ " if last else "├─ "
-            output = prefix + branch + relation.type.name
+            output = prefix + branch + relation.name
             if isinstance(relation, NodeEntity):
                 output = f"{output} (label:{relation.entity.label}, text:{relation.entity.text})"
             print(output)
@@ -275,7 +245,7 @@ def _print_relation_tree(node: Node):
 # 2. Substances + Structure (intermediary)
 # Substance (NamedTuple) + Structure (Mapping id -> (path, substance))
 # Reduced, immutable snapshots of relevant words, enriched with additional
-# fields (path, types, entity). This layer abstracts and extracts linguistic
+# fields (path, features, entity). This layer abstracts and extracts linguistic
 # details. It is one of the intermediate layers between the NLP output and the
 # logical relationship.
 #
@@ -299,7 +269,7 @@ def _create_relation_tree(structure: dict[int, tuple[list[int], Substance]]) -> 
     clusters: dict[int, tuple[list[int], Cluster, Optional[Node]]] = {}
     for id, (path, substance) in structure.items():
         if substance.cluster not in clusters:
-            cluster = Cluster(path=None, id=substance.cluster, head=0, elements=[], types=None)
+            cluster = Cluster(path=None, id=substance.cluster, head=0, elements=[], features=None)
             clusters[substance.cluster] = (None, cluster, None)
         path, cluster, node = clusters[substance.cluster]
         if substance.id == substance.cluster:
@@ -309,7 +279,7 @@ def _create_relation_tree(structure: dict[int, tuple[list[int], Substance]]) -> 
                 id=substance.cluster,
                 head=path[-2] if len(path) >= 2 else 0,
                 elements=cluster.elements,
-                types=substance.types
+                features=substance.features
             )
         cluster.elements.append(substance)
         clusters[substance.cluster] = (path, cluster, node)
@@ -356,7 +326,7 @@ def _create_relation_tree(structure: dict[int, tuple[list[int], Substance]]) -> 
             id=cluster.id,
             head=path[-2] if len(path) >= 2 else 0,
             elements=cluster.elements,
-            types=cluster.types
+            features=cluster.features
         )
         clusters[id] = (path, cluster, node)
 
@@ -369,7 +339,7 @@ def _create_relation_tree(structure: dict[int, tuple[list[int], Substance]]) -> 
         roots = {tuple(path[:2]) for path, cluster, node in clusters.values() if len(path) >= 2}
         if len(roots) > 1:
             clusters[0] = (
-                [0], Cluster(path=[0], id=0, head=0, elements=[], types=None), None
+                [0], Cluster(path=[0], id=0, head=0, elements=[], features=None), None
             )
 
     # The node objects are determined and added to the clusters. From this point
@@ -439,7 +409,7 @@ def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
 
         # 2. Create a Substance object for all relevant words.
         #    Substance is a reduced snapshot of Word, enriched with additional
-        #    fields (e.g. types, word, entity and relation for head) that are
+        #    fields (e.g. features, word, entity and relation for head) that are
         #    required for building logical relationships. Enclosed by structure,
         #    it forms an explicit intermediate layer between the linguistic data
         #    (stanza) and the final entity relationships (node tree).
@@ -605,7 +575,7 @@ def sentences(lang: str, text: str) -> list[Sentence]:
 def relations(lang: str, text: str, entities: list[tuple[int, int, str]]) -> Node:
     lang = _validate_language(lang)
     if not text.strip() or not entities:
-        return (Type.EMPTY, None)
+        return NodeEmpty
     entities = [
         Entity(start, end, label, text[start:end])
         for start, end, label in entities

@@ -64,7 +64,7 @@ class Cluster(NamedTuple):
     id: int
     head: int
     elements: list[Substance | Cluster]
-    features: set[Feature]
+    features: FrozenSet[Feature] = frozenset()
 
 
 # DESIGN DECISION:
@@ -274,6 +274,7 @@ def _create_relation_tree(structure: dict[int, tuple[list[int], Substance]]) -> 
             cluster = Cluster(path=None, id=substance.cluster, head=0, elements=[], features=None)
             clusters[substance.cluster] = (None, cluster, None)
         path, cluster, node = clusters[substance.cluster]
+        # The primary substance of a cluster determines its features and path.
         if substance.id == substance.cluster:
             path = tuple(substance.path)
             cluster = Cluster(
@@ -378,7 +379,7 @@ def _create_relation_tree(structure: dict[int, tuple[list[int], Substance]]) -> 
     # root element is determined via the shortest path
     root_id, (cluster, node) = min(
         clusters.items(),
-        key=lambda item: len(item[1][0].path)  # item[1][0] ist cluster
+        key=lambda item: len(item[1][0].path)
     )
     return node
 

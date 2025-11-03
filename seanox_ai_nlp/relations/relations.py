@@ -80,23 +80,23 @@ class Node(ABC):
         return name.replace("Node", "").upper()
 
 
-@dataclass
+@dataclass(frozen=True)
 class NodeEmpty(Node):
     ...
 
 
-@dataclass
+@dataclass(frozen=True)
 class NodeSet(Node):
     relations: list[NodeNot | NodeSet | NodeEntity]
 
 
-@dataclass
+@dataclass(frozen=True)
 class NodeEntity(Node):
     entity: Entity
     relations: Optional[list[NodeNot | NodeSet | NodeEntity]] = None
 
 
-@dataclass
+@dataclass(frozen=True)
 class NodeNot(Node):
     relations: list[NodeNot | NodeSet | NodeEntity] = None
 
@@ -265,13 +265,13 @@ def _print_relation_tree(node: Node):
 # semantic relations (e.g. NOT, SET). This level is the basis for further
 # processing, e.g. reasoning or queries.
 
-def _create_relation_tree(structure: dict[int, tuple[list[int], Substance]]) -> Node:
+def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]]) -> Node:
 
     # Convert nad group structure into cluster(s)
-    clusters: dict[int, tuple[list[int], Cluster, Optional[Node]]] = {}
+    clusters: dict[int, tuple[tuple[int, ...], Cluster, Optional[Node]]] = {}
     for id, (path, substance) in structure.items():
         if substance.cluster not in clusters:
-            cluster = Cluster(path=None, id=substance.cluster, head=0, elements=[], features=None)
+            cluster = Cluster(path=None, id=substance.cluster, head=0, elements=[])
             clusters[substance.cluster] = (None, cluster, None)
         path, cluster, node = clusters[substance.cluster]
         # The primary substance of a cluster determines its features and path.
@@ -323,7 +323,7 @@ def _create_relation_tree(structure: dict[int, tuple[list[int], Substance]]) -> 
     # - and keep 0 as an indicator for ROOT so that paths are never empty
     relations = set(clusters.keys())
     for id, (path, cluster, node) in list(clusters.items()):
-        path = [relation for relation in path if relation == 0 or relation in relations]
+        path = tuple(relation for relation in path if relation == 0 or relation in relations)
         cluster = Cluster(
             path=path,
             id=cluster.id,
@@ -342,7 +342,7 @@ def _create_relation_tree(structure: dict[int, tuple[list[int], Substance]]) -> 
         roots = {tuple(path[:2]) for path, cluster, node in clusters.values() if len(path) >= 2}
         if len(roots) > 1:
             clusters[0] = (
-                [0], Cluster(path=[0], id=0, head=0, elements=[], features=None), None
+                [0], Cluster(path=(0,), id=0, head=0, elements=[]), None
             )
 
     # The node objects are determined and added to the clusters. From this point

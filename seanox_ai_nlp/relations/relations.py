@@ -265,7 +265,7 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
     # immutable so that all consumers can rely on the content.
 
     @dataclass
-    class Cluster():
+    class Cluster:
         path: tuple[int, ...]
         id: int
         head: int

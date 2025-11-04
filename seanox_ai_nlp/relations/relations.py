@@ -59,14 +59,6 @@ class Substance(NamedTuple):
     features: FrozenSet[Feature] = frozenset()
 
 
-class Cluster(NamedTuple):
-    path: tuple[int, ...]
-    id: int
-    head: int
-    elements: list[Substance | Cluster]
-    features: FrozenSet[Feature] = frozenset()
-
-
 # DESIGN DECISION:
 # In the nodes, relations deliberately uses a union to document which object
 # types are explicitly expected.
@@ -267,11 +259,24 @@ def _print_relation_tree(node: Node):
 
 def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]]) -> Node:
 
+    # DESIGN DECISION:
+    # Cluster is an internal class and can therefore be mutable. In contrast to
+    # classes in general and module-related scope, where everything should be
+    # immutable so that all consumers can rely on the content.
+
+    @dataclass
+    class Cluster():
+        path: tuple[int, ...]
+        id: int
+        head: int
+        elements: list[Substance | Cluster]
+        features: set[Feature]
+
     # Convert nad group structure into cluster(s)
     clusters: dict[int, tuple[tuple[int, ...], Cluster, Optional[Node]]] = {}
     for id, (path, substance) in structure.items():
         if substance.cluster not in clusters:
-            cluster = Cluster(path=None, id=substance.cluster, head=0, elements=[])
+            cluster = Cluster(path=None, id=substance.cluster, head=0, elements=[], features=())
             clusters[substance.cluster] = (None, cluster, None)
         path, cluster, node = clusters[substance.cluster]
         # The primary substance of a cluster determines its features and path.
@@ -315,7 +320,7 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
             path = paths[0]
             head = path[-2] if len(path) >= 2 else 0
             clusters[relation] = (
-                path, Cluster(path=path, id=relation, head=head, elements=[]), None
+                path, Cluster(path=path, id=relation, head=head, elements=[], features=()), None
             )
 
     # Normalize paths (in the dict and in the cluster objects)
@@ -342,7 +347,7 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
         roots = {tuple(path[:2]) for path, cluster, node in clusters.values() if len(path) >= 2}
         if len(roots) > 1:
             clusters[0] = (
-                [0], Cluster(path=(0,), id=0, head=0, elements=[]), None
+                [0], Cluster(path=(0,), id=0, head=0, elements=[], features=()), None
             )
 
     # The node objects are determined and added to the clusters. From this point
@@ -353,7 +358,6 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
         # only substances and clusters in the form of convergence points may be
         # included. Other clusters would be an error.
 
-        # TODO: NOT must be implemented
         # without elements, it must be a convergence point
         if not cluster.elements:
             node = NodeSet(relations=[])
@@ -375,6 +379,18 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
                 parent_cluster, parent_node = clusters[cluster.head]
                 parent_cluster.elements.append(cluster)
                 parent_node.relations.append(node)
+
+    # Approach for NOT in Node/Substance
+    # - Determine node for substance
+    # - Create NodeNot as container for original node
+    # - Replace node with NodeNot in parent node
+    # TODO:
+
+    # Approach for NOT in Cluster/Node
+    # - Determine node for cluster
+    # - Create NodeNot as container for original cluster
+    # - In parent node, replace node with NodeNot
+    # TODO:
 
     # root element is determined via the shortest path
     root_id, (cluster, node) = min(

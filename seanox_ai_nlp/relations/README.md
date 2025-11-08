@@ -26,7 +26,7 @@ configurable lexicons__, ensuring that the approach remains modular and can be
 easily extended to additional languages.
 
 Building on this, the __Entity Relation Composer__ establishes a rule-based logic
-layer that implements the principles of [Entity Relation Semantics (ERS)](
+layer that implements the principles of __[Entity Relation Semantics (ERS)](
     #entity-relation-semantics-ers)__ as described below. It processes entities
 from upstream components and represents their relations using the basic
 constructs __SET__ (grouping or relation) and __NOT__ (exclusion). Enumerations

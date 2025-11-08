@@ -79,18 +79,17 @@ class NodeEmpty(Node):
 
 @dataclass(frozen=True)
 class NodeSet(Node):
-    relations: list[NodeNot | NodeSet | NodeEntity]
+    relations: tuple[NodeNot | NodeSet | NodeEntity, ...]
+
+
+@dataclass(frozen=True)
+class NodeNot(Node):
+    relations: tuple[NodeNot | NodeSet | NodeEntity, ...]
 
 
 @dataclass(frozen=True)
 class NodeEntity(Node):
     entity: Entity
-    relations: Optional[list[NodeNot | NodeSet | NodeEntity]] = None
-
-
-@dataclass(frozen=True)
-class NodeNot(Node):
-    relations: list[NodeNot | NodeSet | NodeEntity] = None
 
 
 _PIPELINES_MODEL_DIR = os.path.join(os.getcwd(), ".stanza")
@@ -407,9 +406,9 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
             # - Substances carrying NEGATION or CONTRAST are wrapped as NodeNot
             # - All other Substances are added directly as NodeEntity
             create_relations = lambda substance: (
-                NodeNot(relations=[NodeEntity(entity=substance.entity, relations=None)])
+                NodeNot(relations=[NodeEntity(entity=substance.entity)])
                 if substance.features and (Feature.NEGATION in substance.features or Feature.CONTRAST in substance.features)
-                else NodeEntity(entity=substance.entity, relations=None)
+                else NodeEntity(entity=substance.entity)
             )
             node = NodeSet(relations=[create_relations(substance) for substance in cluster.elements])
         else:
@@ -427,11 +426,32 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
                 parent_node.relations.append(node)
 
     # root element is determined via the shortest path
-    root_id, (cluster, node) = min(
+    id, (cluster, node) = min(
         clusters.items(),
         key=lambda item: len(item[1][0].path)
     )
-    return node
+
+    # The price for immutable nodes: Internally, you have to abandon the concept
+    # and use mutable lists. Therefore, nodes must ultimately be finalized
+    # recursively and changed to immutable nodes.
+
+    def finalize(node: Node) -> Node:
+        if isinstance(node, NodeEmpty):
+            return node
+        if isinstance(node, NodeEntity):
+            return node
+        if isinstance(node, NodeSet):
+            return NodeSet(
+                relations=tuple(finalize(relations) for relations in node.relations)
+            )
+        if isinstance(node, NodeNot):
+            return NodeNot(
+                relations=tuple(finalize(relations) for relations in (node.relations or []))
+            )
+        else:
+            raise TypeError(f"Unsupported node type: {type(node)}")
+
+    return finalize(node)
 
 
 def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:

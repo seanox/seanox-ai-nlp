@@ -218,7 +218,8 @@ def _print_relation_tree(node: Node):
             branch = "└─ " if last else "├─ "
             output = prefix + branch + relation.name
             if isinstance(relation, NodeEntity):
-                output = f"{output} ({details(relation)})"
+                print(f"{output} ({details(relation)})")
+                continue
             print(output)
             recurse(relation, prefix + ("   " if last else "│  "), root=False)
 
@@ -244,11 +245,11 @@ def _print_relation_tree(node: Node):
 # logical relationship.
 #
 # 3. Clustering / Normalization
-# Substance + Node + Cluster (Mapping cluster id  -> (path, cluster, node)
+# Substance + Node + Cluster (Mapping cluster id -> (path, cluster, node)
 # Substances are grouped into clusters, synthetic clusters are inserted for
-# convergence points, and paths are normalized. The result: a consistent tree
-# topology. It is next one of the intermediate layers between the NLP output and
-# the logical relationship.
+# convergence points and opposition (NEGATION and CONTRAST), and paths are
+# normalized. The result: a consistent tree topology. It is next one of the
+# intermediate layers between the NLP output and the logical relationship.
 #
 # 4. Relations / Node-Tree
 # Node, NodeSet, NodeEmpty, NodeEntity
@@ -272,7 +273,11 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
         elements: list[Substance | Cluster]
         features: set[Feature]
 
-    # Convert nad group structure into cluster(s)
+    @dataclass
+    class ClusterNot(Cluster):
+        ...
+
+    # Convert and group structure into cluster(s)
     clusters: dict[int, tuple[tuple[int, ...], Cluster, Optional[Node]]] = {}
     for id, (path, substance) in structure.items():
         if substance.cluster not in clusters:
@@ -287,10 +292,46 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
                 id=substance.cluster,
                 head=path[-2] if len(path) >= 2 else 0,
                 elements=cluster.elements,
-                features=substance.features
+                features=None
             )
+            # NEGATION and CONTRAST are first inserted as loose negative
+            # clusters, and later the paths are adjusted to all clusters and
+            # substances. With the negative ID, the clusters retain an implicit
+            # and simple relationship, and overlaps are prevented.
+            if Feature.NEGATION in substance.features or Feature.CONTRAST in substance.features:
+                opposition = ClusterNot(
+                    path=path[:-1] + (-substance.cluster, substance.cluster),
+                    id=-substance.cluster,
+                    head=cluster.head,
+                    elements=[cluster],
+                    features=substance.features
+                )
+                clusters[opposition.id] = (opposition.path, opposition, None)
         cluster.elements.append(substance)
-        clusters[substance.cluster] = (path, cluster, node)
+        clusters[substance.cluster] = (path, cluster, None)
+
+    # NEGATION and CONTRAST clusters (restricted to the cluster level), as well
+    # as the relevant elements, are assigned or re-assigned by adjusting paths
+    # and head. Only negative clusters need to be considered during iteration,
+    # as the relevant elements can be determined via the corresponding positive
+    # ID.
+
+    # For each positive ID that has a negative counterpart, iterate through all
+    # clusters. If a path contains the positive ID but not the negative one,
+    # update the element:
+    # - set its head to the negative ID
+    # - insert the negative ID directly before the positive ID in its path
+    # Finally, write the updated path and cluster back into the dictionary.
+
+    positives = [abs(id) for id in clusters if id < 0]
+    for positive in positives:
+        for id, (path, cluster, node) in clusters.items():
+            if positive not in path or -positive in path:
+                continue
+            cluster.head = -positive
+            index = path.index(positive)
+            cluster.path = path[:index] + (-positive,) + path[index:]
+            clusters[id] = (cluster.path, cluster, None)
 
     # Find convergence points (branches) in the paths that do not exist as
     # separate cluster in the clusters. A synthetic cluster without element
@@ -336,7 +377,7 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
             elements=cluster.elements,
             features=cluster.features
         )
-        clusters[id] = (path, cluster, node)
+        clusters[id] = (path, cluster, None)
 
     # Insert a root cluster (id=0, head=0) only if necessary:
     # - no root cluster exists yet, and
@@ -347,7 +388,7 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
         roots = {tuple(path[:2]) for path, cluster, node in clusters.values() if len(path) >= 2}
         if len(roots) > 1:
             clusters[0] = (
-                [0], Cluster(path=(0,), id=0, head=0, elements=[], features=()), None
+                (0,), Cluster(path=(0,), id=0, head=0, elements=[], features=()), None
             )
 
     # The node objects are determined and added to the clusters. From this point
@@ -362,10 +403,15 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
         if not cluster.elements:
             node = NodeSet(relations=[])
         elif len(cluster.elements) > 1:
-            node = NodeSet(relations=[
-                NodeEntity(entity=substance.entity, relations=None)
-                for substance in cluster.elements
-            ])
+            # NEGATION and CONTRAST substances (restricted to the substances level):
+            # - Substances carrying NEGATION or CONTRAST are wrapped as NodeNot
+            # - All other Substances are added directly as NodeEntity
+            create_relations = lambda substance: (
+                NodeNot(relations=[NodeEntity(entity=substance.entity, relations=None)])
+                if substance.features and (Feature.NEGATION in substance.features or Feature.CONTRAST in substance.features)
+                else NodeEntity(entity=substance.entity, relations=None)
+            )
+            node = NodeSet(relations=[create_relations(substance) for substance in cluster.elements])
         else:
             node = NodeEntity(entity=cluster.elements[0])
         clusters[id] = (path, cluster, node)
@@ -379,18 +425,6 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
                 parent_cluster, parent_node = clusters[cluster.head]
                 parent_cluster.elements.append(cluster)
                 parent_node.relations.append(node)
-
-    # Approach for NOT in Node/Substance
-    # - Determine node for substance
-    # - Create NodeNot as container for original node
-    # - Replace node with NodeNot in parent node
-    # TODO:
-
-    # Approach for NOT in Cluster/Node
-    # - Determine node for cluster
-    # - Create NodeNot as container for original cluster
-    # - In parent node, replace node with NodeNot
-    # TODO:
 
     # root element is determined via the shortest path
     root_id, (cluster, node) = min(

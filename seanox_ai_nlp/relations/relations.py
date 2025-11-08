@@ -412,7 +412,7 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
             )
             node = NodeSet(relations=[create_relations(substance) for substance in cluster.elements])
         else:
-            node = NodeEntity(entity=cluster.elements[0])
+            node = NodeEntity(entity=cluster.elements[0].entity)
         clusters[id] = (path, cluster, node)
 
     # Nesting is based on the insertion of clusters and nodes in their parents

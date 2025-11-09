@@ -441,12 +441,25 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
         if isinstance(node, NodeEntity):
             return node
         if isinstance(node, NodeSet):
+            # NodeSet may contain multiple NodeEntity instances referencing the
+            # same Entity, e.g. due to multi-token spans. These duplicates are
+            # removed within the same SET level.
+            relations = []
+            entities = set()
+            for relation in node.relations:
+                if not isinstance(relation, NodeEntity):
+                    relations.append(relation)
+                    continue
+                if relation.entity in entities:
+                    continue
+                entities.add(relation.entity)
+                relations.append(relation)
             return NodeSet(
-                relations=tuple(finalize(relations) for relations in node.relations)
+                relations=tuple(finalize(relation) for relation in relations)
             )
         if isinstance(node, NodeNot):
             return NodeNot(
-                relations=tuple(finalize(relations) for relations in (node.relations or []))
+                relations=tuple(finalize(relation) for relation in (node.relations or []))
             )
         else:
             raise TypeError(f"Unsupported node type: {type(node)}")

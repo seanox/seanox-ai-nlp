@@ -109,10 +109,10 @@ retrieval logic__ that can be easily integrated into existing NLP pipelines.
 Text: "Get apples for the fruit cake, chocolate for the cookies, but no strawberries."
 Entities: [
   {"label": "FRUITS", "text": "apples", "start": 4, "end": 10},
-  {"label": "FRUITS", "text": "strawberries", "start": 65, "end": 77},
   {"label": "TREATS", "text": "fruit cake", "start": 19, "end": 29},
+  {"label": "INGREDIENTS", "text": "chocolate", "start": 31, "end": 40},
   {"label": "TREATS", "text": "cookies", "start": 49, "end": 56},
-  {"label": "INGREDIENTS", "text": "chocolate", "start": 31, "end": 40}
+  {"label": "FRUITS", "text": "strawberries", "start": 65, "end": 77}
 ]
 ```
 _Semantic input from upstream components, e.g. Named Entity Recognition (NER)_

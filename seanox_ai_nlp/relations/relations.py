@@ -175,16 +175,20 @@ def _get_substance_path(
     # potential convergence points are preserved and can later form clusters
     # that act as structural brackets.
     #
-    # Negative path segments from subsequent NEGATION and CONTRAST clusters,
-    # as well as the ROOT cluster (0), are excluded from reduction because
-    # they must always be represented.
+    # Negative path segments from subsequent NEGATION and CONTRAST clusters, as
+    # well as the ROOT cluster (0), are excluded from reduction because they
+    # must always be represented.
+    #
+    # The first two path segments are retained so that a base cluster can always
+    # be formed below ROOT. This also retains entities where no
+    # assignment/relations could be found.
 
-    path = [
-        item for item in path
-        if not (item > 0 and (item not in touchpoints or len(touchpoints[item]) < 2))
-    ]
-
-    return tuple(path)
+    return tuple(
+        path[:2] + [
+            item for item in path[2:]
+            if not (item > 0 and (item not in touchpoints or len(touchpoints[item]) < 2))
+        ]
+    )
 
 
 def _create_substance(lang: str, sentence: Sentence, word: Word, entity: Entity) -> Substance:
@@ -342,11 +346,14 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
             ])
         elif not cluster.elements:
             node = NodeSet(relations=[])
-        else:
+        elif len(cluster.elements) > 1:
             node = NodeSet(relations=[
                 NodeEntity(entity=substance.entity)
                 for substance in cluster.elements
             ])
+        else:
+            substance = cluster.elements[0]
+            node = NodeEntity(entity=substance.entity)
         clusters[id] = (path, cluster, node)
 
     # Nesting is based on the insertion of clusters and nodes in their parents

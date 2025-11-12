@@ -70,6 +70,31 @@ class Schema(ABC):
 #   def find_markers(self, sentence: Sentence, word: Word) -> frozenset[str]:
         ...
 
+    def infer_relation_root(self, sentence: Sentence, word: Word) -> int:
+        """
+        Infer the root entity relation for a word in the dependency tree.
+
+        This method traverses the dependency chain upward (following head) and
+        identifies the highest ancestor word that is associated with an entity.
+        Unlike infer_relation_head, which stops at the first parent entity,this
+        method continues to traverse the chain and returns the top-most entity
+        node.
+
+        Args:
+            sentence (Sentence): The Stanza sentence containing the word.
+            word (Word): The word whose root entity relation is to be inferred.
+
+        Returns:
+            int: The ID of the highest ancestor word that carries an entity.
+                 Returns 0 if no entity is found in the chain (root).
+        """
+        root = 0
+        while word.head > 0:
+            word = sentence.words[word.head - 1]
+            if word.entity is not None:
+                root = word.id
+        return root
+
     def infer_relation_head(self, sentence: Sentence, word: Word) -> int:
         """
         Infer the head (parent) relation for a word in the dependency tree.

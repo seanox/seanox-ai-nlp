@@ -139,10 +139,11 @@ def _get_word_feats(word: Word) -> dict[str, str]:
 def _get_word_path(sentence: Sentence, word: Word) -> tuple[int, ...]:
     path: list[int] = []
     while True:
-        path.insert(0, word.head)
+        path.append(word.head)
         if word.head <= 0:
             break
         word = sentence.words[word.head - 1]
+    path.reverse()
     return tuple(path)
 
 
@@ -157,17 +158,20 @@ def _get_substance_path(
     # negative ID, the clusters maintain an implicit and simple relations with
     # each other, and overlaps are prevented.
 
-    path: list[int] = [substance.cluster]
+    path: list[int] = []
     if Feature.NEGATION in substance.features or Feature.CONTRAST in substance.features:
-        path.insert(0, -substance.cluster)
+        path.append(-substance.cluster)
+    path.append(substance.cluster)
 
     while True:
-        path.insert(0, abs(substance.head))
+        path.append(abs(substance.head))
         if substance.head == 0:
             break
         substance = substances.get(abs(substance.head))
         if Feature.NEGATION in substance.features or Feature.CONTRAST in substance.features:
-            path.insert(0, -substance.cluster)
+            path.append(-substance.cluster)
+
+    path.reverse()
 
     # Normalization / optimization / reduction of path segments:
     # Segments used by fewer than two substances are removed, so that only

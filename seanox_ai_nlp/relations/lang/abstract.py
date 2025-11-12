@@ -49,6 +49,21 @@ class ConnectorMarkers(Enum):
 class Schema(ABC):
 
     def sentence_preprocessor(self) -> Callable[[Sentence], list[str]] | None:
+        """
+        Optional preprocessing for sentence normalization.
+
+        This method can be overridden by language-specific schemas to provide a
+        preprocessing function that rewrites or normalizes sentences before they
+        are passed to the main Stanza pipeline. Typical use cases include
+        replacing everyday logical words or phrases with forms that better align
+        with Universal Dependencies conventions.
+
+        Returns:
+            Callable[[Sentence], list[str]] | None:
+                A function that accepts a Stanza Sentence object and returns a
+                list of strings representing the preprocessed sentence(s). If no
+                preprocessing is required, returns None.
+        """
         return None
 
 #   @abstractmethod
@@ -56,6 +71,22 @@ class Schema(ABC):
         ...
 
     def infer_relation_head(self, sentence: Sentence, word: Word) -> int:
+        """
+        Infer the head (parent) relation for a word in the dependency tree.
+
+        This method traverses the dependency chain upward until it finds a
+        parent word that is associated with an entity. If no such parent exists,
+        the root (0) is returned. This ensures that relations are anchored to
+        meaningful entity nodes rather than arbitrary tokens.
+
+        Args:
+            sentence (Sentence): The Stanza sentence containing the word.
+            word (Word): The word whose head relation is to be inferred.
+
+        Returns:
+            int: The ID of the parent word that carries an entity, or 0 if no
+            entity parent exists (root).
+        """
         while word.head > 0:
             parent = sentence.words[word.head - 1]
             if getattr(parent, "entity", None) is not None:
@@ -64,5 +95,20 @@ class Schema(ABC):
         return 0
 
     def infer_relation(self, sentence: Sentence, word: Word) -> Relation:
-        return Relation(head=0, cluster=word.id)
+        """
+        Infer the relation (head and cluster) for a word.
 
+        This method provides a default implementation that assigns the word
+        itself as its cluster and sets the head to root (0). Language-specific
+        schemas can override this method to apply more refined rules based on
+        dependency relations, part-of-speech tags, or morphological features.
+
+        Args:
+            sentence (Sentence): The Stanza sentence containing the word.
+            word (Word): The word whose relation is to be inferred.
+
+        Returns:
+            Relation: A Relation object containing the inferred head, cluster,
+            and any associated features.
+        """
+        return Relation(head=0, cluster=word.id)

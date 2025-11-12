@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 from seanox_ai_nlp.relations.lang import languages, language_schema
-from seanox_ai_nlp.relations.lang.abstract import Feature
+from seanox_ai_nlp.relations.lang.abstract import Feature, Relation
 
 from abc import ABC
 from collections import defaultdict
 from dataclasses import dataclass
 from stanza.models.common.doc import Word, Sentence
-from typing import Optional, NamedTuple, FrozenSet
+from typing import NamedTuple, FrozenSet
 
 import os
 import re
@@ -197,20 +197,36 @@ def _create_substance(lang: str, sentence: Sentence, word: Word, entity: Entity)
 
     # There are two types of relations:
     #
-    # 1. head (dependency): refers to the parent substance.
+    # 1. head (dependency): refers to the parent substance
     #    - The value always starts at 0 (root)
     #    - Must be explicitly determined using semantic rules
+    #    - If head does not refer to a substance or root, the next higher-level
+    #      substance is used
     #
-    # 2. cluster: refers to the grouping of related substances.
-    #    - Determined using rules based on UD features
-    #      deprel + upos from Universal Dependencies
+    # 2. cluster: refers to the grouping of related substances
+    #    - Determined using rules based on UD deprel, upos and features
+    #    - Clusters must always refer to an existing word; if the value is
+    #      outside, the ID of the current word is used.
     #
     # Together, head and cluster provide a bidirectional view of the relation
     # structure. To correctly represent logical constructs such as SET and NOT,
     # these relations must be further refined using extended, language-specific
     # rules.
 
+    # TODO: Prove that the approach/assumption is correct
+    def normalize_relation(sentence: Sentence, word: Word, relation: Relation) -> Relation:
+        if relation.head < 0 or relation.head > len(sentence.words):
+            relation = Relation(head=0, cluster=relation.cluster)
+        if relation.head > 0 and sentence.words[relation.head - 1].entity is None:
+            relation = Relation(head=schema.infer_relation_head(sentence, word), cluster=relation.cluster)
+        if relation.cluster <= 0 or relation.cluster > len(sentence.words):
+            relation = Relation(head=relation.head, cluster=word.id)
+        if relation.cluster > 0 and sentence.words[relation.cluster - 1].entity is None:
+            relation = Relation(head=relation.head, cluster=schema.infer_relation_head(sentence, word))
+        return relation
+
     relation = schema.infer_relation(sentence, word)
+    relation = normalize_relation(sentence, word, relation)
     return Substance(
         path=None,
         id=word.id,
@@ -307,7 +323,7 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
         elements: list[Substance | Cluster]
 
     # Convert and group structure into cluster(s)
-    clusters: dict[int, tuple[tuple[int, ...], Cluster, Optional[Node]]] = {}
+    clusters: dict[int, tuple[tuple[int, ...], Cluster, Node | None]] = {}
 
     # Initial creation of all clusters
     for id, (path, substance) in structure.items():
@@ -323,18 +339,6 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
     for id, (path, substance) in structure.items():
         path, cluster, node = clusters[substance.cluster]
         cluster.elements.append(substance)
-
-    # Insert a root cluster (id=0, head=0) only if necessary:
-    # - no root cluster exists yet, and
-    # - and there are at least two clusters with different root path prefixes
-    # In that case, the root cluster serves as a container to enable proper
-    # nesting.
-    if 0 not in clusters:
-        roots = {tuple(path[:2]) for path, cluster, node in clusters.values() if len(path) >= 2}
-        if len(roots) > 1:
-            clusters[0] = (
-                (0,), Cluster(path=(0,), id=0, head=0, elements=[]), None
-            )
 
     # The node objects are determined and added to the clusters.
     # From this point on, the node objects form the final layer/view.
@@ -366,11 +370,22 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
                 parent_cluster.elements.append(cluster)
                 parent_node.relations.append(node)
 
-    # root element is determined via the shortest path
-    id, (cluster, node) = min(
-        clusters.items(),
-        key=lambda item: len(item[1][0].path)
-    )
+    # Recursive determination of the root node
+    # The root node is the first node that is not a NodeSet. Or a NodeSet that
+    # has more than one relation.
+
+    def find_root(node: Node) -> Node | None:
+        if not isinstance(node, NodeSet):
+            return node
+        if len(node.relations) > 1:
+            return node
+        for relation in node.relations or []:
+            relation = find_root(relation)
+            if relation is not None:
+                return relation
+        return None
+    cluster, node = clusters[0]
+    node = find_root(node) or NodeEmpty()
 
     # The price for immutable nodes: Internally, you have to abandon the concept
     # and use mutable lists. Therefore, nodes must ultimately be finalized
@@ -412,9 +427,6 @@ def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
 
     if not entities:
         return NodeEmpty()
-
-    # TODO: Multi-Word / Multi-Token Entities
-    # TODO: Entities refer to the entire text with start and end, e.g. beyond sentences
 
     relations = []
     for sentence in doc.sentences:
@@ -575,6 +587,19 @@ def _create_doc(lang: str, text: str) -> stanza.Document:
 
 
 def pretty_print_sentence(sentence: Sentence):
+    """
+    Print a human-readable tree representation of a single parsed sentence.
+
+    This function visualizes the syntactic dependency structure of a sentence
+    using a tree layout. It is primarily intended for debugging and inspection
+    of the linguistic analysis performed by Stanza.
+
+    Args:
+        sentence (Sentence): A Stanza Sentence object to be printed.
+
+    Raises:
+        TypeError: If the input is not a Sentence instance.
+    """
     if not sentence:
         return
     if not isinstance(sentence, Sentence):
@@ -583,6 +608,20 @@ def pretty_print_sentence(sentence: Sentence):
 
 
 def pretty_print_sentences(sentences: list[Sentence]):
+    """
+    Print human-readable tree representations for a list of parsed sentences.
+
+    Each sentence is visualized individually in a tree layout that shows
+    syntactic dependencies. This is useful for inspecting multiple sentences
+    from a document or text input.
+
+    Args:
+        sentences (list[Sentence]): A list of Stanza Sentence objects.
+
+    Raises:
+        TypeError: If the input is not a list of Sentence instances or contains
+            unsupported element types.
+    """
     if not sentences:
         return
     if not isinstance(sentences, list):
@@ -594,12 +633,43 @@ def pretty_print_sentences(sentences: list[Sentence]):
 
 
 def pretty_print_node(node: Node):
+    """
+    Print a human-readable tree representation of a relation node.
+
+    This function visualizes the logical structure of entities and their
+    relationships in a tree layout. It is primarily intended for debugging
+    and inspection of the relation graph created from text and entities.
+
+    Args:
+        node (Node): The root node of the relation tree to be printed.
+
+    Raises:
+        TypeError: If the input is not a Node instance.
+    """
     if not isinstance(node, Node):
         raise TypeError(f"Unsupported type: {type(node)}")
     _print_relation_tree(node)
 
 
 def sentences(lang: str, text: str) -> list[Sentence]:
+    """
+    Parse text into sentences using a Stanza NLP pipeline.
+
+    This function validates the language code, creates a Stanza document for
+    the given text, and returns the parsed sentences. Each sentence contains
+    tokens, lemmas, part-of-speech tags, and dependency relations.
+
+    Args:
+        lang (str): Language code (e.g. "de", "en").
+        text (str): Input text to be analyzed.
+
+    Returns:
+        list[Sentence]: A list of Stanza Sentence objects representing the
+        parsed sentences. Returns an empty list if the text is blank.
+
+    Raises:
+        ValueError: If the language code is missing or unsupported.
+    """
     lang = _validate_language(lang)
     if not text.strip():
         return []
@@ -612,9 +682,34 @@ def sentences(lang: str, text: str) -> list[Sentence]:
 # structure lean and consistent.
 
 def relations(lang: str, text: str, entities: list[tuple[int, int, str]]) -> Node:
+    """
+    Build a logical relation tree from text and annotated entities.
+
+    This function parses the input text using a Stanza NLP pipeline, enriches
+    the recognized entities with linguistic features, and constructs a logical
+    relation tree. The resulting Node structure represents semantic relations
+    such as SET and NOT between entities, providing a normalized view of the
+    text's logical meaning.
+
+    Args:
+        lang (str): Language code (e.g. "de", "en").
+        text (str): Input text to be analyzed.
+        entities (list[tuple[int, int, str]]): List of entity spans as
+            (start_index, end_index, label). The text substring between
+            start_index and end_index is automatically extracted.
+
+    Returns:
+        Node: Root node of the relation tree representing logical structure
+        between entities. Returns NodeEmpty if no entities are provided or
+        the text is blank.
+
+    Raises:
+        ValueError: If the language code is missing or unsupported.
+        TypeError: If the input types are invalid.
+    """
     lang = _validate_language(lang)
     if not text.strip() or not entities:
-        return NodeEmpty
+        return NodeEmpty()
     entities = [
         Entity(start, end, label, text[start:end])
         for start, end, label in entities

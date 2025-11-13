@@ -378,7 +378,7 @@ _UNIT_IEC_CLASSIFICATION_PATTERN = rf"""
 # RegEx for classification with OR linked named groups.
 UNIT_CLASSIFICATION_PATTERN = UNIT_SYMBOLS_PATTERN
 
-def _dict_from_comma_separated_pairs(data: str) -> dict[str, str]:
+def _dict_from_comma_separated_pairs(data: str) -> dict[str, list[str]]:
     result = {}
     data = re.sub(r"\s*\|\s*[\r\n]\s*", "", data.strip())
     items = re.split(r"\s*\|\s*", data)

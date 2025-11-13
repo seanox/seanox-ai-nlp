@@ -25,18 +25,18 @@ In addition, __language-specific keywords with logical meaning are taken from
 configurable lexicons__, ensuring that the approach remains modular and can be
 easily extended to additional languages.
 
-Building on this, the __Semantic Logic Composer__ establishes a rule-based logic
-layer, implementing the principles of __[Retrieval-Union Semantics (RUS)](
-    #retrieval-union-semantics-rus)__ as described above. It processes entities
+Building on this, the __Entity Relation Composer__ establishes a rule-based logic
+layer that implements the principles of __[Entity Relation Semantics (ERS)](
+    #entity-relation-semantics-ers)__ as described below. It processes entities
 from upstream components and represents their relations using the basic
-constructs __ANY__ (union) and __NOT__ (exclusion). Enumerations are always
-interpreted as unions, making an explicit __OR__ unnecessary. An __AND__ in the
-sense of an intersection does not exist; expressive power arises through
-combination, nesting, and normalization. Restrictions or entity bindings
-(__WITH__) do not require an explicit operator either, since they are expressed
-implicitly through tree structure and nesting. The resulting logical structure
-can be expressed in __SQL, JSON, or YAML__ and serves downstream components as a
-foundation for search or filtering.
+constructs __SET__ (grouping or relation) and __NOT__ (exclusion). Enumerations
+are always interpreted as sets, making an explicit __OR__ unnecessary, while an
+__AND__ in the sense of a strict intersection does not exist; instead,
+expressive power arises through combination, nesting, and normalization.
+Restrictions or entity bindings (__WITH__) do not require an explicit operator
+either, since they are expressed implicitly through tree structure and nesting.
+The resulting logical structure can be expressed in __SQL, JSON, or YAML__ and
+serves downstream components as a foundation for search or filtering.
 
 This approach is __neither complete nor perfect__ and will __never replace a
 large language model (LLM)__ -- natural language is far too complex for
@@ -52,7 +52,7 @@ semantic or neural models can operate more efficiently.
 
 - [Introduction](#introduction)
 - [Features](#features)
-- [Retrieval-Union Semantics (RUS)](#retrieval-union-semantics-rus)
+- [Entity Relation Semantics (ERS)](#entity-relation-semantics-ers)
   - [Example](#example)
 - [Known Limitations](#known-limitations)
 - [Usage](#usage)
@@ -61,36 +61,47 @@ semantic or neural models can operate more efficiently.
 - [System Design](#system-design)
 - [Sources & References](#sources--references)
 
-# Retrieval-Union Semantics (RUS)
+# Entity Relation Semantics (ERS)
 
 __Interpret logic in a retrieval-oriented manner -- not as full semantic
 reasoning, and not as formal-mathematical logic.__
 
-__Retrieval-Union Semantics (RUS)__ functions as a __pre-retrieval stage__ in the
-information retrieval pipeline. It applies only __lightweight, coarse-grained
-logic__ based on linguistically more stable inclusion and exclusion marker --
-negators, simple verb particles), which are often detectable in a rule-based
-manner and may contribute to reducing noise. RUS thus provides a __transparent,
-deterministic filtering layer__ that narrows the candidate set for downstream
-processes without attempting full semantic interpretation.
+__Entity Relation Semantics (ERS)__ functions as a __pre-retrieval stage__ in
+the information retrieval pipeline. It applies only __lightweight,
+coarse-grained logic__ based on linguistically stable inclusion and exclusion
+markers -- such as negators or simple verb particles -- which are often
+detectable in a rule-based manner and help reduce noise. ERS thus provides a
+__transparent, deterministic filtering layer__ that narrows the candidate set
+for downstream processes without attempting full semantic interpretation.
 
-Everything mentioned is interpreted by default as a __union (ANY)__, so __OR__
+Everything mentioned is interpreted by default as a __set (SET)__, so __OR__
 does not need to be modeled explicitly. __NOT__ is used for exclusion, while
 intersections (__AND__) emerge through __combinatorics, nesting, and
 normalization__ rather than as a separate operator. Restrictions or entity
 bindings (__WITH__) do not require an explicit operator either, since they are
 expressed __implicitly through tree structure and nesting__. This reduction to
-a small set of primitives creates a __transparent, deterministic, and auditable
+a small set of constructs creates a __transparent, deterministic, and auditable
 retrieval logic__ that can be easily integrated into existing NLP pipelines.
 
-| Everyday sentence                        | Composer syntax        | SQL equivalent          |
-|------------------------------------------|------------------------|-------------------------|
-| Get something for A or B                 | `ANY(A,B)`             | `(A OR B)`              |
-| Get something for A and B                | `ANY(A,B)`             | `(A OR B)`              |
-| Get something for A and B, but not C     | `ANY(A,B,NOT(C))`      | `(A OR B) AND NOT C`    |
-| Get something for A or B, but not C      | `ANY(A,B,NOT(C))`      | `(A OR B) AND NOT C`    |
-| Get something for A, but not B and not C | `ANY(A,NOT(B),NOT(C))` | `A AND NOT B AND NOT C` |
-| Get something for A or (B and C)         | `ANY(A,B,C)`           | `A OR B OR C`           |
+| Everyday sentence                        | Composer syntax        | Relation approximation (SQL-like) |
+|------------------------------------------|------------------------|-----------------------------------|
+| Get something for A or B                 | `SET(A,B)`             | `A WITH B`                        |
+| Get something for A and B                | `SET(A,B)`             | `A WITH B`                        |
+| Get something for A and B, but not C     | `SET(A,B,NOT(C))`      | `A WITH B AND NOT WITH C`         |
+| Get something for A or B, but not C      | `SET(A,B,NOT(C))`      | `A WITH B AND NOT WITH C`         |
+| Get something for A, but not B and not C | `SET(A,NOT(B),NOT(C))` | `A NOT WITH B AND NOT WITH C`     |
+| Get something for A or (B and C)         | `SET(A,B,C)`           | `A WITH B AND WITH C`             |
+
+> [!IMPORTANT]  
+> The _Relation approximation (SQL-like)_ column does not represent actual SQL
+> syntax. It is a human-readable notation designed to illustrate how ERS
+> constructs (__SET__, __NOT__, __WITH__) can be interpreted in a relational
+> style. The expressions are approximations for clarity and should not be
+> understood as executable SQL statements.
+
+> [!NOTE]
+> In ERS, everyday _or_ and _and_ expressions collapse into the same construct
+> (__SET__), since both are interpreted as grouping (__WITH__). 
 
 ## Example
 
@@ -107,15 +118,15 @@ Entities: [
 _Semantic input from upstream components, e.g. Named Entity Recognition (NER)_
 
 ```
-ANY
-+- DATA (label:FRUITS, text:apples)
-+- ANY
-   +- DATA (label:TREATS, text:fruit cake)
-   +- ANY
-   |  +- DATA (label:INGREDIENTS, text:chocolate)
-   |  +- DATA (label:TREATS, text:cookies)
-   +- NOT
-      +- DATA (label:FRUITS, text:strawberries)
+SET
++- SET
+|  +- ENTITY (label:FRUITS, text:apples)
+|  +- ENTITY (label:FRUITS, text:fruit cake)
+|  +- NOT
+|     +- ENTITY (label:FRUITS, text:strawberries)
++- SET
+   +- ENTITY (label:INGREDIENTS, text:chocolate)
+   +- ENTITY (label:TREATS, text:cookies)   
 ```
 _Tree representation of the return value (a node object)_
 
@@ -128,10 +139,11 @@ separate operator, and shows that the statement is much more than just `apples
 # Known Limitations
 
 - __Focused expressiveness__  
-  The logic layer is intentionally reduced to a small set of primitives __ANY__
-  and __NOT__. This ensures transparency and auditability, while more complex
-  constructs (e.g., explicit intersections) are represented through nesting and
-  normalization.
+  The logic layer is intentionally reduced to a small set of constructs: __SET__
+  for grouping/relations and __NOT__ for exclusion. This ensures transparency
+  and auditability, while more complex combinations (e.g., intersections) are
+  expressed implicitly through nesting and normalization rather than as
+  separate operators.
 - __Language coverage__  
   Accuracy depends on the quality of syntactic parsing and the configured
   lexicons. Domain-specific terminology may require additional curation.

@@ -55,5 +55,14 @@ class Schema(ABC):
 #   def find_markers(self, sentence: Sentence, word: Word) -> frozenset[str]:
         ...
 
+    def infer_relation_head(self, sentence: Sentence, word: Word) -> int:
+        while word.head > 0:
+            parent = sentence.words[word.head - 1]
+            if getattr(parent, "entity", None) is not None:
+                return parent.id
+            word = parent
+        return 0
+
     def infer_relation(self, sentence: Sentence, word: Word) -> Relation:
         return Relation(head=0, cluster=word.id)
+

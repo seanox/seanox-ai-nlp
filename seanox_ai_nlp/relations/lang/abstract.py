@@ -113,10 +113,9 @@ class Schema(ABC):
             entity parent exists (root).
         """
         while word.head > 0:
-            parent = sentence.words[word.head - 1]
-            if getattr(parent, "entity", None) is not None:
-                return parent.id
-            word = parent
+            word = sentence.words[word.head - 1]
+            if word.entity is not None:
+                return word.id
         return 0
 
     def infer_relation(self, sentence: Sentence, word: Word) -> Relation:

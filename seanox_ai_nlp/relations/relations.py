@@ -2,17 +2,14 @@
 
 from __future__ import annotations
 
-from seanox_ai_nlp.relations.lang import languages, language_schema
-from seanox_ai_nlp.relations.lang.abstract import Feature, Relation
+from seanox_ai_nlp.relations.lang import abstract, languages, language_schema
 
 from abc import ABC
-from collections import defaultdict
 from dataclasses import dataclass
 from stanza.models.common.doc import Word, Sentence
-from typing import NamedTuple, FrozenSet
+from typing import NamedTuple
 
 import os
-import re
 import stanza
 
 
@@ -35,6 +32,13 @@ Word.add_property(
 )
 
 Word.add_property(
+    "cluster",
+    default=None,
+    getter=lambda self: getattr(self, "_cluster", ()),
+    setter=lambda self, value: setattr(self, "_cluster", tuple(value))
+)
+
+Word.add_property(
     "entity",
     default=None,
     getter=lambda self: getattr(self, "_entity", None),
@@ -42,9 +46,7 @@ Word.add_property(
 )
 
 
-class Entity(NamedTuple):
-    start: int
-    end: int
+class Entity(abstract.Entity):
     label: str
     text: str
 
@@ -52,11 +54,8 @@ class Entity(NamedTuple):
 class Substance(NamedTuple):
     path: tuple[int, ...]
     id: int
-    head: int
     cluster: int
-    word: Word
     entity: Entity
-    features: FrozenSet[Feature] = frozenset()
 
 
 # DESIGN DECISION:
@@ -96,13 +95,7 @@ _PIPELINES_MODEL_DIR = os.path.join(os.getcwd(), ".stanza")
 _PIPELINES_CACHE: dict[tuple[str, str], stanza.Pipeline] = {}
 
 
-def _re_compile_logic_pattern(*pattern: str) -> re.Pattern:
-    return re.compile(
-        rf"(?i)^({'|'.join([f'(?:{pattern})' for pattern in pattern])})$"
-    )
-
-
-def _print_sentence_tree(sentence: Sentence):
+def _print_sentence_tree(sentence: Sentence) -> None:
 
     if not sentence:
         return
@@ -130,119 +123,7 @@ def _print_sentence_tree(sentence: Sentence):
         recurse(root_node_id, "", index == len(root_nodes) - 1, is_root=True)
 
 
-def _get_word_feats(word: Word) -> dict[str, str]:
-    if not word or not word.feats:
-        return {}
-    return dict(feat.split("=", 1) for feat in word.feats.split("|"))
-
-
-def _get_word_path(sentence: Sentence, word: Word) -> tuple[int, ...]:
-    path: list[int] = []
-    while True:
-        path.append(word.head)
-        if word.head <= 0:
-            break
-        word = sentence.words[word.head - 1]
-    path.reverse()
-    return tuple(path)
-
-
-def _get_substance_path(
-        touchpoints: dict[int, tuple[int, ...]],
-        substances: dict[int, Substance],
-        substance: Substance
-) -> tuple[int, ...]:
-
-    # NEGATION and CONTRAST are represented as negative path segments, which
-    # later form the NOT cluster to enclose the relevant substances. With the
-    # negative ID, the clusters maintain an implicit and simple relations with
-    # each other, and overlaps are prevented.
-
-    path: list[int] = []
-    if Feature.NEGATION in substance.features or Feature.CONTRAST in substance.features:
-        path.append(-substance.cluster)
-    path.append(substance.cluster)
-
-    while True:
-        path.append(abs(substance.head))
-        if substance.head == 0:
-            break
-        substance = substances.get(abs(substance.head))
-        if Feature.NEGATION in substance.features or Feature.CONTRAST in substance.features:
-            path.append(-substance.cluster)
-
-    path.reverse()
-
-    # Normalization / optimization / reduction of path segments:
-    # Segments used by fewer than two substances are removed, so that only
-    # common touchpoints remain as cluster relationships. As a side effect,
-    # potential convergence points are preserved and can later form clusters
-    # that act as structural brackets.
-    #
-    # Negative path segments from subsequent NEGATION and CONTRAST clusters, as
-    # well as the ROOT cluster (0), are excluded from reduction because they
-    # must always be represented.
-    #
-    # The first two path segments are retained so that a base cluster can always
-    # be formed below ROOT. This also retains entities where no
-    # assignment/relations could be found.
-
-    return tuple(
-        path[:2] + [
-            item for item in path[2:]
-            if not (item > 0 and (item not in touchpoints or len(touchpoints[item]) < 2))
-        ]
-    )
-
-
-def _create_substance(lang: str, sentence: Sentence, word: Word, entity: Entity) -> Substance:
-
-    schema = language_schema(lang)
-
-    # There are two types of relations:
-    #
-    # 1. head (dependency): refers to the parent substance
-    #    - The value always starts at 0 (root)
-    #    - Must be explicitly determined using semantic rules
-    #    - If head does not refer to a substance or root, the next higher-level
-    #      substance is used
-    #
-    # 2. cluster: refers to the grouping of related substances
-    #    - Determined using rules based on UD deprel, upos and features
-    #    - Clusters must always refer to an existing word; if the value is
-    #      outside, the ID of the current word is used.
-    #
-    # Together, head and cluster provide a bidirectional view of the relation
-    # structure. To correctly represent logical constructs such as SET and NOT,
-    # these relations must be further refined using extended, language-specific
-    # rules.
-
-    # TODO: Prove that the approach/assumption is correct
-    def normalize_relation(sentence: Sentence, word: Word, relation: Relation) -> Relation:
-        if relation.head < 0 or relation.head > len(sentence.words):
-            relation = Relation(head=0, cluster=relation.cluster)
-        if relation.head > 0 and sentence.words[relation.head - 1].entity is None:
-            relation = Relation(head=schema.infer_relation_head(sentence, word), cluster=relation.cluster)
-        if relation.cluster <= 0 or relation.cluster > len(sentence.words):
-            relation = Relation(head=relation.head, cluster=word.id)
-        if relation.cluster > 0 and sentence.words[relation.cluster - 1].entity is None:
-            relation = Relation(head=relation.head, cluster=schema.infer_relation_head(sentence, word))
-        return relation
-
-    relation = schema.infer_relation(sentence, word)
-    relation = normalize_relation(sentence, word, relation)
-    return Substance(
-        path=None,
-        id=word.id,
-        head=relation.head,
-        cluster=relation.cluster,
-        features=relation.features,
-        word=word,
-        entity=entity
-    )
-
-
-def _print_relation_tree(node: Node):
+def _print_relation_tree(node: Node) -> None:
 
     def recurse(node: Node, prefix: str = "", root: bool = True):
 
@@ -287,23 +168,21 @@ def _print_relation_tree(node: Node):
 #
 # 1. Linguistic Level (Stanza object)
 # Sentence, Word, Entity from the NLP pipeline
-# Raw data from linguistic analysis: tokens, lemmas, dependencies, start/end
-# offsets. This level is detailed, but too complex, too raw and too strict  for
-# direct logical processing.
+# Raw data from linguistic analysis: token, lemma, upos, deprel, feats,
+# start/end offset. This level is detailed, but too complex for direct logical
+# processing.
 #
 # 2. Substances + Structure (intermediary)
 # Substance (NamedTuple) + Structure (Mapping id -> (path, substance))
-# Reduced, immutable snapshots of relevant words, enriched with additional
-# fields (path, features, entity). This layer abstracts and extracts linguistic
-# details. It is one of the intermediate layers between the NLP output and the
-# logical relationship.
+# Reduced meta-information (path, cluster, entity) of relevant words. This layer
+# abstracts and extracts linguistic and logical details. It is one of the
+# intermediate layers between the NLP output and the logical relationship.
 #
 # 3. Clustering / Normalization
 # Substance + Node + Cluster (Mapping cluster id -> (path, cluster, node)
-# Substances are grouped into clusters, synthetic clusters are inserted for
-# convergence points and opposition (NEGATION and CONTRAST), and paths are
-# normalized. The result: a consistent tree topology. It is next one of the
-# intermediate layers between the NLP output and the logical relationship.
+# Substances are grouped into clusters and form the basis for the tree topology
+# through nesting. It is next one of the intermediate layers between the NLP
+# output and the logical relationship.
 #
 # 4. Relations / Node-Tree
 # Node, NodeSet, NodeEmpty, NodeEntity
@@ -332,12 +211,15 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
     # Initial creation of all clusters
     for id, (path, substance) in structure.items():
         for index in range(1, len(path) + 1):
-            id = path[index-1]
-            if id in clusters:
+            if substance.cluster in clusters:
                 continue
-            head = path[index-2] if index >= 2 else None
-            cluster = Cluster(path=tuple(path[:index]), id=id, head=head, elements=[])
-            clusters[id] = (cluster.path, cluster, None)
+            cluster = Cluster(
+                id=substance.cluster,
+                path=substance.path[:-1],
+                head=substance.path[-2],
+                elements=[]
+            )
+            clusters[substance.cluster] = (cluster.path, cluster, None)
 
     # Assignment of substances to clusters
     for id, (path, substance) in structure.items():
@@ -377,7 +259,6 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
     # Recursive determination of the root node
     # The root node is the first node that is not a NodeSet. Or a NodeSet that
     # has more than one relation.
-
     def find_root(node: Node) -> Node | None:
         if not isinstance(node, NodeSet):
             return node
@@ -432,67 +313,61 @@ def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
     if not entities:
         return NodeEmpty()
 
+    # DESIGN DECISION:
+    #
+    # The approach should answer the main question: Which entities must be
+    # considered together, and how, so that the relevant data can be determined
+    # as a prefilter for a retrieval process?
+    #
+    # Sentences are complex and highly variable word connections. Capturing
+    # semantic meaning purely through rule-based approaches is not feasible.
+    #
+    # The approach is based on an absolute minimization of complexity. Assuming
+    # that words gain their meaning within a sentence through the context they
+    # form together. The meaning of a sentence emerges compositionally from the
+    # meanings of its constituent parts. Each part of the sentence contributes
+    # partial information, which together yields the overall meaning.
+    #
+    # Implementation:
+    # - Parts of a sentence are grouped into clusters. A cluster contains words
+    #   that belong together and must be considered together. Instead of working
+    #   directly with words, substance objects with meta-information about the
+    #   word are used for abstraction.
+    # - All clusters in a sentence form a SET (the overall structure).
+    # - Negations within a sentence part form additional synthetic sub-cluster
+    #   that can enclose entities and sets.
+
+    schema = language_schema(doc.lang)
+
     relations = []
     for sentence in doc.sentences:
 
-        # 1. Annotate words and detect words relevant to entities
+        # 1. Annotate words, path, cluster, and entity are set.
         #    Ignore MWT (Multi-Word Token without start_char).
-        #    In addition, mark words that refer to entities by assigning the
-        #    respective entity to the word. This allows the logical meaning of a
-        #    word to be correctly evaluated later in the sentence and entity
-        #    context.
-        words: dict[Word, list[Entity]] = defaultdict(list)
-        for word in sentence.words:
-            word.path = _get_word_path(sentence, word)
-            if word.start_char is not None:
-                for entity in entities:
-                    if entity.start <= word.start_char < entity.end:
-                        words[word].append(entity)
-                        word.entity = entity
-                        break
+        schema.annotate_words(sentence, entities)
+
+        words: list[Word] = [word for word in sentence.words if word.entity is not None]
 
         # 2. Create a Substance object for all relevant words.
-        #    Substance is a reduced snapshot of Word, enriched with additional
-        #    fields (e.g. features, word, entity and relation for head) that are
-        #    required for building logical relationships. Enclosed by structure,
-        #    it forms an explicit intermediate layer between the linguistic data
-        #    (stanza) and the final entity relationships (node tree).
-        #
-        #    Because Substance is immutable/read-only, its construction requires
-        #    two passes: in the first pass, raw Substances are created with
-        #    basic fields (id, relation, entity, etc.); in the second pass, once
-        #    all relation are known, the correct dependency path can be computed
-        #    and new enriched Substances are produced. This ensures consistency
-        #    and auditability without mutating existing objects.
+        #    Substance is reduced meta-information about a word that is required
+        #    for building logical relationships. Enclosed by structure, it forms
+        #    an explicit intermediate layer between the linguistic data (stanza)
+        #    and the final entity relationships (node tree).
         substances: dict[int, Substance] = {}
         for word in words:
-            for entity in words[word]:
-                substance = _create_substance(doc.lang, sentence, word, entity)
-                substances[substance.id] = substance
-
-        # Touchpoints serve as the basis for path optimization. Path elements
-        # that are used exclusively by a single substance can be removed. This
-        # leaves only the common reference points as direct relationships
-        # between substances.
-        touchpoints: dict[int, list[int]] = defaultdict(list)
-        for id, substance in substances.items():
-            touchpoints[substance.head].append(id)
-            touchpoints[substance.cluster].append(id)
-        touchpoints = {key: tuple(ids) for key, ids in touchpoints.items()}
-
-        # 3. Finalizing the substance with the correct dependency path and head
-        substances = [
-            substance._replace(path=path, head=path[-2], cluster=path[-1])
-            for substance in substances.values()
-            if (path := _get_substance_path(touchpoints, substances, substance))
-        ]
+            substances[word.id] = Substance(
+                path=word.cluster,
+                id=word.id,
+                cluster=word.cluster[-1],
+                entity=word.entity
+            )
 
         # X. Creating a flat tree structure of entities based on substances
         structure = {substance.id: (substance.path, substance) for substance in substances}
 
         # IMPORTANT: Do not shorten or simplify paths; IDs of irrelevant words
-        # without entities can be potential convergence points that will be
-        # needed later for the tree structure.
+        # without entities can be potential convergence points, negations or
+        # contrasts that will be needed later for the tree structure.
 
         relations.append(_create_relation_tree(structure))
 
@@ -503,7 +378,7 @@ def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
     return NodeSet(relations=relations)
 
 
-def _download_pipeline_lazy(lang: str):
+def _download_pipeline_lazy(lang: str) -> None:
     if os.path.exists(os.path.join(_PIPELINES_MODEL_DIR, lang)):
         return
     stanza.download(lang, model_dir=_PIPELINES_MODEL_DIR)
@@ -590,7 +465,7 @@ def _create_doc(lang: str, text: str) -> stanza.Document:
     return doc
 
 
-def pretty_print_sentence(sentence: Sentence):
+def pretty_print_sentence(sentence: Sentence) -> None:
     """
     Print a human-readable tree representation of a single parsed sentence.
 
@@ -611,7 +486,7 @@ def pretty_print_sentence(sentence: Sentence):
     _print_sentence_tree(sentence)
 
 
-def pretty_print_sentences(sentences: list[Sentence]):
+def pretty_print_sentences(sentences: list[Sentence]) -> None:
     """
     Print human-readable tree representations for a list of parsed sentences.
 
@@ -636,7 +511,7 @@ def pretty_print_sentences(sentences: list[Sentence]):
         _print_sentence_tree(sentence)
 
 
-def pretty_print_node(node: Node):
+def pretty_print_node(node: Node) -> None:
     """
     Print a human-readable tree representation of a relation node.
 

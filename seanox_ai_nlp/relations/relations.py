@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from seanox_ai_nlp.relations.lang import abstract, languages, language_schema
+from seanox_ai_nlp.relations.abstract import Entity
+from seanox_ai_nlp.relations.lang import languages, language_schema
 
 from abc import ABC
 from dataclasses import dataclass
@@ -44,11 +45,6 @@ Word.add_property(
     getter=lambda self: getattr(self, "_entity", None),
     setter=lambda self, value: setattr(self, "_entity", value)
 )
-
-
-class Entity(abstract.Entity):
-    label: str
-    text: str
 
 
 class Substance(NamedTuple):
@@ -315,27 +311,36 @@ def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
 
     # DESIGN DECISION:
     #
-    # The approach should answer the main question: Which entities must be
-    # considered together, and how, so that the relevant data can be determined
-    # as a prefilter for a retrieval process?
+    # The goal of this approach is to identify and group entities within a
+    # sentence so that they can be used as logical units for a coarse prefilter
+    # in retrieval.
     #
-    # Sentences are complex and highly variable word connections. Capturing
-    # semantic meaning purely through rule-based approaches is not feasible.
+    # Assuming that words gain their meaning within a sentence through the
+    # context they form together. The meaning of a sentence emerges
+    # compositionally from the meanings of its constituent parts. Each part of
+    # the sentence contributes partial information, which together yields the
+    # overall meaning.
     #
-    # The approach is based on an absolute minimization of complexity. Assuming
-    # that words gain their meaning within a sentence through the context they
-    # form together. The meaning of a sentence emerges compositionally from the
-    # meanings of its constituent parts. Each part of the sentence contributes
-    # partial information, which together yields the overall meaning.
+    # Concluding sentences are complex and highly variable word connections.
+    # Capturing semantic meaning purely through rule-based approaches is not
+    # feasible.
     #
-    # Implementation:
-    # - Parts of a sentence are grouped into clusters. A cluster contains words
-    #   that belong together and must be considered together. Instead of working
-    #   directly with words, substance objects with meta-information about the
-    #   word are used for abstraction.
-    # - All clusters in a sentence form a SET (the overall structure).
-    # - Negations within a sentence part form additional synthetic sub-cluster
-    #   that can enclose entities and sets.
+    # The approach is based on consistently minimizing complexity. Words derive
+    # their meaning in a sentence from the context they form together; the
+    # overall meaning arises compositionally from the partial information of the
+    # individual sentence components.
+    #
+    # To implement this, parts of the sentence are grouped into clusters, each
+    # of which summarises words that are logically connected and must be
+    # considered together. Instead of working directly with words, substance
+    # objects with meta-information serve as abstract representations. All
+    # clusters in a sentence together form a set that describes the overall
+    # structure. Negations generate additional synthetic sub-clusters that can
+    # include entities and sets.
+    #
+    # The structure begins at the sentence root (level 0). At level 1, main
+    # clusters and independent negations are represented. Negations within
+    # clusters appear as sub-clusters at levels 2 and 3.
 
     schema = language_schema(doc.lang)
 

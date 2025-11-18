@@ -1,49 +1,54 @@
 # seanox_ai_npl/relations/abstract.py
 
-from abc import ABC, abstractmethod
-from enum import Enum, auto
+from abc import ABC
+from enum import Enum
 from stanza.models.common.doc import Sentence, Word
-from typing import Callable, NamedTuple, FrozenSet
+from typing import Callable
+
+from seanox_ai_nlp.relations.abstract import Entity
 
 
-class Feature(Enum):
-    NEGATION = auto()
-    CONTRAST = auto()
+class UPOS(Enum):
+    ADJ = "ADJ"
+    ADP = "ADP"
+    ADV = "ADV"
+    AUX = "AUX"
+    CCONJ = "CCONJ"
+    DET = "DET"
+    INTJ = "INTJ"
+    NOUN = "NOUN"
+    NUM = "NUM"
+    PART = "PART"
+    PRON = "PRON"
+    PROPN = "PROPN"
+    PUNCT = "PUNCT"
+    SCONJ = "SCONJ"
+    SYM = "SYM"
+    VERB = "VERB"
+    X = "X"
 
 
-class Relation(NamedTuple):
-    head: int
-    cluster: int
-    features: FrozenSet[Feature] = frozenset()
-
-
-# TODO: Check RELATIVE and CLAUSE for deprel / upos relevance
-#       PrimitiveMarker should only contain deprel-/upos-relevant constants.
-class PrimitiveMarker(Enum):
+class DEPREL(Enum):
+    ROOT = "root"
+    NSUBJ = "nsubj"
+    OBJ = "obj"
+    IOBJ = "iobj"
+    OBL = "obl"
     NMOD = "nmod"
-    PREP = "prep"
-    RELATIVE = "relative"
-    CLAUSE = "clause"
+    AMOD = "amod"
+    ADVMOD = "advmod"
+    DET = "det"
+    CASE = "case"
     CC = "cc"
     CONJ = "conj"
-    ADP = "adp"
-
-
-class SyntacticMarkers(Enum):
-    COORDINATION = "coordination"
-
-
-class MorphologicalMarkers(Enum):
-    NEGATION = "negation"
-    COMPARATIVE = "comparative"
-    SUPERLATIVE = "superlative"
-
-
-class ConnectorMarkers(Enum):
-    ADVERSATIVE = "adversative"
-    CAUSAL = "causal"
-    CONCESSIVE = "concessive"
-    FINAL = "final"
+    PUNCT = "punct"
+    COMPOUND = "compound"
+    APPOS = "appos"
+    VOCATIVE = "vocative"
+    MARK = "mark"
+    AUX = "aux"
+    COP = "cop"
+    DISCOURSE = "discourse"
 
 
 class Schema(ABC):
@@ -66,73 +71,53 @@ class Schema(ABC):
         """
         return None
 
-#   @abstractmethod
-#   def find_markers(self, sentence: Sentence, word: Word) -> frozenset[str]:
-        ...
-
-    def infer_relation_root(self, sentence: Sentence, word: Word) -> int:
+    def infer_word_path(self, sentence: Sentence, word: Word) -> tuple[int, ...]:
         """
-        Infer the root entity relation for a word in the dependency tree.
+        Infer the dependency path of a word within a sentence.
 
-        This method traverses the dependency chain upward (following head) and
-        identifies the highest ancestor word that is associated with an entity.
-        Unlike infer_relation_head, which stops at the first parent entity,this
-        method continues to traverse the chain and returns the top-most entity
-        node.
+        This method provides the sequence of parent nodes that connect a word
+        back to the root of the sentence. The path can be used by applications
+        to understand how a word is positioned in the grammatical structure,
+        which is helpful for tasks such as clustering, relation extraction, or
+        linking words to higher‑level entities.
 
         Args:
-            sentence (Sentence): The Stanza sentence containing the word.
-            word (Word): The word whose root entity relation is to be inferred.
+            sentence (Sentence): The sentence object containing the word.
+            word (Word): The word whose dependency path should be retrieved.
 
         Returns:
-            int: The ID of the highest ancestor word that carries an entity.
-                 Returns 0 if no entity is found in the chain (root).
+            tuple[int, ...]: A sequence of IDs representing the word’s path
+            from the root of the sentence down to the word itself.
         """
-        root = 0
-        while word.head > 0:
+        path: list[int] = []
+        while True:
+            path.append(word.head)
+            if word.head <= 0:
+                break
             word = sentence.words[word.head - 1]
-            if word.entity is not None:
-                root = word.id
-        return root
+        path.reverse()
+        return tuple(path)
 
-    def infer_relation_head(self, sentence: Sentence, word: Word) -> int:
-        """
-        Infer the head (parent) relation for a word in the dependency tree.
+    def annotate_words(self, sentence: Sentence, entities: list[Entity]) -> None:
 
-        This method traverses the dependency chain upward until it finds a
-        parent word that is associated with an entity. If no such parent exists,
-        the root (0) is returned. This ensures that relations are anchored to
-        meaningful entity nodes rather than arbitrary tokens.
+        if not sentence or not sentence.words:
+            return
 
-        Args:
-            sentence (Sentence): The Stanza sentence containing the word.
-            word (Word): The word whose head relation is to be inferred.
+        # In the default implementation, the sentence  root is used as the base
+        # cluster. The idea is that annotate_words is rarely overwritten and the
+        # logical cluster assignment is performed with refinement_words.
+        cluster = self.infer_word_path(sentence, sentence.words[0])[:2]
 
-        Returns:
-            int: The ID of the parent word that carries an entity, or 0 if no
-            entity parent exists (root).
-        """
-        while word.head > 0:
-            word = sentence.words[word.head - 1]
-            if word.entity is not None:
-                return word.id
-        return 0
+        # Annotate words, path, default cluster, and entity are set.
+        # Ignore MWT (Multi-Word Token without start_char).
+        for word in sentence.words:
+            word.path = self.infer_word_path(sentence, word)
+            word.cluster = cluster
+            if word.start_char is not None:
+                for entity in entities:
+                    if entity.start <= word.start_char < entity.end:
+                        word.entity = entity
+                        break
 
-    def infer_relation(self, sentence: Sentence, word: Word) -> Relation:
-        """
-        Infer the relation (head and cluster) for a word.
-
-        This method provides a default implementation that assigns the word
-        itself as its cluster and sets the head to root (0). Language-specific
-        schemas can override this method to apply more refined rules based on
-        dependency relations, part-of-speech tags, or morphological features.
-
-        Args:
-            sentence (Sentence): The Stanza sentence containing the word.
-            word (Word): The word whose relation is to be inferred.
-
-        Returns:
-            Relation: A Relation object containing the inferred head, cluster,
-            and any associated features.
-        """
-        return Relation(head=0, cluster=word.id)
+    def refinement_words(self, sentence: Sentence, entities: list[Entity]) -> None:
+        pass

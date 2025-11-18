@@ -322,22 +322,22 @@ def _normalize(text: str = "") -> str:
 
 
 class TemplateException(Exception):
-    def __init__(self, message):
+    def __init__(self, message) -> None:
         super().__init__(message)
 
 
 class TemplateConditionException(TemplateException):
-    def __init__(self, message):
+    def __init__(self, message) -> None:
         super().__init__(message)
 
 
 class TemplateSyntaxException(TemplateException):
-    def __init__(self, message):
+    def __init__(self, message) -> None:
         super().__init__(message)
 
 
 class TemplateExpressionException(TemplateException):
-    def __init__(self, message):
+    def __init__(self, message) -> None:
         super().__init__(message)
 
 
@@ -399,7 +399,7 @@ class _Template:
 
         return environment
 
-    def __init__(self, directory: str, filename: str, filters: dict[str, Callable] = None):
+    def __init__(self, directory: str, filename: str, filters: dict[str, Callable] = None) -> None:
 
         self.variants = {}
         self.environment = _Template._create_template_environment(filters)

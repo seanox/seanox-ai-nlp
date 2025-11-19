@@ -206,16 +206,16 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
 
     # Initial creation of all clusters
     for id, (path, substance) in structure.items():
-        for index in range(1, len(path) + 1):
-            if substance.cluster in clusters:
+        for index in range(0, len(path)):
+            if substance.path[index] in clusters:
                 continue
             cluster = Cluster(
-                id=substance.cluster,
-                path=substance.path[:-1],
-                head=substance.path[-2],
+                id=substance.path[index],
+                path=substance.path[:index + 1],
+                head = substance.path[index - 1] if index > 0 else 0,
                 elements=[]
             )
-            clusters[substance.cluster] = (cluster.path, cluster, None)
+            clusters[cluster.id] = (cluster.path, cluster, None)
 
     # Assignment of substances to clusters
     for id, (path, substance) in structure.items():
@@ -347,28 +347,29 @@ def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
     relations = []
     for sentence in doc.sentences:
 
-        # 1. Annotate words, path, cluster, and entity are set.
-        #    Ignore MWT (Multi-Word Token without start_char).
+        # Annotate words, path, cluster, and entity are set.
+        # Ignore MWT (Multi-Word Token without start_char).
         schema.annotate_words(sentence, entities)
 
         words: list[Word] = [word for word in sentence.words if word.entity is not None]
 
-        # 2. Create a Substance object for all relevant words.
-        #    Substance is reduced meta-information about a word that is required
-        #    for building logical relationships. Enclosed by structure, it forms
-        #    an explicit intermediate layer between the linguistic data (stanza)
-        #    and the final entity relationships (node tree).
-        substances: dict[int, Substance] = {}
-        for word in words:
-            substances[word.id] = Substance(
-                path=word.cluster,
-                id=word.id,
-                cluster=word.cluster[-1],
-                entity=word.entity
+        # Create a flat tree structure of Substance object for all relevant
+        # words. Substance is reduced meta-information about a word that is
+        # required for building logical relationships. Enclosed by structure, it
+        # forms an explicit intermediate layer between the linguistic data
+        # (stanza) and the final entity relationships (node tree).
+        structure: dict[int, tuple[tuple[int, ...], Substance]] = {
+            word.id: (
+                word.cluster,
+                Substance(
+                    path=word.cluster,
+                    id=word.id,
+                    cluster=word.cluster[-1],
+                    entity=word.entity
+                )
             )
-
-        # X. Creating a flat tree structure of entities based on substances
-        structure = {substance.id: (substance.path, substance) for substance in substances}
+            for word in words
+        }
 
         # IMPORTANT: Do not shorten or simplify paths; IDs of irrelevant words
         # without entities can be potential convergence points, negations or

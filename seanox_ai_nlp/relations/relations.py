@@ -313,7 +313,16 @@ def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
     #
     # The goal of this approach is to identify and group entities within a
     # sentence so that they can be used as logical units for a coarse prefilter
-    # in retrieval.
+    # in retrieval. For the retrieval process, entities are categorized
+    # meta-information, comparable to keywords -- in other words, a robust set
+    # of candidate terms that do not attempt to capture full sentence semantics.
+    #
+    # The resulting structure is a tree, reduced to the smallest form while
+    # preserving all logical relations (clusters and exclusions):
+    # - Level 0: sentence root
+    # - Level 1: main clusters (word-based entities)
+    # - Level 2: synthetic exclusion nodes (structural, not tied to word IDs)
+    # - Level 3: sub-clusters under exclusion
     #
     # Assuming that words gain their meaning within a sentence through the
     # context they form together. The meaning of a sentence emerges
@@ -335,12 +344,35 @@ def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
     # considered together. Instead of working directly with words, substance
     # objects with meta-information serve as abstract representations. All
     # clusters in a sentence together form a set that describes the overall
-    # structure. Negations generate additional synthetic sub-clusters that can
+    # structure. Exclusions generate additional synthetic sub-clusters that can
     # include entities and sets.
     #
     # The structure begins at the sentence root (level 0). At level 1, main
-    # clusters and independent negations are represented. Negations within
-    # clusters appear as sub-clusters at levels 2 and 3.
+    # clusters and independent exclusions are represented. Exclusions within
+    # clusters appear as sub-clusters at deeper levels. Level 2 represents a
+    # synthetic exclusion layer -- a technical construct introduced to
+    # explicitly capture the presence of a negation or contrast. This layer acts
+    # as a container that signals -- this sub-cluster in level 3 is excluded.
+    # Multiple exclusions may be semantically nested, but are treated as a
+    # single logical unit. They are flattened at level 2 and represented as part
+    # of a cluster, while still preserving their role as candidate terms for
+    # retrieval.
+    #
+    # Robustness
+    #
+    # It is important to understand that incorrect decisions or faulty logical
+    # relationships can severely damage the quality of downstream pipelines,
+    # even in a coarse prefilter. Therefore, the active fail-safe principle
+    # applies:
+    #
+    # - Patterns are not only searched for that allow logical assignments,
+    #   but also for patterns that challenge or contradict them.
+    # - In cases of ambiguity, uncertainty, or contradictions, all relevant
+    #   entities are collected into a single cluster instead of making risky
+    #   assumptions.
+    #
+    # This approach prevents faulty pre-decisions from destroying the semantic
+    # integrity of the overall structure.
 
     schema = language_schema(doc.lang)
 
@@ -350,6 +382,7 @@ def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
         # Annotate words, path, cluster, and entity are set.
         # Ignore MWT (Multi-Word Token without start_char).
         schema.annotate_words(sentence, entities)
+        schema.refinement_words(sentence, entities)
 
         words: list[Word] = [word for word in sentence.words if word.entity is not None]
 
@@ -372,8 +405,8 @@ def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
         }
 
         # IMPORTANT: Do not shorten or simplify paths; IDs of irrelevant words
-        # without entities can be potential convergence points, negations or
-        # contrasts that will be needed later for the tree structure.
+        # without entities can be potential convergence points, exclusions that
+        # will be needed later for the tree structure.
 
         relations.append(_create_relation_tree(structure))
 

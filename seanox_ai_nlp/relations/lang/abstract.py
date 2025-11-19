@@ -98,6 +98,29 @@ class Schema(ABC):
         path.reverse()
         return tuple(path)
 
+    def infer_sentence_root(self, sentence: Sentence) -> Word | None:
+        """
+        Determine the root word of a sentence.
+
+        This method inspects the dependency parse of the given Stanza sentence
+        and returns the word that functions as the syntactic root. If the
+        sentence is empty or contains no words, None is returned.
+
+        Args:
+            sentence (Sentence): The Stanza sentence object.
+
+        Returns:
+            Word | None: The root word of the sentence, or None if no root
+            exists.
+        """
+        if not sentence or not sentence.words:
+            return None
+
+        for word in sentence.words:
+            if word.deprel == "root" or word.head == 0:
+                return word
+        return sentence.words[0]
+
     def annotate_words(self, sentence: Sentence, entities: list[Entity]) -> None:
 
         if not sentence or not sentence.words:

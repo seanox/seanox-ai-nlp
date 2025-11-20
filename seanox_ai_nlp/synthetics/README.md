@@ -77,13 +77,14 @@ or augmentation in domain-specific NLP workflows.
 - [Benchmark](#benchmark)
   - [Single-Pass Evaluation](#single-pass-evaluation)
   - [Scaled Evaluation (×500)](#scaled-evaluation-500)
-- [API Reference](#api-reference)
-  - [`synthetics`](#syntheticsdatasource-str-template-str-data-dictstr-any-filters-dictstr-callable--none---synthetic)
-  - [`Synthetic`](#synthetic)
-  - [`TemplateException`](#templateexception)
-  - [`TemplateConditionException`](#templateconditionexception)
-  - [`TemplateExpressionException`](#templateexpressionexception)
-  - [`TemplateSyntxException`](#templatesyntxexception)
+- [API](#api)
+  - [Reference](#reference)
+    - [`synthetics`](#syntheticsdatasource-str-template-str-data-dictstr-any-filters-dictstr-callable--none---synthetic)
+    - [`Synthetic`](#synthetic)
+    - [`TemplateException`](#templateexception)
+    - [`TemplateConditionException`](#templateconditionexception)
+    - [`TemplateExpressionException`](#templateexpressionexception)
+    - [`TemplateSyntxException`](#templatesyntxexception)
 - [System Design](#system-design)
   - [Components Overview](#components-overview)
   - [Processing Workflow](#processing-workflow)
@@ -567,13 +568,15 @@ I/O and external dependencies.
 | Avg. time per iteration              | ~0.0865 ms         |
 | Theoretical throughput               | ~2,452,724 chars/s |
 
-# API Reference
+# API
 
 The __synthetic__ module offers a compact API for synthetic text generation. It
 is suitable for NLP pipelines, annotation workflows, or automated content
 generation tools. 
 
-## `synthetics(datasource: str, template: str, data: dict[str, Any], filters: dict[str, Callable] = None) -> Synthetic`
+## Reference
+
+### `synthetics(datasource: str, template: str, data: dict[str, Any], filters: dict[str, Callable] = None) -> Synthetic`
 
 <details>
   <summary>
@@ -610,7 +613,7 @@ __Raises:__
   invalid.
 </details>
 
-## `Synthetic`
+### `Synthetic`
 
 <details>
   <summary>
@@ -630,20 +633,20 @@ __Attributes__:
   text. Each span is represented as a tuple (`start_index, end_index, label`).
 </details>
 
-## `TemplateException`
+### `TemplateException`
 
 Raised when the template file cannot be loaded or parsed due to general errors
 in the YAML.
 
-## `TemplateConditionException`
+### `TemplateConditionException`
 
 Raised when a condition expression in the template is invalid or unsafe to
 evaluate.
 
-## `TemplateExpressionException`
+### `TemplateExpressionException`
 If a span expression in the template is invalid.
 
-## `TemplateSyntxException`
+### `TemplateSyntxException`
 
 Raised when a syntax error occurs in the jinja2 template.
 

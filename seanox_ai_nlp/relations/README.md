@@ -57,7 +57,8 @@ semantic or neural models can operate more efficiently.
 - [Known Limitations](#known-limitations)
 - [Usage](#usage)
 - [Benchmark](#benchmark)
-- [API Reference](#api-reference)
+- [API](#api)
+  - [Reference](#reference)
 - [System Design](#system-design)
 - [Sources & References](#sources--references)
 
@@ -174,7 +175,9 @@ I/O and external dependencies.
 
 ## Scaled Evaluation (&times;500)
 
-# API Reference
+# API
+
+## Reference
 
 # System Design
 

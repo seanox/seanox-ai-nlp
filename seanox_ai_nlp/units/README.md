@@ -68,19 +68,20 @@ expressions from natural language.
 - [Known Limitations](#known-limitations)
   - [Unit Recognition Without Semantic Context](#unit-recognition-without-semantic-context)
   - [Ambiguous Unit Symbols](#ambiguous-unit-symbols)
-- [API Reference](#api-reference)
-  - [`units`](#unitstext-str---listunit)
-  - [`spacing`](#spacingtext-str-mode-spacingmode--spacingmodenumeric---str)
-  - [`Unit`](#unit-namedtuple)
-  - [`NUMERIC_PATTERN`](#numeric_pattern)
-  - [`NUMERIC_VALIDATION_PATTERN`](#numeric_validation_pattern)
-  - [`NUMERIC_EXPRESSION_VALIDATION_PATTERN`](#numeric_expression_validation_pattern)
-  - [`UNIT_SYMBOLS_PATTERN`](#unit_symbols_pattern)
-  - [`UNIT_PATTERN`](#unit_pattern)
-  - [`UNIT_VALIDATION_PATTERN`](#unit_validation_pattern)
-  - [`UNIT_EXPRESSION_VALIDATION_PATTERN`](#unit_expression_validation_pattern)
-  - [`UNIT_CLASSIFICATION_PATTERN`](#unit_classification_pattern)
-  - [`UNIT_OPERATORS_PATTERN`](#unit_operators_pattern)
+- [API](#api-reference)
+  - [Reference](#reference)
+    - [`units`](#unitstext-str---listunit)
+    - [`spacing`](#spacingtext-str-mode-spacingmode--spacingmodenumeric---str)
+    - [`Unit`](#unit-namedtuple)
+    - [`NUMERIC_PATTERN`](#numeric_pattern)
+    - [`NUMERIC_VALIDATION_PATTERN`](#numeric_validation_pattern)
+    - [`NUMERIC_EXPRESSION_VALIDATION_PATTERN`](#numeric_expression_validation_pattern)
+    - [`UNIT_SYMBOLS_PATTERN`](#unit_symbols_pattern)
+    - [`UNIT_PATTERN`](#unit_pattern)
+    - [`UNIT_VALIDATION_PATTERN`](#unit_validation_pattern)
+    - [`UNIT_EXPRESSION_VALIDATION_PATTERN`](#unit_expression_validation_pattern)
+    - [`UNIT_CLASSIFICATION_PATTERN`](#unit_classification_pattern)
+    - [`UNIT_OPERATORS_PATTERN`](#unit_operators_pattern)
 - [System Design](#system-design)
   - [Components Overview](#components-overview)
   - [Processing Workflow](#processing-workflow)
@@ -585,13 +586,15 @@ The module was tested on an Intel Core i5-12400 with Windows 11 and 16 GB RAM.
 | Avg. time per unit                  | ~0.0173 ms           |
 | Theoretical throughput              | ~57,740 units/s      |
 
-# API Reference
+# API
 
 The __units__ module offers a compact API for extracting unit expressions from
 natural language. It is suitable for NLP pipelines, preprocessing workflows, and
 annotation tools.
 
-## `units(text: str) -> list[Unit]`
+## Reference
+
+### `units(text: str) -> list[Unit]`
 
 <details>
   <summary>
@@ -616,7 +619,7 @@ __Notes:__
 
 </details> 
 
-## `spacing(text: str, mode: SpacingMode = SpacingMode.NUMERIC) -> str`
+### `spacing(text: str, mode: SpacingMode = SpacingMode.NUMERIC) -> str`
 
 <details>
   <summary>
@@ -636,7 +639,7 @@ __Returns:__
 
 </details>
 
-## `Unit` (NamedTuple)
+### `Unit` (NamedTuple)
 
 <details>
   <summary>
@@ -653,45 +656,45 @@ __Attributes:__
 
 </details>
 
-## `NUMERIC_PATTERN`
+### `NUMERIC_PATTERN`
 
 Precompiled regular expressions, matches numeric values in various
 locale-specific formats (e.g. `1,000.5`, `1.000,5`, `1 000.5`).
 
-## `NUMERIC_VALIDATION_PATTERN`
+### `NUMERIC_VALIDATION_PATTERN`
 
 Precompiled regular expressions, validates a single numeric value.
 
-## `NUMERIC_EXPRESSION_VALIDATION_PATTERN`
+### `NUMERIC_EXPRESSION_VALIDATION_PATTERN`
 
 Precompiled regular expressions, validates compound numeric expressions (e.g.
 `5 x 10`, `3.5/2`).
 
-## `UNIT_SYMBOLS_PATTERN`
+### `UNIT_SYMBOLS_PATTERN`
 
 Precompiled regular expressions, matches all supported unit symbols, including
 SI, IEC, informal, and common units.
 
-## `UNIT_PATTERN`
+### `UNIT_PATTERN`
 
 Precompiled regular expressions, matches both standalone units and measure pairs
 (e.g. `15 cm`, `?20 &ordm;C`).
 
-## `UNIT_VALIDATION_PATTERN`
+### `UNIT_VALIDATION_PATTERN`
 
 Precompiled regular expressions, validates a single unit symbol.
 
-## `UNIT_EXPRESSION_VALIDATION_PATTERN`
+### `UNIT_EXPRESSION_VALIDATION_PATTERN`
 
 Precompiled regular expressions, validates compound unit expressions (e.g.
 `km/h`, `mol&middot;L?&sup1;`).
 
-## `UNIT_CLASSIFICATION_PATTERN`
+### `UNIT_CLASSIFICATION_PATTERN`
 
 Precompiled regular expressions, named group-based pattern for classifying units
 into semantic categories (e.g. `mass`, `length`, `energy`).
 
-## `UNIT_OPERATORS_PATTERN`
+### `UNIT_OPERATORS_PATTERN`
 
 Precompiled regular expressions, matches operators used in compound units (e.g.
 `/`, `&middot;`, `x`).

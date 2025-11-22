@@ -8,7 +8,6 @@ from .es import SchemaES
 from .fr import SchemaFR
 from .it import SchemaIT
 from .ru import SchemaRU
-from .default import SchemaDefault
 
 
 _SCHEMAS: dict[str, type[Schema]] = {
@@ -28,7 +27,7 @@ def languages() -> frozenset[str]:
 
 def language_schema(lang: str) -> Schema:
     if lang not in _SCHEMAS:
-        return SchemaDefault()
+        raise ValueError(f"Unsupported language: {lang}")
     return _SCHEMAS[lang]()
 
 

@@ -385,6 +385,8 @@ def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
         schema.refinement_words(sentence, entities)
 
         words: list[Word] = [word for word in sentence.words if word.entity is not None]
+        if not words:
+            continue
 
         # Create a flat tree structure of Substance object for all relevant
         # words. Substance is reduced meta-information about a word that is

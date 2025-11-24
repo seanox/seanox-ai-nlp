@@ -58,7 +58,37 @@ Auch hier wird ein bewusst vereinfachter Ansatz verfolgt. Pronomen reflektieren
 die im unmittelbar vorangehenden Satzfragment verwendeten Entitäten. Tritt ein
 Pronomen innerhalb eines Nebensatzes auf, so werden alle im vorangehenden
 Satzfragment genannten Entitäten als Referenz herangezogen. Befindet sich ein
-Pronomen im Hauptsatz, werden die Entitäten aus dem Vorsatz reflektiert. 
+Pronomen im Hauptsatz, werden die Entitäten aus dem Vorsatz reflektiert.
+
+<details>
+  <summary>
+<strong>Ist die Koreferenzauflösung wirklich erforderlich?</strong>
+  </summary>
+
+Im Prinzip werden alle Entitäten vollständig als __SET__ organisiert, wobei
+sowohl ganze Sätze als auch Teilsätze berücksichtigt sind. Da die finale
+Struktur nur die Ebenen 0-3 nutzt -- mit Sätzen auf Ebene 0 und Teilsätzen auf
+Ebene 1 -- sind die Entitäten, auf die ein Pronomen verweisen könnte, bereits in
+den vorgelagerten Clustern enthalten und dort logisch eindeutig qualifiziert. Da
+die Interpretation innerhalb der Struktur stets __in Verbindung mit__ erfolgt,
+stellt sich die Frage, ob eine zusätzliche explizite Auflösung von Pronomen
+überhaupt notwendig ist.
+
+```
+Hole Äpfel und Birnen für den Kuchen. Es können auch Konserven sein.
+
+SET(SET(Äpfel, Birnen, Kuchen), Konserven)
+```
+
+__Antwort:__ Für den groben Vorfilter im Retrieval ist eine explizite
+__Koreferenzauflösung nicht erforderlich__. Da alle Entitäten ohnehin als
+__SET__ organisiert und logisch vollqualifiziert enthalten sind, werden Pronomen
+automatisch __in Verbindung mit__ den vorherigen Clustern interpretiert. Eine
+zusätzliche Auflösung würde nur unnötige Komplexität und Fehleranfälligkeit
+einführen und widerspricht dem Prinzip der Minimalisierung und Robustheit. Falls
+spätere, semantisch feinere Verarbeitung nötig ist, kann Koreferenzauflösung
+dort erfolgen -- aber nicht im Vorfilter.
+</details>
 
 ## de
 TODO:

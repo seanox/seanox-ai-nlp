@@ -69,22 +69,44 @@ class Node(ABC):
 
 @dataclass(frozen=True)
 class NodeEmpty(Node):
-    ...
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, NodeEmpty)
+
+    def __hash__(self) -> int:
+        return hash(self.__class__)
 
 
 @dataclass(frozen=True)
 class NodeSet(Node):
     relations: tuple[NodeNot | NodeSet | NodeEntity, ...]
 
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, NodeSet) and frozenset(self.relations) == frozenset(other.relations)
+
+    def __hash__(self) -> int:
+        return hash((self.__class__, frozenset(self.relations)))
+
 
 @dataclass(frozen=True)
 class NodeNot(Node):
     relations: tuple[NodeNot | NodeSet | NodeEntity, ...]
 
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, NodeNot) and frozenset(self.relations) == frozenset(other.relations)
+
+    def __hash__(self) -> int:
+        return hash((self.__class__, frozenset(self.relations)))
+
 
 @dataclass(frozen=True)
 class NodeEntity(Node):
     entity: Entity
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, NodeEntity) and self.entity == other.entity
+
+    def __hash__(self) -> int:
+        return hash((self.__class__, self.entity))
 
 
 _PIPELINES_MODEL_DIR = os.path.join(os.getcwd(), ".stanza")

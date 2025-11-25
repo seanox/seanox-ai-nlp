@@ -84,21 +84,14 @@ expressed __implicitly through tree structure and nesting__. This reduction to
 a small set of constructs creates a __transparent, deterministic, and auditable
 retrieval logic__ that can be easily integrated into existing NLP pipelines.
 
-| Everyday sentence                        | Composer syntax        | Relation approximation (SQL-like) |
-|------------------------------------------|------------------------|-----------------------------------|
-| Get something for A or B                 | `SET(A,B)`             | `A WITH B`                        |
-| Get something for A and B                | `SET(A,B)`             | `A WITH B`                        |
-| Get something for A and B, but not C     | `SET(A,B,NOT(C))`      | `A WITH B AND NOT WITH C`         |
-| Get something for A or B, but not C      | `SET(A,B,NOT(C))`      | `A WITH B AND NOT WITH C`         |
-| Get something for A, but not B and not C | `SET(A,NOT(B),NOT(C))` | `A NOT WITH B AND NOT WITH C`     |
-| Get something for A or (B and C)         | `SET(A,B,C)`           | `A WITH B AND WITH C`             |
-
-> [!IMPORTANT]  
-> The _Relation approximation (SQL-like)_ column does not represent actual SQL
-> syntax. It is a human-readable notation designed to illustrate how ERS
-> constructs (__SET__, __NOT__, __WITH__) can be interpreted in a relational
-> style. The expressions are approximations for clarity and should not be
-> understood as executable SQL statements.
+| Everyday sentence                        | Composer syntax          | Relational analogy        |
+|------------------------------------------|--------------------------|---------------------------|
+| Get something for A or B                 | `SET(A, B)`              | `WITH(A, B)`              |
+| Get something for A and B                | `SET(A, B)`              | `WITH(A, B)`              |
+| Get something for A and B, but not C     | `SET(A, B, NOT(C))`      | `WITH(A, B, NOT(C))`      |
+| Get something for A or B, but not C      | `SET(A, B, NOT(C))`      | `WITH(A, B, NOT(C))`      |
+| Get something for A, but not B and not C | `SET(A, NOT(B), NOT(C))` | `WITH(A, NOT(B), NOT(C))` |
+| Get something for A or (B and C)         | `SET(A, B, C)`           | `WITH(A, B, C)`           | 
 
 > [!NOTE]
 > In ERS, everyday _or_ and _and_ expressions collapse into the same construct

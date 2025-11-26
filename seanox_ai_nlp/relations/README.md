@@ -174,7 +174,7 @@ I/O and external dependencies.
 
 The __relations__ module provides a compact API for parsing text with annotated
 entities and constructing logical relation trees. It is suitable for semantic
-preprocessing, retrieval pipelines, or rule?based reasoning workflows.
+preprocessing, retrieval pipelines, or rule-based reasoning workflows.
 
 ## Reference
 
@@ -223,7 +223,7 @@ __Raises__
 
 <details>
   <summary>
-Print a human?readable tree representation of a single parsed sentence.
+Print a human-readable tree representation of a single parsed sentence.
   </summary>
 
 __Parameters__
@@ -237,7 +237,7 @@ __Raises__
 
 <details>
   <summary>
-Print human?readable tree representations for a list of parsed sentences.
+Print human-readable tree representations for a list of parsed sentences.
   </summary>
 
 __Parameters__
@@ -252,7 +252,7 @@ __Raises__
 
 <details>
   <summary>
-Print a human?readable tree representation of a relation node.
+Print a human-readable tree representation of a relation node.
   </summary>
 
 __Parameters__
@@ -268,7 +268,7 @@ __Raises__
 - __Node__: Abstract base class for relation nodes.
   - `NodeEmpty`: Empty node.
   - `NodeEntity`: Single entity node.
-  - `NodeSet`: A set of entities or sub?nodes.
+  - `NodeSet`: A set of entities or sub-nodes.
   - `NodeNot`: Negation node.
 
 # System Design

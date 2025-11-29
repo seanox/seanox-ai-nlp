@@ -28,6 +28,13 @@ Präpositionalphrasen (z.B. für X, zum Y) gelten als Indikatoren für den Beginn
 eines neuen logischen Clusters. Konjunktionen (z.B. und, oder) sind lediglich
 interne Verbindungen und bilden keine neuen Cluster.
 
+### Satzgrenzen als Gültigkeitsbereiche
+Satzgrenzen markieren den Scope, also den Bereich, in dem logische Relationen
+gelten. Sie sind keine eigenen logischen Operatoren, sondern dienen als
+natürliche linguistische Grenzen, innerhalb derer Cluster gebildet und
+Relationen interpretiert werden.
+
+## Negation und Kontrast
 Negation und Kontraste sind besondere Formen der logischen Strukturierung, da
 sie explizite oder implizite Ein- und Ausschlüsse innerhalb eines Satzes
 markieren. Wörter und Phrasen wie __nicht__, __kein__, __ohne__, __aber__ oder
@@ -41,15 +48,6 @@ Ausschlusses. Treten mehrere Negationen oder Kontraste auf, werden sie flach
 innerhalb desselben Clusters gesammelt, etwa __SET(A,B,NOT(C),NOT(D))__, um
 unnötig komplexe Verschachtelungen zu vermeiden und die logische Integrität auch
 bei komplexeren Satzmustern zu erhalten.
-
-### Satzgrenzen als Gültigkeitsbereiche
-Satzgrenzen markieren den Scope, also den Bereich, in dem logische Relationen
-gelten. Sie sind keine eigenen logischen Operatoren, sondern dienen als
-natürliche linguistische Grenzen, innerhalb derer Cluster gebildet und
-Relationen interpretiert werden.
-
-## Negation und Kontrast
-TODO:
 
 ## Koreferenzauflösung / Coreference Resolution
 Die Koreferenzauflösung ist -- wie für natürliche Sprache typisch -- ein

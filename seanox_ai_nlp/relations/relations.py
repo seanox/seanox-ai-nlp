@@ -303,22 +303,18 @@ def _create_relation_tree(structure: dict[int, tuple[tuple[int, ...], Substance]
             # NodeSet may contain multiple NodeEntity instances referencing the
             # same Entity, e.g. due to multi-token spans. These duplicates are
             # removed within the same SET level.
-            relations = []
-            entities = set()
-            for relation in node.relations:
-                if not isinstance(relation, NodeEntity):
-                    relations.append(relation)
-                    continue
-                if relation.entity in entities:
-                    continue
-                entities.add(relation.entity)
-                relations.append(relation)
             return NodeSet(
-                relations=tuple(finalize(relation) for relation in relations)
+                relations=tuple({
+                    finalize(relation)
+                    for relation in node.relations
+                })
             )
         if isinstance(node, NodeNot):
             return NodeNot(
-                relations=tuple(finalize(relation) for relation in (node.relations or []))
+                relations=tuple({
+                    finalize(relation)
+                    for relation in (node.relations or [])
+                })
             )
         else:
             raise TypeError(f"Unsupported node type: {type(node)}")
@@ -434,6 +430,7 @@ def _create_relations(doc: stanza.Document, entities: list[Entity]) -> Node:
 
         relations.append(_create_relation_tree(structure))
 
+    relations = tuple(dict.fromkeys(relations))
     if not relations:
         return NodeEmpty()
     if len(relations) == 1:
@@ -623,7 +620,7 @@ def sentences(lang: str, text: str) -> list[Sentence]:
 # fields of the output format are deliberately omitted in order to keep the
 # structure lean and consistent.
 
-def relations(lang: str, text: str, entities: list[tuple[int, int, str]]) -> Node:
+def relations(lang: str, text: str, entities: list[tuple[int, int, str]], semantic: bool = True) -> Node:
     """
     Build a logical relation tree from text and annotated entities.
 
@@ -639,6 +636,15 @@ def relations(lang: str, text: str, entities: list[tuple[int, int, str]]) -> Nod
         entities (list[tuple[int, int, str]]): List of entity spans as
             (start_index, end_index, label). The text substring between
             start_index and end_index is automatically extracted.
+        semantic (bool, optional): Controls how entities that occur multiple
+            times on a level are handled.
+            - If True (default), the equality of nodes is determined only by
+              label and text of the contained entity. Multiple occurrences of
+              entities at the same level are prevented. This produces a
+              normalized, meaning-oriented relation tree.
+            - If False, all occurrences of the entities are retained at the same
+              level. This produces a form-oriented relation tree that reflects
+              the original wording.
 
     Returns:
         Node: Root node of the relation tree representing logical structure
@@ -653,7 +659,7 @@ def relations(lang: str, text: str, entities: list[tuple[int, int, str]]) -> Nod
     if not text.strip() or not entities:
         return NodeEmpty()
     entities = [
-        Entity(start, end, label, text[start:end])
+        Entity(start, end, label, text[start:end], semantic)
         for start, end, label in entities
     ]
     return _create_relations(

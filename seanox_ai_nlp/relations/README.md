@@ -64,7 +64,12 @@ semantic or neural models can operate more efficiently.
     - [`pretty_print_sentence`](#pretty_print_sentencesentence-sentence---none)
     - [`pretty_print_sentences`](#pretty_print_sentencessentences-listsentence---none)
     - [`pretty_print_node`](#pretty_print_nodenode-node---none)
-  - [Entities & Nodes](#entities--nodes)
+    - [`Entity`](#entity)
+    - [`Node`](#node)
+    - [`NodeEmpty`](#nodeempty)
+    - [`NodeEntity`](#nodeentity)
+    - [`NodeSet`](#nodeset)
+    - [`NodeNot`](#nodenot)
 - [System Design](#system-design)
 - [Sources & References](#sources--references)
 
@@ -197,7 +202,7 @@ __Raises__
 - `ValueError`: If the language code is missing or unsupported.
 </details>
 
-### `relations(lang: str, text: str, entities: list[tuple[int, int, str]]) -> Node`
+### `relations(lang: str, text: str, entities: list[tuple[int, int, str]], semantic: bool = True) -> Node`
 
 <details>
   <summary>
@@ -209,6 +214,15 @@ __Parameters__
 - `text (str)`: Input text to be analyzed.
 - `entities (list[tuple[int, int, str]])`: List of entity spans as
   `(start_index, end_index, label)`.
+- `semantic (bool, optional)`: Controls how entities that occur multiple times
+  on a level are handled.
+  - If `True` (default), the equality of nodes is determined only by label and
+    text of the contained entity. Multiple occurrences of entities at the same
+    level are prevented. This produces a normalized, meaning-oriented relation
+    tree.
+  - If `False`, all occurrences of the entities are retained at the same level.
+    This produces a form-oriented relation tree that reflects the original
+    wording.
 
 __Returns__
 - `Node`: Root node of the relation tree (`NodeEmpty`, `NodeEntity`, `NodeSet`,
@@ -262,14 +276,29 @@ __Raises__
 - `TypeError`: If the input is not a `Node` instance.
 </details>
 
-## Entities & Nodes
+### `Entity`
 
-- __Entity__: Represents a recognized entity with label, text, and position.
-- __Node__: Abstract base class for relation nodes.
-  - `NodeEmpty`: Empty node.
-  - `NodeEntity`: Single entity node.
-  - `NodeSet`: A set of entities or sub-nodes.
-  - `NodeNot`: Negation node.
+Represents a recognized entity with label, text, and position.
+
+### `Node`
+
+Abstract base class for relation nodes.
+
+### `NodeEmpty`
+
+Empty node.
+
+### `NodeEntity`
+
+Single entity node.
+
+### `NodeSet`
+
+A set of entities or sub-nodes.
+
+### `NodeNot`
+
+Exclusion of the enclosed node.
 
 # System Design
 

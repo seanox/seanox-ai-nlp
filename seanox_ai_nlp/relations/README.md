@@ -59,6 +59,12 @@ semantic or neural models can operate more efficiently.
 - [Benchmark](#benchmark)
 - [API](#api)
   - [Reference](#reference)
+    - [`sentences`](#sentenceslang-str-text-str---listsentence)
+    - [`relations`](#relationslang-str-text-str-entities-listtupleint-int-str---node)
+    - [`pretty_print_sentence`](#pretty_print_sentencesentence-sentence---none)
+    - [`pretty_print_sentences`](#pretty_print_sentencessentences-listsentence---none)
+    - [`pretty_print_node`](#pretty_print_nodenode-node---none)
+  - [Entities & Nodes](#entities--nodes)
 - [System Design](#system-design)
 - [Sources & References](#sources--references)
 
@@ -84,25 +90,14 @@ expressed __implicitly through tree structure and nesting__. This reduction to
 a small set of constructs creates a __transparent, deterministic, and auditable
 retrieval logic__ that can be easily integrated into existing NLP pipelines.
 
-| Everyday sentence                        | Composer syntax        | Relation approximation (SQL-like) |
-|------------------------------------------|------------------------|-----------------------------------|
-| Get something for A or B                 | `SET(A,B)`             | `A WITH B`                        |
-| Get something for A and B                | `SET(A,B)`             | `A WITH B`                        |
-| Get something for A and B, but not C     | `SET(A,B,NOT(C))`      | `A WITH B AND NOT WITH C`         |
-| Get something for A or B, but not C      | `SET(A,B,NOT(C))`      | `A WITH B AND NOT WITH C`         |
-| Get something for A, but not B and not C | `SET(A,NOT(B),NOT(C))` | `A NOT WITH B AND NOT WITH C`     |
-| Get something for A or (B and C)         | `SET(A,B,C)`           | `A WITH B AND WITH C`             |
-
-> [!IMPORTANT]  
-> The _Relation approximation (SQL-like)_ column does not represent actual SQL
-> syntax. It is a human-readable notation designed to illustrate how ERS
-> constructs (__SET__, __NOT__, __WITH__) can be interpreted in a relational
-> style. The expressions are approximations for clarity and should not be
-> understood as executable SQL statements.
-
-> [!NOTE]
-> In ERS, everyday _or_ and _and_ expressions collapse into the same construct
-> (__SET__), since both are interpreted as grouping (__WITH__). 
+| Everyday sentence                        | Composer syntax          | Relational analogy        |
+|------------------------------------------|--------------------------|---------------------------|
+| Get something for A or B                 | `SET(A, B)`              | `WITH(A, B)`              |
+| Get something for A and B                | `SET(A, B)`              | `WITH(A, B)`              |
+| Get something for A and B, but not C     | `SET(A, B, NOT(C))`      | `WITH(A, B, NOT(C))`      |
+| Get something for A or B, but not C      | `SET(A, B, NOT(C))`      | `WITH(A, B, NOT(C))`      |
+| Get something for A, but not B and not C | `SET(A, NOT(B), NOT(C))` | `WITH(A, NOT(B), NOT(C))` |
+| Get something for A or (B and C)         | `SET(A, B, C)`           | `WITH(A, B, C)`           | 
 
 ## Example
 
@@ -123,19 +118,19 @@ SET
 +- SET
 |  +- ENTITY (label:FRUITS, text:apples)
 |  +- ENTITY (label:FRUITS, text:fruit cake)
-|  +- NOT
-|     +- ENTITY (label:FRUITS, text:strawberries)
 +- SET
-   +- ENTITY (label:INGREDIENTS, text:chocolate)
-   +- ENTITY (label:TREATS, text:cookies)   
+|  +- ENTITY (label:INGREDIENTS, text:chocolate)
+|  +- ENTITY (label:TREATS, text:cookies)   
++- NOT
+   +- ENTITY (label:FRUITS, text:strawberries)
 ```
 _Tree representation of the return value (a node object)_
 
-In the tree representation, the logical binding (e.g. _apples_ __with__
-_fruit cake_) -- or the logical grouping of _chocolate_ __and__ _cookies_
-becomes visible -- it arises implicitly through nesting, without the need for a
-separate operator, and shows that the statement is much more than just `apples
-    OR cake OR chocolate OR cookies`.
+In the tree representation, the logical binding (e.g. _apples_ __with__ _fruit
+cake_) -- or the logical grouping of _chocolate_ __and__ _cookies_ becomes
+visible -- it arises implicitly through nesting, without the need for a separate
+operator, and shows that the statement is much more than just `apples OR cake OR
+    chocolate OR cookies`.
 
 # Known Limitations
 
@@ -177,7 +172,104 @@ I/O and external dependencies.
 
 # API
 
+The __relations__ module provides a compact API for parsing text with annotated
+entities and constructing logical relation trees. It is suitable for semantic
+preprocessing, retrieval pipelines, or rule-based reasoning workflows.
+
 ## Reference
+
+### `sentences(lang: str, text: str) -> list[Sentence]`
+
+<details>
+  <summary>
+Parse text into sentences using a Stanza NLP pipeline.
+  </summary>
+
+__Parameters__
+- `lang (str)`: Language code (e.g. `"de"`, `"en"`).
+- `text (str)`: Input text to be analyzed.
+
+__Returns__
+- `list[Sentence]`: A list of Stanza Sentence objects containing tokens, lemmas,
+  POS tags, and dependency relations.
+
+__Raises__
+- `ValueError`: If the language code is missing or unsupported.
+</details>
+
+### `relations(lang: str, text: str, entities: list[tuple[int, int, str]]) -> Node`
+
+<details>
+  <summary>
+Build a logical relation tree from text and annotated entities.
+  </summary>
+
+__Parameters__
+- `lang (str)`: Language code (e.g. `"de"`, `"en"`).
+- `text (str)`: Input text to be analyzed.
+- `entities (list[tuple[int, int, str]])`: List of entity spans as
+  `(start_index, end_index, label)`.
+
+__Returns__
+- `Node`: Root node of the relation tree (`NodeEmpty`, `NodeEntity`, `NodeSet`,
+  `NodeNot`).
+
+__Raises__
+- `ValueError`: If the language code is missing or unsupported.
+- `TypeError`: If input types are invalid.
+</details>
+
+### `pretty_print_sentence(sentence: Sentence) -> None`
+
+<details>
+  <summary>
+Print a human-readable tree representation of a single parsed sentence.
+  </summary>
+
+__Parameters__
+- `sentence (Sentence)`: A Stanza Sentence object.
+
+__Raises__
+- `TypeError`: If the input is not a `Sentence` instance.
+</details>
+
+### `pretty_print_sentences(sentences: list[Sentence]) -> None`
+
+<details>
+  <summary>
+Print human-readable tree representations for a list of parsed sentences.
+  </summary>
+
+__Parameters__
+- `sentences (list[Sentence])`: A list of Stanza Sentence objects.
+
+__Raises__
+- `TypeError`: If the input is not a list of `Sentence` instances or contains
+  unsupported types.
+</details>
+
+### `pretty_print_node(node: Node) -> None`
+
+<details>
+  <summary>
+Print a human-readable tree representation of a relation node.
+  </summary>
+
+__Parameters__
+- `node (Node)`: The root node of the relation tree.
+
+__Raises__
+- `TypeError`: If the input is not a `Node` instance.
+</details>
+
+## Entities & Nodes
+
+- __Entity__: Represents a recognized entity with label, text, and position.
+- __Node__: Abstract base class for relation nodes.
+  - `NodeEmpty`: Empty node.
+  - `NodeEntity`: Single entity node.
+  - `NodeSet`: A set of entities or sub-nodes.
+  - `NodeNot`: Negation node.
 
 # System Design
 

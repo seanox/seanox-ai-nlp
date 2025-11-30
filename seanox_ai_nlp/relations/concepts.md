@@ -1,13 +1,36 @@
+# Konzepte
+
+## Inhalt
+- [Theoretische Ansätze](#theoretische-ansätze)
+  - [Allgemein](#allgemein)
+    - [Grundsatz](#grundsatz)
+    - [Syntaktische Konstituenten (Bausteine eines Satzes) als Cluster](
+          #syntaktische-konstituenten-bausteine-eines-satzes-als-cluster)
+    - [Satzgrenzen als Gültigkeitsbereiche](#satzgrenzen-als-gültigkeitsbereiche) 
+    - [Negation und Kontrast](#negation-und-kontrast)
+    - [Koreferenzauflösung / Coreference Resolution](
+          #koreferenzauflösung--coreference-resolution)
+    - [Maximales Minimum](#maximales-minimum) 
+  - [sprachspezifisch de](#sprachspezifisch-de)
+  - [sprachspezifisch dk](#sprachspezifisch-dk)
+  - [sprachspezifisch en](#sprachspezifisch-en)
+  - [sprachspezifisch es](#sprachspezifisch-es)
+  - [sprachspezifisch fr](#sprachspezifisch-fr)
+  - [sprachspezifisch it](#sprachspezifisch-it)
+  - [sprachspezifisch ru](#sprachspezifisch-ru)
+- [Test](#test)
+  - [Bekannte Probleme](#bekannte-probleme)
+
 # Theoretische Ansätze
 
 ## Allgemein
 
-## Grundsatz
+### Grundsatz
 Das Ziel ist es, von __vorgelagerten Prozessen identifizierte und kategorisierte
 Entitäten__ innerhalb eines Satzes über ihre expliziten sowie oberflächlich
 erschliessbaren logischen Beziehungen zu gruppieren, sodass sie als logische
 Einheiten für einen __groben Vorfilter im Retrieval__ (z.B. für Embeddings)
-dienen. Entitäten werden dabei weiterhin als __kategorisierte Meta?Information__
+dienen. Entitäten werden dabei weiterhin als __kategorisierte Meta-Information__
 behandelt -- vergleichbar mit Keywords. Das Ergebnis ist ein __robuster
 Kandidatensatz__, der die nachgelagerte Verarbeitung unterstützt, __ohne den
 Anspruch, die vollständige Satzsemantik abzubilden__.
@@ -34,7 +57,7 @@ gelten. Sie sind keine eigenen logischen Operatoren, sondern dienen als
 natürliche linguistische Grenzen, innerhalb derer Cluster gebildet und
 Relationen interpretiert werden.
 
-## Negation und Kontrast
+### Negation und Kontrast
 Negation und Kontraste sind besondere Formen der logischen Strukturierung, da
 sie explizite oder implizite Ein- und Ausschlüsse innerhalb eines Satzes
 markieren. Wörter und Phrasen wie __nicht__, __kein__, __ohne__, __aber__ oder
@@ -49,7 +72,7 @@ innerhalb desselben Clusters gesammelt, etwa __SET(A,B,NOT(C),NOT(D))__, um
 unnötig komplexe Verschachtelungen zu vermeiden und die logische Integrität auch
 bei komplexeren Satzmustern zu erhalten.
 
-## Koreferenzauflösung / Coreference Resolution
+### Koreferenzauflösung / Coreference Resolution
 Die Koreferenzauflösung ist -- wie für natürliche Sprache typisch -- ein
 komplexes Thema mit erheblicher Unsicherheit in der regelbasierten Abbildung.
 Auch hier wird ein bewusst vereinfachter Ansatz verfolgt. Pronomen reflektieren
@@ -88,23 +111,86 @@ spätere, semantisch feinere Verarbeitung nötig ist, kann Koreferenzauflösung
 dort erfolgen -- aber nicht im Vorfilter.
 </details>
 
-## de
+### Maximales Minimum
+Abstrakt beschrieben geht es um die kleinste mögliche logische Repräsentation,
+die stabil genug ist, um robustes Retrieval zu unterstützen, aber gleichzeitig
+so minimal bleibt, dass sie die Komplexität natürlicher Sprache bewusst nicht
+abzubilden versucht.
+
+## sprachspezifisch de
 TODO:
 
-## dk
+## sprachspezifisch dk
 TODO:
 
-## en
+## sprachspezifisch en
 TODO:
 
-## es
+## sprachspezifisch es
 TODO:
 
-## fr
+## sprachspezifisch fr
 TODO:
 
-## it
+## sprachspezifisch it
 TODO:
 
 ## ru
+TODO:
+
+# Test
+Die Überprüfung der zu sprachlicher Eingaben erstellten logischen Strukturen 
+erfordert eine grosse Bandbreite an Testbeispielen. Aufgrund der hohen
+sprachlichen Vielfalt -- unterschiedliche Wortwahl, Ausdrucksformen,
+Satzstrukturen (inklusive Satzmodi), Negationsformen, Koreferenzmuster und
+Sonderdarstellungen wie Listen oder Tabellen -- sind manuell erstellte Testfälle
+nicht praktikabel. Regelbasierte Testansätze sind technisch begrenzt, da sie die
+Variabilität natürlicher Sprache nicht ausreichend abbilden können.
+
+Daher wird auf __neuronale Methoden__ gesetzt. Ein Sprachmodell kann im
+Gegensatz zu klassischen Verfahren automatisch Testbeispiele generieren und
+dabei sowohl die sprachliche Variation als auch die logische Konsistenz
+berücksichtigen.
+
+Die Tests sind nicht auf die vollständige Semantik ausgerichtet, sondern ein
+pragmatischer Ansatz zur korrekten Abbildung vereinfachter logischer Strukturen.
+Ziel ist eine breite sprachliche Abdeckung bei gleichzeitiger Vermeidung von
+Redundanzen und automatisierter Validierung der Resultate.
+
+## Bekannte Probleme
+
+- __Sprachliche Vielfalt__  
+  Natürliche Sprache hat eine hohe Variabilität in Wortwahl, Ausdrucksformen,
+  Satzstrukturen (inklusive Satzmodi), Negationsformen und Koreferenzmuster.
+  Manuelle Tests und regelbasierten Verfahren können diese Vielfalt nicht
+  ausreichend abdecken.
+
+- __LLM-Faulheit / Abnehmende Variantenvielfalt (Plateau-Effekt)__  
+  Sprachmodelle zeigen bei der Generierung von Testbeispielen häufig ein 
+  Plateau: Nach einer gewissen Anzahl von Varianten nimmt die sprachliche
+  Kreativität meist ab. Statt neue Strukturen zu erzeugen, wiederholen sich
+  bekannte Muster in leicht veränderter Form. Das begrenzt die Diversität der
+  Testfälle, wenn das Modell ohne zusätzliche Steuerung eingesetzt wird.
+
+- __Redundanz und Oberflächenvariation__  
+  Generierte Beispiele neigen zu rein stilistischen Unterschieden, während die
+  zugrunde liegende logische Struktur identisch bleibt. Für eine robuste
+  Testbasis ist jedoch eine echte Variation in logischen Mustern erforderlich.
+
+- __Komplexe Phänomene__  
+  Aspekte wie Negation, Kontrast oder Koreferenz sind sprachlich vielfältig und
+  schwer regelbasiert zu erfassen. Ohne gezielte Testfälle werden diese
+  Phänomene nicht ausreichend abdeckt.
+
+- __Sonderformen__  
+  Nicht-lineare Darstellungsweisen wie Listen, Tabellen oder elliptische Sätze
+  werden von klassischen Testansätzen oft nicht berücksichtigt, obwohl sie in
+  realen Texten häufig vorkommen.
+
+- __Validierung__ 
+  Die manuelle Überprüfung der generierten logischen Strukturen ist wegen der
+  erforderlichen Testmenge nicht praktikabel und erfordert eine automatisierte
+  Validierung. Wie bei den Testbeispielen muss auch hier wegen der hohen
+  Variabilität auf __neuronale Methoden__ gesetzt werden.
+
 TODO:

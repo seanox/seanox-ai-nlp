@@ -327,7 +327,8 @@ TODO:
   - [sprachspezifisch ru](concepts.md#sprachspezifisch-ru)
 - [Test](#test)
   - [Bekannte Probleme](concepts.md#bekannte-probleme)
-TDOO:  
+  
+TODO:  
 
 # Sources & References
 - https://stanfordnlp.github.io/stanza/neural_pipeline.html

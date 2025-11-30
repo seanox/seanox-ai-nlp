@@ -71,6 +71,7 @@ semantic or neural models can operate more efficiently.
     - [`NodeSet`](#nodeset)
     - [`NodeNot`](#nodenot)
 - [System Design](#system-design)
+- [Concepts](#concepts)
 - [Sources & References](#sources--references)
 
 # Entity Relation Semantics (ERS)

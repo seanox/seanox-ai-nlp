@@ -327,6 +327,9 @@ TODO:
   - [sprachspezifisch __`ru`__](concepts.md#sprachspezifisch-ru)
 - [Test](#test)
   - [Bekannte Probleme](concepts.md#bekannte-probleme)
+  - [Zielsetzung](concepts.md#zielsetzung)
+  - [Vorgehensweise](concepts.md#vorgehensweise)
+  - [Erweiterungen](concepts.md#erweiterungen)
   
 TODO:  
 

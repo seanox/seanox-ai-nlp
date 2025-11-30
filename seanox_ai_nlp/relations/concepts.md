@@ -20,6 +20,9 @@
   - [sprachspezifisch __`ru`__](#sprachspezifisch-ru)
 - [Test](#test)
   - [Bekannte Probleme](#bekannte-probleme)
+  - [Zielsetzung](#zielsetzung)
+  - [Vorgehensweise](#vorgehensweise)
+  - [Erweiterungen](#erweiterungen)
 
 # Theoretische Ansätze
 
@@ -192,5 +195,19 @@ Redundanzen und automatisierter Validierung der Resultate.
   erforderlichen Testmenge nicht praktikabel und erfordert eine automatisierte
   Validierung. Wie bei den Testbeispielen muss auch hier wegen der hohen
   Variabilität auf __neuronale Methoden__ gesetzt werden.
+
+## Zielsetzung
+- Abdeckung breiter sprachliche Vielfalt
+- Abdeckung echter Variation in logischen Mustern 
+- Abdeckung komplexer Phänomene wie Negation, Kontrast und Koreferenz
+- Abdeckung Sonderformen (Listen, Tabellen, elliptische Sätze)
+- Vermeidung von Redundanzen
+- Automatisiert Validierung der Ergebnisse
+
+## Vorgehensweise
+TODO:
+
+## Erweiterungen
+TODO:
 
 TODO:

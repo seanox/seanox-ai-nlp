@@ -302,6 +302,32 @@ Exclusion of the enclosed node.
 
 # System Design
 
+TODO:
+
+# Concepts
+
+- [Theoretische Ansätze](concepts.md#theoretische-ansätze)
+  - [Allgemein](concepts.md#allgemein)
+    - [Grundsatz](concepts.md#grundsatz)
+    - [Syntaktische Konstituenten (Bausteine eines Satzes) als Cluster](
+          concepts.md#syntaktische-konstituenten-bausteine-eines-satzes-als-cluster)
+    - [Satzgrenzen als Gültigkeitsbereiche](
+          concepts.md#satzgrenzen-als-gültigkeitsbereiche)
+    - [Negation und Kontrast](concepts.md#negation-und-kontrast)
+    - [Koreferenzauflösung / Coreference Resolution](
+          concepts.md#koreferenzauflösung--coreference-resolution)
+    - [Maximales Minimum](concepts.md#maximales-minimum)
+  - [sprachspezifisch de](concepts.md#sprachspezifisch-de)
+  - [sprachspezifisch dk](concepts.md#sprachspezifisch-dk)
+  - [sprachspezifisch en](concepts.md#sprachspezifisch-en)
+  - [sprachspezifisch es](concepts.md#sprachspezifisch-es)
+  - [sprachspezifisch fr](concepts.md#sprachspezifisch-fr)
+  - [sprachspezifisch it](concepts.md#sprachspezifisch-it)
+  - [sprachspezifisch ru](concepts.md#sprachspezifisch-ru)
+- [Test](#test)
+  - [Bekannte Probleme](concepts.md#bekannte-probleme)
+TDOO:  
+
 # Sources & References
 - https://stanfordnlp.github.io/stanza/neural_pipeline.html
 - https://universaldependencies.org/docs/de/dep/

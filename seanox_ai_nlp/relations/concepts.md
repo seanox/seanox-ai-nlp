@@ -10,14 +10,14 @@
     - [Negation und Kontrast](#negation-und-kontrast)
     - [Koreferenzauflösung / Coreference Resolution](
           #koreferenzauflösung--coreference-resolution)
-    - [Maximales Minimum](#maximales-minimum) 
-  - [sprachspezifisch de](#sprachspezifisch-de)
-  - [sprachspezifisch dk](#sprachspezifisch-dk)
-  - [sprachspezifisch en](#sprachspezifisch-en)
-  - [sprachspezifisch es](#sprachspezifisch-es)
-  - [sprachspezifisch fr](#sprachspezifisch-fr)
-  - [sprachspezifisch it](#sprachspezifisch-it)
-  - [sprachspezifisch ru](#sprachspezifisch-ru)
+    - [Maximales Minimum](#maximales-minimum)
+  - [sprachspezifisch __`de`__](#sprachspezifisch-de)
+  - [sprachspezifisch __`dk`__](#sprachspezifisch-dk)
+  - [sprachspezifisch __`en`__](#sprachspezifisch-en)
+  - [sprachspezifisch __`es`__](#sprachspezifisch-es)
+  - [sprachspezifisch __`fr`__](#sprachspezifisch-fr)
+  - [sprachspezifisch __`it`__](#sprachspezifisch-it)
+  - [sprachspezifisch __`ru`__](#sprachspezifisch-ru)
 - [Test](#test)
   - [Bekannte Probleme](#bekannte-probleme)
 
@@ -117,25 +117,25 @@ die stabil genug ist, um robustes Retrieval zu unterstützen, aber gleichzeitig
 so minimal bleibt, dass sie die Komplexität natürlicher Sprache bewusst nicht
 abzubilden versucht.
 
-## sprachspezifisch de
+## sprachspezifisch __`de`__
 TODO:
 
-## sprachspezifisch dk
+## sprachspezifisch __`dk`__
 TODO:
 
-## sprachspezifisch en
+## sprachspezifisch __`en`__
 TODO:
 
-## sprachspezifisch es
+## sprachspezifisch __`es`__
 TODO:
 
-## sprachspezifisch fr
+## sprachspezifisch __`fr`__
 TODO:
 
-## sprachspezifisch it
+## sprachspezifisch __`it`__
 TODO:
 
-## ru
+## sprachspezifisch __`ru`__
 TODO:
 
 # Test

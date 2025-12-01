@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections import namedtuple
+
 from seanox_ai_nlp.relations.abstract import Entity
 from seanox_ai_nlp.relations.lang import languages, language_schema
 
@@ -112,8 +114,34 @@ class NodeEntity(Node):
 _PIPELINES_MODEL_DIR = os.path.join(os.getcwd(), ".stanza")
 _PIPELINES_CACHE: dict[tuple[str, str], stanza.Pipeline] = {}
 
+TREE_SYMBOLS_BRANCH_ASCII = "+- "
+TREE_SYMBOLS_END_ASCII    = "+- "
+TREE_SYMBOLS_PIPE_ASCII   = "|  "
+TREE_SYMBOLS_SPACE_ASCII  = "   "
 
-def _print_sentence_tree(sentence: Sentence) -> None:
+TREE_SYMBOLS_BRANCH_UNICODE = "├─ "
+TREE_SYMBOLS_END_UNICODE    = "└─ "
+TREE_SYMBOLS_PIPE_UNICODE   = "│  "
+TREE_SYMBOLS_SPACE_UNICODE  = "   "
+
+TreeSymbols = namedtuple("TreeSymbols", ["BRANCH", "END", "PIPE", "SPACE"])
+TREE_SYMBOLS = {
+    True: TreeSymbols(
+        TREE_SYMBOLS_BRANCH_UNICODE,
+        TREE_SYMBOLS_END_UNICODE,
+        TREE_SYMBOLS_PIPE_UNICODE,
+        TREE_SYMBOLS_SPACE_UNICODE
+    ),
+    False: TreeSymbols(
+        TREE_SYMBOLS_BRANCH_ASCII,
+        TREE_SYMBOLS_END_ASCII,
+        TREE_SYMBOLS_PIPE_ASCII,
+        TREE_SYMBOLS_SPACE_ASCII
+    )
+}
+
+
+def _print_sentence_tree(sentence: Sentence, unicode: bool = True) -> None:
 
     if not sentence:
         return
@@ -123,14 +151,16 @@ def _print_sentence_tree(sentence: Sentence) -> None:
         nodes.setdefault(word.id, [])
         nodes.setdefault(word.head, []).append(word.id)
 
+    symbols = TREE_SYMBOLS[unicode]
+
     def recurse(node_id: int, prefix: str = "", is_last: bool = True, is_root: bool = False):
         word = sentence.words[node_id - 1]
         label = f"{word.text} (id:{word.id}, head:{word.head}, lemma:{word.lemma}, upos:{word.upos}, deprel:{word.deprel}, feats:{word.feats})"
-        connector = "" if is_root else ("└─ " if is_last else "├─ ")
+        connector = "" if is_root else (symbols.END if is_last else symbols.BRANCH)
         print(prefix + connector + label)
 
         # Only expand if a connector has been set
-        prefix = prefix if is_root else prefix + ("   " if is_last else "│  ")
+        prefix = prefix if is_root else prefix + (symbols.SPACE if is_last else symbols.PIPE)
         for index, relation_id in enumerate(nodes.get(node_id, [])):
             recurse(relation_id, prefix, index == len(nodes[node_id]) - 1)
 
@@ -141,7 +171,7 @@ def _print_sentence_tree(sentence: Sentence) -> None:
         recurse(root_node_id, "", index == len(root_nodes) - 1, is_root=True)
 
 
-def _print_relation_tree(node: Node) -> None:
+def _print_relation_tree(node: Node, unicode: bool = True) -> None:
 
     def recurse(node: Node, prefix: str = "", root: bool = True):
 
@@ -154,7 +184,7 @@ def _print_relation_tree(node: Node) -> None:
 
         # The type is only output here for the root node.
         # For recursive calls (root=False), the type was already output in the
-        # previous print().
+        # previous print.
         if root:
             output = node.name
             if isinstance(node, NodeEntity):
@@ -166,15 +196,17 @@ def _print_relation_tree(node: Node) -> None:
         if not node.relations:
             return
 
+        symbols = TREE_SYMBOLS[unicode]
+
         for index, relation in enumerate(node.relations):
             last = index == len(node.relations) - 1
-            branch = "└─ " if last else "├─ "
+            branch = symbols.END if last else symbols.BRANCH
             output = prefix + branch + relation.name
             if isinstance(relation, NodeEntity):
                 print(f"{output} ({details(relation)})")
                 continue
             print(output)
-            recurse(relation, prefix + ("   " if last else "│  "), root=False)
+            recurse(relation, prefix + (symbols.SPACE if last else symbols.PIPE), root=False)
 
     recurse(node)
 
@@ -525,7 +557,7 @@ def _create_doc(lang: str, text: str) -> stanza.Document:
     return doc
 
 
-def pretty_print_sentence(sentence: Sentence) -> None:
+def pretty_print_sentence(sentence: Sentence, unicode: bool = True) -> None:
     """
     Print a human-readable tree representation of a single parsed sentence.
 
@@ -543,10 +575,10 @@ def pretty_print_sentence(sentence: Sentence) -> None:
         return
     if not isinstance(sentence, Sentence):
         raise TypeError(f"Unsupported type: {type(sentence)}")
-    _print_sentence_tree(sentence)
+    _print_sentence_tree(sentence, unicode)
 
 
-def pretty_print_sentences(sentences: list[Sentence]) -> None:
+def pretty_print_sentences(sentences: list[Sentence], unicode: bool = True) -> None:
     """
     Print human-readable tree representations for a list of parsed sentences.
 
@@ -568,10 +600,10 @@ def pretty_print_sentences(sentences: list[Sentence]) -> None:
     if not all(isinstance(sentence, Sentence) for sentence in sentences):
         raise TypeError(f"Unsupported element type: {type(sentences)}")
     for sentence in sentences:
-        _print_sentence_tree(sentence)
+        _print_sentence_tree(sentence, unicode)
 
 
-def pretty_print_node(node: Node) -> None:
+def pretty_print_node(node: Node, unicode: bool = True) -> None:
     """
     Print a human-readable tree representation of a relation node.
 
@@ -587,7 +619,7 @@ def pretty_print_node(node: Node) -> None:
     """
     if not isinstance(node, Node):
         raise TypeError(f"Unsupported type: {type(node)}")
-    _print_relation_tree(node)
+    _print_relation_tree(node, unicode)
 
 
 def sentences(lang: str, text: str) -> list[Sentence]:

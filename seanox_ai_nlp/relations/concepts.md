@@ -18,6 +18,7 @@
   - [sprachspezifisch __`fr`__](#sprachspezifisch-fr)
   - [sprachspezifisch __`it`__](#sprachspezifisch-it)
   - [sprachspezifisch __`ru`__](#sprachspezifisch-ru)
+- [Methodik](#methodik) 
 - [Test](#test)
   - [Bekannte Probleme](#bekannte-probleme)
   - [Zielsetzung](#zielsetzung)
@@ -120,7 +121,41 @@ die stabil genug ist, um robustes Retrieval zu unterstützen, aber gleichzeitig
 so minimal bleibt, dass sie die Komplexität natürlicher Sprache bewusst nicht
 abzubilden versucht.
 
+> [!NOTE]  
+> Im Konzept wird für die Beschreibung und zur Visualisierung der Regeln
+> __XPath__ verwendet, da es eine verständliche Abfragesprache für hierarchische
+> Strukturen ist. Damit verbunden ist der __Leitgedanke__: Wenn sich eine Regel
+> __in XPath ausdrücken__ lässt, lässt sie sich auch __technisch umsetzen__.
+
 ## sprachspezifisch __`de`__
+TODO:
+
+### Cluster
+
+#### Regel 1
+
+TODO:
+
+```xpath
+//node[@upos='NOUN' and @deprel='root']
+   /descendant::node[@upos='NOUN' and @deprel='nmod'
+       and child[@upos='ADP' and @deprel='case']]
+```
+
+<details>
+  <summary>
+Beispiel
+  </summary>
+
+```
+TODO:
+```
+
+TODO:
+</details>
+
+#### Regel 2
+
 TODO:
 
 ## sprachspezifisch __`dk`__
@@ -139,6 +174,15 @@ TODO:
 TODO:
 
 ## sprachspezifisch __`ru`__
+TODO:
+
+# Methodik
+Die Entwicklung orientiert sich am Prinzip des Minimal Viable Product (MVP). In
+Iterationen entstehen jeweils überprüfbare Entwicklungsstände, die in
+nachfolgenden Iterationen kontrolliert verfeinert werden. Jede Iteration erzeugt
+eigene Tests, die nicht nur die aktuelle Stufe absichern, sondern auch als
+Grundlage für die Validierung der weiteren Entwicklung dienen.
+
 TODO:
 
 # Test

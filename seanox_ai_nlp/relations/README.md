@@ -307,29 +307,30 @@ TODO:
 
 # Concepts
 
-- [Theoretische Ansätze](concepts.md#theoretische-ansätze)
-  - [Allgemein](concepts.md#allgemein)
-    - [Grundsatz](concepts.md#grundsatz)
+- [Theoretische Ansätze](concepts/theoretical.md#theoretische-ansätze)
+  - [Allgemein](concepts/theoretical.md#allgemein)
+    - [Grundsatz](concepts/theoretical.md#grundsatz)
     - [Syntaktische Konstituenten (Bausteine eines Satzes) als Cluster](
-          concepts.md#syntaktische-konstituenten-bausteine-eines-satzes-als-cluster)
+          concepts/theoretical.md#syntaktische-konstituenten-bausteine-eines-satzes-als-cluster)
     - [Satzgrenzen als Gültigkeitsbereiche](
-          concepts.md#satzgrenzen-als-gültigkeitsbereiche)
-    - [Negation und Kontrast](concepts.md#negation-und-kontrast)
+          concepts/theoretical.md#satzgrenzen-als-gültigkeitsbereiche)
+    - [Negation und Kontrast](concepts/theoretical.md#negation-und-kontrast)
     - [Koreferenzauflösung / Coreference Resolution](
-          concepts.md#koreferenzauflösung--coreference-resolution)
-    - [Maximales Minimum](concepts.md#maximales-minimum)
-  - [sprachspezifisch __`de`__](concepts.md#sprachspezifisch-de)
-  - [sprachspezifisch __`dk`__](concepts.md#sprachspezifisch-dk)
-  - [sprachspezifisch __`en`__](concepts.md#sprachspezifisch-en)
-  - [sprachspezifisch __`es`__](concepts.md#sprachspezifisch-es)
-  - [sprachspezifisch __`fr`__](concepts.md#sprachspezifisch-fr)
-  - [sprachspezifisch __`it`__](concepts.md#sprachspezifisch-it)
-  - [sprachspezifisch __`ru`__](concepts.md#sprachspezifisch-ru)
-- [Test](#test)
-  - [Bekannte Probleme](concepts.md#bekannte-probleme)
-  - [Zielsetzung](concepts.md#zielsetzung)
-  - [Vorgehensweise](concepts.md#vorgehensweise)
-  - [Erweiterungen](concepts.md#erweiterungen)
+          concepts/theoretical.md#koreferenzauflösung--coreference-resolution)
+    - [Maximales Minimum](concepts/theoretical.md#maximales-minimum)
+  - [sprachspezifisch __`de`__](concepts/theoretical.md#sprachspezifisch-de)
+  - [sprachspezifisch __`dk`__](concepts/theoretical.md#sprachspezifisch-dk)
+  - [sprachspezifisch __`en`__](concepts/theoretical.md#sprachspezifisch-en)
+  - [sprachspezifisch __`es`__](concepts/theoretical.md#sprachspezifisch-es)
+  - [sprachspezifisch __`fr`__](concepts/theoretical.md#sprachspezifisch-fr)
+  - [sprachspezifisch __`it`__](concepts/theoretical.md#sprachspezifisch-it)
+  - [sprachspezifisch __`ru`__](concepts/theoretical.md#sprachspezifisch-ru)
+- [Methodik](concepts/methodology.md#methodik)
+- [Test](concepts/test.md#test)
+  - [Bekannte Probleme](concepts/test.md#bekannte-probleme)
+  - [Zielsetzung](concepts/test.md#zielsetzung)
+  - [Vorgehensweise](concepts/test.md#vorgehensweise)
+  - [Erweiterungen](concepts/test.md#erweiterungen)
   
 TODO:  
 

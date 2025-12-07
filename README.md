@@ -39,7 +39,7 @@ highlight the specific components where this package provides support.
 This conceptual overview serves as a foundation for understanding the individual
 components, which are detailed in the next section.
 
-# License Agreement
+# License Terms
 Seanox Software Solutions is an open-source project, hereinafter referred to as
 __Seanox__.
 
